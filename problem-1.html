@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 1: Problem 1: Build a Graph (Adjacency List) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="3">
+<div class="px-2"><h1>Problem 1: Build a Graph (Adjacency List)</h1>
+<h2>[Algorithm Family: Graph Representation]</h2>
+<h2>[Phase 1: Fundamentals — "I can represent and traverse any graph"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are building a social network. Given N users (numbered 0 to N-1)
+</span>and a list of friendships (pairs of users who are friends),
+store this information so that you can quickly answer:
+  → "Who are the friends of user X?"
+
+Input:
+  n = 5  (users: 0, 1, 2, 3, 4)
+  edges = [[0,1], [0,2], [1,3], [2,3], [3,4]]
+
+Output:
+  A data structure where you can look up any user's friends instantly.
+  
+  Friends of 0 → [1, 2]
+  Friends of 1 → [0, 3]
+  Friends of 2 → [0, 3]
+  Friends of 3 → [1, 2, 4]
+  Friends of 4 → [3]</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>    0 ---- 1
+</span>    |      |
+    |      |
+    2 ---- 3
+           |
+           |
+           4
+
+  Edge List (what we're given):
+    0 — 1
+    0 — 2
+    1 — 3
+    2 — 3
+    3 — 4</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer      │  Why?                   ║
+╠══════════════════╪══════════════╪═════════════════════════╣
+║  NODES           │  Users 0-4   │  Each person = node     ║
+║  EDGES           │  Friendships │  Each pair = edge        ║
+║  Directed?       │  NO          │  Friendship is mutual   ║
+║  Weighted?       │  NO          │  No "strength" value    ║
+║  Cyclic?         │  YES         │  0→1→3→2→0 is a cycle  ║
+║  Connected?      │  YES         │  Everyone reachable     ║
+║  Sparse/Dense?   │  Sparse      │  5 edges, max=10       ║
+║                  │              │  (V*(V-1)/2 = 10)      ║
+╚══════════════════╧══════════════╧═════════════════════════╝
+
+  Dense means: edges close to V*(V-1)/2 (undirected) or V*(V-1) (directed)
+  Sparse means: edges close to V or much less than V²
+  Here: 5 edges vs max 10 → SPARSE</code></pre></div>
+<h3>What Does "Undirected" Mean Visually?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  UNDIRECTED: 0 ---- 1     (friendship goes BOTH ways)
+</span>              0 is friend of 1  AND  1 is friend of 0
+
+  DIRECTED:   0 ---→ 1     (one-way relationship)
+              0 follows 1  BUT  1 may NOT follow 0
+              (like Twitter followers vs Facebook friends)</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST — What's the Naive Approach?</h2>
+<h3>Approach 1: Store the raw edge list</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  edges = [[0,1], [0,2], [1,3], [2,3], [3,4]]
+</span>
+  Query: "Who are friends of node 3?"
+  → Scan EVERY edge
+  → Check if 3 appears in [0,1]? NO
+  → Check if 3 appears in [0,2]? NO
+  → Check if 3 appears in [1,3]? YES → friend is 1
+  → Check if 3 appears in [2,3]? YES → friend is 2
+  → Check if 3 appears in [3,4]? YES → friend is 4
+  → Answer: [1, 2, 4]</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Every query scans ALL edges → O(E) per query
+</span>  
+  If you have 1 million users and 10 million friendships:
+    → Each "who are my friends?" costs scanning 10 million edges
+    → If 1 million users ask → 10^6 × 10^7 = 10^13 operations
+    → IMPOSSIBLY SLOW
+
+  We need: O(1) to ACCESS a user's friend list
+           O(degree) to ITERATE through friends
+           (degree = number of friends that specific user has)</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<h3>What Representation Fits?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  We need to answer: "Give me all neighbors of node X" — FAST
+</span>  
+  Three options exist:
+
+  ┌─────────────────┬───────────────────┬──────────────────┐
+  │  Representation  │  "Friends of X?"  │  Space           │
+  ├─────────────────┼───────────────────┼──────────────────┤
+  │  Edge List       │  O(E) — scan all  │  O(E)            │
+  │  Adjacency Matrix│  O(V) — scan row  │  O(V²)           │
+  │  Adjacency List  │  O(degree) — BEST │  O(V + E)        │
+  └─────────────────┴───────────────────┴──────────────────┘
+
+  For SPARSE graphs (E &lt;&lt; V²):
+    → Adjacency List WINS on both time and space
+    → This social network: O(5+5) = O(10) vs O(25) for matrix
+  
+  For DENSE graphs (E ≈ V²):
+    → Matrix might win (discussed in Problem 2)</code></pre></div>
+<h3>What is an Adjacency List?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  A dictionary (or array of lists) where:
+</span>    KEY   = a node
+    VALUE = list of all nodes connected to it
+
+  Think of it as:
+    "Each person carries a CONTACT LIST of their friends"
+
+  For our graph:
+    {
+      0: [1, 2],        ← node 0 connects to 1 and 2
+      1: [0, 3],        ← node 1 connects to 0 and 3
+      2: [0, 3],        ← node 2 connects to 0 and 3
+      3: [1, 2, 4],     ← node 3 connects to 1, 2, and 4
+      4: [3]            ← node 4 connects to 3 only
+    }</code></pre></div>
+<h3>Why Adjacency List Works Here</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → SPARSE graph: only 5 edges, 5 nodes
+</span>  → Space: O(V + 2E) for undirected = O(5 + 10) = O(15)
+    (each edge stored TWICE — once for each endpoint)
+  → Query "friends of 3": just return graph[3] → O(1) access + O(degree) iteration
+  → Adding a new friendship: append to both lists → O(1)</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — Building the Adjacency List</h2>
+<h3>The Core Idea</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For each edge [u, v] in the edge list:
+</span>    → Add v to u's neighbor list    (u can reach v)
+    → Add u to v's neighbor list    (v can reach u)  ← ONLY for undirected!</code></pre></div>
+<h3>Step-by-Step Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Start: graph = {0: [], 1: [], 2: [], 3: [], 4: []}
+</span>
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Processing Edge [0, 1] — "0 and 1 are friends"              │
+  │                                                              │
+  │   graph[0].append(1)    →  graph[0] = [1]                   │
+  │   graph[1].append(0)    →  graph[1] = [0]                   │
+  │                                                              │
+  │   State: {0:[1], 1:[0], 2:[], 3:[], 4:[]}                   │
+  │                                                              │
+  │   Visually:   0 ---- 1     2     3     4                     │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Processing Edge [0, 2] — "0 and 2 are friends"              │
+  │                                                              │
+  │   graph[0].append(2)    →  graph[0] = [1, 2]                │
+  │   graph[2].append(0)    →  graph[2] = [0]                   │
+  │                                                              │
+  │   State: {0:[1,2], 1:[0], 2:[0], 3:[], 4:[]}                │
+  │                                                              │
+  │   Visually:   0 ---- 1                                       │
+  │               |                                              │
+  │               2            3     4                           │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Processing Edge [1, 3] — "1 and 3 are friends"              │
+  │                                                              │
+  │   graph[1].append(3)    →  graph[1] = [0, 3]                │
+  │   graph[3].append(1)    →  graph[3] = [1]                   │
+  │                                                              │
+  │   State: {0:[1,2], 1:[0,3], 2:[0], 3:[1], 4:[]}             │
+  │                                                              │
+  │   Visually:   0 ---- 1                                       │
+  │               |      |                                       │
+  │               2      3          4                            │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Processing Edge [2, 3] — "2 and 3 are friends"              │
+  │                                                              │
+  │   graph[2].append(3)    →  graph[2] = [0, 3]                │
+  │   graph[3].append(2)    →  graph[3] = [1, 2]                │
+  │                                                              │
+  │   State: {0:[1,2], 1:[0,3], 2:[0,3], 3:[1,2], 4:[]}        │
+  │                                                              │
+  │   Visually:   0 ---- 1                                       │
+  │               |      |                                       │
+  │               2 ---- 3          4                            │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Processing Edge [3, 4] — "3 and 4 are friends"              │
+  │                                                              │
+  │   graph[3].append(4)    →  graph[3] = [1, 2, 4]             │
+  │   graph[4].append(3)    →  graph[4] = [3]                   │
+  │                                                              │
+  │   State: {0:[1,2], 1:[0,3], 2:[0,3], 3:[1,2,4], 4:[3]}     │
+  │                                                              │
+  │   Visually:   0 ---- 1                                       │
+  │               |      |                                       │
+  │               2 ---- 3                                       │
+  │                      |                                       │
+  │                      4                                       │
+  └──────────────────────────────────────────────────────────────┘
+
+  ═══════════════════════════════════════════════════════════════
+  FINAL ADJACENCY LIST:
+  {
+    0: [1, 2],
+    1: [0, 3],
+    2: [0, 3],
+    3: [1, 2, 4],
+    4: [3]
+  }
+  ═══════════════════════════════════════════════════════════════</code></pre></div>
+<h3>Verification</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Query: "Friends of node 3?"
+</span>  → graph[3] = [1, 2, 4]  ✓  (matches the visual — 3 connects to 1, 2, 4)
+
+  Query: "Are 0 and 3 friends?"
+  → Is 3 in graph[0]? → graph[0] = [1, 2] → NO  ✓  (no direct edge)
+
+  Query: "Are 0 and 1 friends?"
+  → Is 1 in graph[0]? → graph[0] = [1, 2] → YES  ✓
+
+  Edge count verification:
+  → Total entries across all lists: 2+2+2+3+1 = 10
+  → For undirected: total entries = 2 × E = 2 × 5 = 10  ✓</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: Undirected Graph — Using defaultdict</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">build_undirected_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Build an adjacency list for an UNDIRECTED graph.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of nodes (0 to n-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [u, v] pairs representing edges
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        graph: dictionary mapping each node to its list of neighbors
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Key insight: each edge [u, v] means BOTH u→v AND v→u
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># defaultdict(list) → accessing a missing key auto-creates empty list</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># This avoids KeyError when a node has no edges yet</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Ensure all nodes exist, even isolated ones (no edges)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># just accessing creates the empty list entry</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Process each edge</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># u can reach v</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># v can reach u (UNDIRECTED = bidirectional)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> graph
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── USAGE ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> build_undirected_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Print the adjacency list</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Adjacency List:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> → </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">list</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">graph</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Query: friends of node 3</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\nFriends of node 3: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">graph</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">3</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Query: degree of each node (number of connections)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"\nDegree of each node:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: degree = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">len</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">graph</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Adjacency List:
+</span>  Node 0 → [1, 2]
+  Node 1 → [0, 3]
+  Node 2 → [0, 3]
+  Node 3 → [1, 2, 4]
+  Node 4 → [3]
+
+Friends of node 3: [1, 2, 4]
+
+Degree of each node:
+  Node 0: degree = 2
+  Node 1: degree = 2
+  Node 2: degree = 2
+  Node 3: degree = 3
+  Node 4: degree = 1</code></pre></div>
+<hr>
+<h3>Version 2: Directed Graph — "Twitter follows"</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">build_directed_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Build an adjacency list for a DIRECTED graph.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of nodes (0 to n-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [u, v] pairs where u → v (u follows v)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        graph: dictionary mapping each node to nodes it points TO
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Key difference from undirected:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Edge [u, v] means ONLY u→v, NOT v→u
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># u points to v</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># graph[v].append(u)  ← THIS LINE IS REMOVED for directed!</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> graph
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── USAGE ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># "0 follows 1", "0 follows 2", "1 follows 3", "2 follows 3", "3 follows 4"</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> build_directed_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Directed Adjacency List:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> → </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">list</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">graph</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Directed Adjacency List:
+</span>  Node 0 → [1, 2]      ← 0 follows 1 and 2
+  Node 1 → [3]          ← 1 follows 3 only
+  Node 2 → [3]          ← 2 follows 3 only
+  Node 3 → [4]          ← 3 follows 4 only
+  Node 4 → []           ← 4 follows nobody</code></pre></div>
+<h3>Visual Comparison: Undirected vs Directed</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  UNDIRECTED:                    DIRECTED:
+</span>  graph[0] = [1, 2]             graph[0] = [1, 2]
+  graph[1] = [0, 3]             graph[1] = [3]         ← no 0!
+  graph[2] = [0, 3]             graph[2] = [3]         ← no 0!
+  graph[3] = [1, 2, 4]          graph[3] = [4]         ← no 1,2!
+  graph[4] = [3]                graph[4] = []          ← no 3!
+
+  Total entries: 10              Total entries: 5
+  (2×E = 2×5)                   (E = 5)</code></pre></div>
+<hr>
+<h3>Version 3: Weighted Graph — "Flight costs"</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">build_weighted_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Build an adjacency list for a WEIGHTED DIRECTED graph.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of nodes
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [u, v, weight] — edge from u to v with given weight
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        graph: dict mapping node → list of (neighbor, weight) tuples
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Real-world: cities connected by flights with different costs
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># store BOTH neighbor AND weight</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># For undirected weighted: also add graph[v].append((u, weight))</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> graph
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── USAGE ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [from, to, cost]</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">100</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">300</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">50</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">200</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> build_weighted_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Weighted Directed Adjacency List:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> → </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">list</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">graph</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"         to </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">neighbor</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">, cost = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">weight</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Weighted Directed Adjacency List:
+</span>  Node 0 → [(1, 100), (2, 300)]
+         to 1, cost = 100
+         to 2, cost = 300
+  Node 1 → [(2, 50)]
+         to 2, cost = 50
+  Node 2 → [(3, 200)]
+         to 3, cost = 200
+  Node 3 → []</code></pre></div>
+<hr>
+<h3>Version 4: Using Plain Dictionary (No imports)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">build_graph_plain</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> directed</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Build adjacency list without any imports.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Sometimes in interviews, you want minimal setup.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Initialize empty list for each node</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> directed</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> graph
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── USAGE ───</span><span>
+</span><span>graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> build_graph_plain</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># {0: [1, 2], 1: [0, 3], 2: [0, 3], 3: [1, 2, 4], 4: [3]}</span></code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(V + E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────┐
+</span>  │  Operation                    │  Time                    │
+  ├──────────────────────────────┼──────────────────────────┤
+  │  Initialize V empty lists     │  O(V)                    │
+  │  Process E edges              │  O(E) — one append each  │
+  │  (undirected: 2 appends/edge) │  Still O(E)              │
+  │                               │                          │
+  │  TOTAL BUILD TIME             │  O(V + E)                │
+  ├──────────────────────────────┼──────────────────────────┤
+  │  Query "neighbors of X"       │  O(1) dict lookup        │
+  │  Iterate neighbors of X       │  O(degree(X))            │
+  │  Check "is Y neighbor of X?"  │  O(degree(X)) — scan list│
+  └──────────────────────────────┴──────────────────────────┘</code></pre></div>
+<h3>Space Complexity: O(V + E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  WHY O(V + E)?
+</span>  
+  → V entries in the dictionary (one per node)
+  → For undirected: each edge stored twice → 2E neighbor entries
+  → For directed: each edge stored once → E neighbor entries
+  → Total: O(V + E)  [we drop constants like 2]
+
+  Concrete example:
+    V = 5, E = 5 (undirected)
+    → 5 dictionary keys + 10 list entries = 15 total storage units
+    
+  Compare with adjacency matrix:
+    → O(V²) = O(25) — stores 25 cells even though only 5 edges exist
+    → WASTED SPACE for sparse graphs!</code></pre></div>
+<h3>Why O(V + E) and Not O(V × E)?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  CRITICAL INSIGHT:
+</span>  
+  We process each edge ONCE (or twice for undirected)
+  We do NOT process each edge for each vertex
+  
+  It's a SINGLE PASS through the edge list:
+    for u, v in edges:     ← this loop runs E times, NOT V×E times
+        graph[u].append(v)  ← O(1) per append
+        graph[v].append(u)  ← O(1) per append
+  
+  Total: E iterations × O(1) work = O(E)
+  Plus initialization: O(V)
+  Grand total: O(V + E)</code></pre></div>
+<hr>
+<h2>STEP 7: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Directed vs Undirected?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  UNDIRECTED (friendship):
+</span>    → Each edge [u,v] → add BOTH directions
+    → graph[u].append(v) AND graph[v].append(u)
+    → Total entries in all lists = 2 × E
+    
+  DIRECTED (Twitter follow):
+    → Each edge [u,v] → add ONE direction only
+    → graph[u].append(v) ONLY
+    → Total entries in all lists = E
+    
+  CODE DIFFERENCE: literally ONE line</code></pre></div>
+<h3>What if Weighted vs Unweighted?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  UNWEIGHTED:
+</span>    → graph[u].append(v)
+    → Store just the neighbor
+    
+  WEIGHTED:
+    → graph[u].append((v, weight))
+    → Store neighbor AND weight as tuple
+    
+  This changes how we ITERATE:
+    Unweighted: for neighbor in graph[node]:
+    Weighted:   for neighbor, weight in graph[node]:</code></pre></div>
+<h3>What if Nodes Aren't Numbers?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Nodes can be ANYTHING hashable: strings, tuples, etc.
+</span>  
+  Example: Cities as nodes
+    graph = defaultdict(list)
+    graph["NYC"].append("LA")
+    graph["NYC"].append("Chicago")
+    
+  Example: Grid cells as nodes (Problem 6 preview)
+    graph[(0,0)].append((0,1))
+    graph[(0,0)].append((1,0))</code></pre></div>
+<hr>
+<h2>STEP 8: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Forgetting to add BOTH directions for undirected ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  WRONG:                                                      ║
+  ║    for u, v in edges:                                        ║
+  ║        graph[u].append(v)    ← only one direction!           ║
+  ║                                                              ║
+  ║  RIGHT:                                                      ║
+  ║    for u, v in edges:                                        ║
+  ║        graph[u].append(v)                                    ║
+  ║        graph[v].append(u)    ← BOTH directions!              ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Isolated nodes (nodes with no edges)             ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  If node 4 has no edges, it won't appear in the dict         ║
+  ║  unless you initialize it!                                   ║
+  ║                                                              ║
+  ║  FIX: Initialize ALL nodes before processing edges           ║
+  ║    graph = {i: [] for i in range(n)}                         ║
+  ║                                                              ║
+  ║  WHY IT MATTERS:                                             ║
+  ║    Later, when we do BFS/DFS (Problem 3-4), we might         ║
+  ║    try graph[4] and get KeyError if not initialized          ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Duplicate edges                                  ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  If input has [0,1] AND [1,0] AND [0,1]:                    ║
+  ║    → You'll store duplicates in the list                     ║
+  ║    → graph[0] = [1, 1]  ← BAD for some algorithms           ║
+  ║                                                              ║
+  ║  FIX (if needed): use set instead of list                    ║
+  ║    graph = defaultdict(set)                                  ║
+  ║    graph[u].add(v)  ← set ignores duplicates                ║
+  ║                                                              ║
+  ║  TRADEOFF: set doesn't preserve insertion order              ║
+  ║            and has slightly more overhead                    ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Self-loops                                       ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Edge [3, 3] → node 3 connects to itself                    ║
+  ║  → graph[3].append(3)                                        ║
+  ║  → Legal in some problems, problematic in others             ║
+  ║  → Watch for this in cycle detection (Problem 10)            ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Empty graph (no edges)                           ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  n = 5, edges = []                                           ║
+  ║  → graph = {0:[], 1:[], 2:[], 3:[], 4:[]}                   ║
+  ║  → 5 isolated nodes, 0 components of size &gt; 1               ║
+  ║  → Should still work correctly!                              ║
+  ╚══════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 9: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │  "I see RELATIONSHIPS between ENTITIES"                        │
+  │       → This is a GRAPH problem                                │
+  │       → Entities = NODES                                       │
+  │       → Relationships = EDGES                                  │
+  │                                                                │
+  │  "I need to QUERY neighbors frequently"                        │
+  │       → I need an ADJACENCY LIST                               │
+  │                                                                │
+  │  "The graph is SPARSE (few edges relative to nodes)"           │
+  │       → Adjacency LIST (not matrix) saves space                │
+  │                                                                │
+  │  "Relationships are MUTUAL" (friendship, roads)                │
+  │       → UNDIRECTED → add edges in BOTH directions              │
+  │                                                                │
+  │  "Relationships are ONE-WAY" (follows, prerequisites)          │
+  │       → DIRECTED → add edge in ONE direction only              │
+  │                                                                │
+  │  "Edges have COSTS/DISTANCES"                                  │
+  │       → WEIGHTED → store (neighbor, weight) tuples             │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 10: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: THE ADJACENCY LIST                         ║
+  ║                                                                    ║
+  ║   → A graph is NODES + EDGES                                      ║
+  ║   → An adjacency list maps each node to its list of neighbors     ║
+  ║   → For undirected: add BOTH directions                           ║
+  ║   → For directed: add ONE direction                               ║
+  ║   → For weighted: store (neighbor, weight) tuples                 ║
+  ║   → Space: O(V + E) — efficient for sparse graphs                ║
+  ║   → Build time: O(V + E) — single pass through edges             ║
+  ║   → Query time: O(1) access, O(degree) iteration                 ║
+  ║                                                                    ║
+  ║   THIS IS THE FOUNDATION.                                         ║
+  ║   Every graph problem from Problem 2 onward starts by             ║
+  ║   building this adjacency list.                                   ║
+  ║                                                                    ║
+  ║   "First, I build the graph. Then, I traverse it."                ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>QUICK REFERENCE CARD</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────┐
+</span>  │  ADJACENCY LIST TEMPLATE                          │
+  │                                                    │
+  │  from collections import defaultdict               │
+  │                                                    │
+  │  # Undirected, Unweighted                          │
+  │  graph = defaultdict(list)                         │
+  │  for u, v in edges:                                │
+  │      graph[u].append(v)                            │
+  │      graph[v].append(u)                            │
+  │                                                    │
+  │  # Directed, Unweighted                            │
+  │  graph = defaultdict(list)                         │
+  │  for u, v in edges:                                │
+  │      graph[u].append(v)                            │
+  │                                                    │
+  │  # Directed, Weighted                              │
+  │  graph = defaultdict(list)                         │
+  │  for u, v, w in edges:                             │
+  │      graph[u].append((v, w))                       │
+  │                                                    │
+  │  # Undirected, Weighted                            │
+  │  graph = defaultdict(list)                         │
+  │  for u, v, w in edges:                             │
+  │      graph[u].append((v, w))                       │
+  │      graph[v].append((u, w))                       │
+  └──────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h3>CONNECTION TO NEXT PROBLEM</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 1 → adjacency LIST (best for sparse graphs)
+</span>  Problem 2 → adjacency MATRIX (best for dense graphs)
+  
+  After Problem 2, you'll know BOTH representations
+  and WHEN to pick each one.
+  
+  Then Problems 3-4 will TRAVERSE these structures using BFS and DFS.</code></pre></div>
+<hr>
+<p><strong>Problem 1 Complete.</strong><br>
+<strong>Ready for Problem 2: Build a Graph (Adjacency Matrix)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="5" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <span class="nav-button prev disabled">← Previous</span>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 1 of 50</span>
+            </div>
+            <a href="problem-2.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

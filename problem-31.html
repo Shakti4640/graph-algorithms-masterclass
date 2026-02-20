@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 31: Problem 31: Prim's Minimum Spanning Tree (MST — Alternative Approach) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="11">
+<div class="px-2"><h1>Problem 31: Prim's Minimum Spanning Tree (MST — Alternative Approach)</h1>
+<h2>[Algorithm Family: Minimum Spanning Tree — Greedy + Priority Queue]</h2>
+<h2>[Phase 3: Standard Interview — "I can solve real interview graph problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Same scenario as Problem 30:
+</span>
+A city planning committee needs to connect N towns with roads.
+Building a road between town u and town v costs weight[u][v] dollars.
+They want ALL towns reachable from every other town,
+while spending MINIMUM total money.
+
+But now — the committee wants to build roads ONE AT A TIME,
+starting from town 0, and always expanding to the NEAREST
+unconnected town.
+
+Input:
+  n = 6  (towns: 0, 1, 2, 3, 4, 5)
+  edges = [
+    [0, 1, 4],
+    [0, 2, 4],
+    [1, 2, 2],
+    [1, 3, 6],
+    [2, 3, 8],
+    [3, 4, 9],
+    [3, 5, 5],
+    [4, 5, 7],
+  ]
+
+Output:
+  Minimum cost: 24
+  (Same answer as Kruskal's — both find the MST)
+
+The DIFFERENCE: HOW we find it.
+  Kruskal's: sort all edges globally, pick cheapest non-cycle edge
+  Prim's:    start from one node, always grow toward cheapest neighbor</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Same graph as Problem 30:
+</span>
+         4         6
+    0 ────── 1 ────── 3
+    |       /         |╲
+    | 4   / 2       8 |  ╲ 5
+    |   /             |    ╲
+    2 ─┘              |     5
+                      9    /
+                      |  / 7
+                      4 ┘
+
+  Adjacency list representation (needed for Prim's):
+    0: [(1,4), (2,4)]
+    1: [(0,4), (2,2), (3,6)]
+    2: [(0,4), (1,2), (3,8)]
+    3: [(1,6), (2,8), (4,9), (5,5)]
+    4: [(3,9), (5,7)]
+    5: [(3,5), (4,7)]</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer              │  Why?                       ║
+╠══════════════════╪══════════════════════╪═════════════════════════════╣
+║  NODES           │  Towns 0-5           │  Same as Problem 30         ║
+║  EDGES           │  Weighted roads      │  Same as Problem 30         ║
+║  Directed?       │  NO (undirected)     │  Roads go both ways         ║
+║  Weighted?       │  YES                 │  Each road has a cost       ║
+║  Connected?      │  YES                 │  MST requires connectivity  ║
+║  Representation  │  Adjacency LIST      │  Prim's explores NEIGHBORS  ║
+║                  │                      │  → list is natural fit      ║
+║  What we seek    │  SAME as Problem 30  │  Minimum spanning tree      ║
+║  HOW we find it  │  DIFFERENT approach  │  Grow tree from one node    ║
+╚══════════════════╧══════════════════════╧═════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 2: THE KEY DIFFERENCE — Kruskal's vs Prim's Mindset</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                   ║
+  ║  KRUSKAL'S (Problem 30):                                          ║
+  ║  ────────────────────────                                         ║
+  ║  "I have ALL edges. Let me sort them and pick cheapest globally." ║
+  ║                                                                   ║
+  ║  Think: GLOBAL perspective                                        ║
+  ║    → Look at ALL edges at once                                    ║
+  ║    → Sort by weight                                               ║
+  ║    → Pick cheapest that doesn't create cycle                      ║
+  ║    → Multiple trees grow simultaneously and merge                 ║
+  ║                                                                   ║
+  ║  Analogy: A helicopter pilot sees ALL roads from above            ║
+  ║           and picks the cheapest ones.                            ║
+  ║                                                                   ║
+  ║                                                                   ║
+  ║  PRIM'S (this problem):                                           ║
+  ║  ──────────────────────                                           ║
+  ║  "I start at one town. What's the cheapest road FROM HERE?"       ║
+  ║                                                                   ║
+  ║  Think: LOCAL perspective (growing outward)                       ║
+  ║    → Start from one node                                          ║
+  ║    → Look at all edges touching the CURRENT TREE                  ║
+  ║    → Pick cheapest edge that leads to an UNVISITED node           ║
+  ║    → Add that node to the tree                                    ║
+  ║    → Repeat: now more edges are available (new node's edges)      ║
+  ║    → ONE tree grows outward until it spans everything             ║
+  ║                                                                   ║
+  ║  Analogy: You're ON THE GROUND at town 0.                        ║
+  ║           You build the cheapest road to a neighbor.              ║
+  ║           Now from your expanded network, build next cheapest.    ║
+  ║           Keep expanding until all towns are reached.             ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<h3>Visual: How Prim's Grows vs How Kruskal's Grows</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  KRUSKAL'S — multiple fragments merge:
+</span>
+    Step 1: 1──2              (cheapest global edge)
+    Step 2: 0──1──2           (next cheapest)
+    Step 3: 0──1──2    3──5   (next cheapest — SEPARATE fragment!)
+    Step 4: 0──1──2──3──5     (fragments merge)
+    Step 5: 0──1──2──3──5──4  (final connection)
+
+    → Multiple small trees grow and merge together
+
+
+  PRIM'S — single tree grows outward:
+
+    Step 1: [0]                        (start at node 0)
+    Step 2: [0, 1]                     (cheapest edge from 0)
+    Step 3: [0, 1, 2]                  (cheapest edge from {0,1})
+    Step 4: [0, 1, 2, 3]              (cheapest edge from {0,1,2})
+    Step 5: [0, 1, 2, 3, 5]           (cheapest edge from {0,1,2,3})
+    Step 6: [0, 1, 2, 3, 5, 4]        (cheapest from {0,1,2,3,5})
+
+    → ONE tree grows bigger and bigger</code></pre></div>
+<hr>
+<h2>STEP 3: WHY PRIM'S LOOKS LIKE DIJKSTRA</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  DIJKSTRA (Problem 23):                                        │
+  │    → Start from source                                         │
+  │    → Use min-heap to always process NEAREST unvisited node     │
+  │    → "Nearest" = smallest TOTAL DISTANCE from source           │
+  │    → Update distances to neighbors                             │
+  │    → Mark node as visited when popped from heap                │
+  │                                                                │
+  │  PRIM'S:                                                       │
+  │    → Start from source                                         │
+  │    → Use min-heap to always process CHEAPEST edge to tree      │
+  │    → "Cheapest" = smallest SINGLE EDGE weight to new node     │
+  │    → Add neighbor edges to heap when new node joins tree       │
+  │    → Mark node as visited when popped from heap                │
+  │                                                                │
+  │  KEY DIFFERENCE:                                                │
+  │    Dijkstra: heap stores (total_distance_from_source, node)    │
+  │    Prim's:   heap stores (single_edge_weight, node)            │
+  │                                                                │
+  │  STRUCTURE IS IDENTICAL:                                        │
+  │    → Priority queue (min-heap)                                  │
+  │    → Visited set                                                │
+  │    → Process cheapest, add neighbors                            │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 4: BRUTE FORCE FIRST</h2>
+<h3>Naive Prim's (Without Priority Queue)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Maintain:
+</span>    → in_mst[]: boolean array — is this node in the tree?
+    → key[]:    cheapest edge weight connecting this node to the tree
+
+  At each step:
+    → Scan ALL nodes not in MST
+    → Find the one with smallest key[] value
+    → Add it to MST
+    → Update key[] for all its neighbors
+
+  This scan takes O(V) per step, and we do V steps → O(V²)
+
+  For sparse graphs: O(V²) is WORSE than Kruskal's O(E log E)
+  For dense graphs:  O(V²) is BETTER (E ≈ V², so E log E ≈ V² log V)
+  
+  We can improve with a priority queue → O(E log V)</code></pre></div>
+<hr>
+<h2>STEP 5: ALGORITHM WALKTHROUGH — Step by Step</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  n = 6
+</span>  Adjacency list:
+    0: [(1,4), (2,4)]
+    1: [(0,4), (2,2), (3,6)]
+    2: [(0,4), (1,2), (3,8)]
+    3: [(1,6), (2,8), (4,9), (5,5)]
+    4: [(3,9), (5,7)]
+    5: [(3,5), (4,7)]
+
+  Data structures:
+    → min_heap: priority queue of (edge_weight, target_node)
+    → visited:  set of nodes already in MST
+    → mst_cost: running total
+
+  ═══════════════════════════════════════════════════════════════
+  INITIALIZATION
+  ═══════════════════════════════════════════════════════════════
+
+  Start at node 0 (arbitrary choice — any node works)
+  
+  visited = {}
+  min_heap = [(0, 0)]     ← (cost=0 to reach starting node, node=0)
+  mst_cost = 0
+  edges_added = 0
+
+  Why (0, 0)?
+    → "It costs $0 to include the starting node in the tree"
+    → This is a TRICK to handle the starting node uniformly
+    → When we pop it, we add node 0 to MST with cost 0
+
+  Visually:
+    Tree: (empty)
+    Heap: [(0, node 0)]
+
+    0     1     2     3     4     5    ← all unvisited
+
+
+  ═══════════════════════════════════════════════════════════════
+  MAIN LOOP: Pop cheapest from heap, add to tree, push neighbors
+  ═══════════════════════════════════════════════════════════════
+
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ POP: (cost=0, node=0)                                       │
+  │                                                              │
+  │   Is node 0 visited? NO → process it                         │
+  │   visited = {0}                                              │
+  │   mst_cost += 0  →  mst_cost = 0                            │
+  │   edges_added = 0  (starting node doesn't count as edge)     │
+  │                                                              │
+  │   Push neighbors of node 0:                                  │
+  │     neighbor 1, weight 4 → push (4, 1)                       │
+  │     neighbor 2, weight 4 → push (4, 2)                       │
+  │                                                              │
+  │   Heap: [(4, 1), (4, 2)]                                     │
+  │                                                              │
+  │   Visually:                                                  │
+  │     Tree:  [0]                                               │
+  │                                                              │
+  │     Available edges from tree:                               │
+  │       0──(4)──1?     0──(4)──2?                              │
+  │       ^^^^^^^^       ^^^^^^^^                                │
+  │       in heap        in heap                                 │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ POP: (cost=4, node=1)   ← cheapest in heap                  │
+  │      (tie between (4,1) and (4,2) — heap picks either)       │
+  │                                                              │
+  │   Is node 1 visited? NO → process it                         │
+  │   visited = {0, 1}                                           │
+  │   mst_cost += 4  →  mst_cost = 4                            │
+  │   edges_added = 1                                            │
+  │                                                              │
+  │   Push neighbors of node 1 (if not visited):                 │
+  │     neighbor 0, weight 4 → VISITED → skip                   │
+  │     neighbor 2, weight 2 → push (2, 2)                       │
+  │     neighbor 3, weight 6 → push (6, 3)                       │
+  │                                                              │
+  │   Heap: [(2, 2), (4, 2), (6, 3)]                             │
+  │          ^^^^^^                                              │
+  │          cheapest!                                           │
+  │                                                              │
+  │   Note: (4, 2) is STALE — there's now a cheaper way          │
+  │         to reach node 2 (cost 2 via node 1 instead of        │
+  │         cost 4 via node 0). The stale entry stays in heap    │
+  │         but will be skipped when popped (node 2 will be      │
+  │         visited by then).                                    │
+  │                                                              │
+  │   Visually:                                                  │
+  │     Tree:  0──(4)──1                                         │
+  │                                                              │
+  │     Available edges from tree:                               │
+  │       0──(4)──2?     1──(2)──2?     1──(6)──3?               │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ POP: (cost=2, node=2)   ← cheapest in heap                  │
+  │                                                              │
+  │   Is node 2 visited? NO → process it                         │
+  │   visited = {0, 1, 2}                                        │
+  │   mst_cost += 2  →  mst_cost = 6                            │
+  │   edges_added = 2                                            │
+  │                                                              │
+  │   Push neighbors of node 2 (if not visited):                 │
+  │     neighbor 0, weight 4 → VISITED → skip                   │
+  │     neighbor 1, weight 2 → VISITED → skip                   │
+  │     neighbor 3, weight 8 → push (8, 3)                       │
+  │                                                              │
+  │   Heap: [(4, 2), (6, 3), (8, 3)]                             │
+  │          ^^^^^^                                              │
+  │          STALE! node 2 already visited                       │
+  │                                                              │
+  │   Visually:                                                  │
+  │     Tree:  0──(4)──1──(2)──2                                 │
+  │                                                              │
+  │     Available edges from tree:                               │
+  │       1──(6)──3?     2──(8)──3?                              │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ POP: (cost=4, node=2)   ← next cheapest                     │
+  │                                                              │
+  │   Is node 2 visited? YES → ❌ SKIP (stale entry)             │
+  │                                                              │
+  │   ┌─────────────────────────────────────────────────────┐   │
+  │   │ THIS IS HOW PRIM'S HANDLES "OUTDATED" ENTRIES:      │   │
+  │   │                                                     │   │
+  │   │ We pushed (4, 2) when exploring node 0.             │   │
+  │   │ Later, we pushed (2, 2) when exploring node 1.      │   │
+  │   │ The (2, 2) was popped first (cheaper).              │   │
+  │   │ Now (4, 2) is popped but node 2 is already in tree. │   │
+  │   │ → Simply SKIP it.                                   │   │
+  │   │                                                     │   │
+  │   │ This is called "lazy deletion" — we don't remove    │   │
+  │   │ stale entries from heap, we just ignore them.        │   │
+  │   │ Same technique as Dijkstra (Problem 23).            │   │
+  │   └─────────────────────────────────────────────────────┘   │
+  │                                                              │
+  │   Heap: [(6, 3), (8, 3)]                                     │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ POP: (cost=6, node=3)   ← cheapest in heap                  │
+  │                                                              │
+  │   Is node 3 visited? NO → process it                         │
+  │   visited = {0, 1, 2, 3}                                     │
+  │   mst_cost += 6  →  mst_cost = 12                           │
+  │   edges_added = 3                                            │
+  │                                                              │
+  │   Push neighbors of node 3 (if not visited):                 │
+  │     neighbor 1, weight 6 → VISITED → skip                   │
+  │     neighbor 2, weight 8 → VISITED → skip                   │
+  │     neighbor 4, weight 9 → push (9, 4)                       │
+  │     neighbor 5, weight 5 → push (5, 5)                       │
+  │                                                              │
+  │   Heap: [(5, 5), (8, 3), (9, 4)]                             │
+  │          ^^^^^^                                              │
+  │          cheapest!                                           │
+  │                                                              │
+  │   Visually:                                                  │
+  │     Tree:  0──(4)──1──(2)──2                                 │
+  │                    |                                         │
+  │                   (6)                                        │
+  │                    |                                         │
+  │                    3                                         │
+  │                                                              │
+  │     Available: 3──(5)──5?    3──(9)──4?                      │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ POP: (cost=5, node=5)   ← cheapest in heap                  │
+  │                                                              │
+  │   Is node 5 visited? NO → process it                         │
+  │   visited = {0, 1, 2, 3, 5}                                  │
+  │   mst_cost += 5  →  mst_cost = 17                           │
+  │   edges_added = 4                                            │
+  │                                                              │
+  │   Push neighbors of node 5 (if not visited):                 │
+  │     neighbor 3, weight 5 → VISITED → skip                   │
+  │     neighbor 4, weight 7 → push (7, 4)                       │
+  │                                                              │
+  │   Heap: [(7, 4), (8, 3), (9, 4)]                             │
+  │          ^^^^^^                                              │
+  │          cheapest! (and 8,3 is stale, 9,4 is stale soon)    │
+  │                                                              │
+  │   Visually:                                                  │
+  │     Tree:  0──(4)──1──(2)──2                                 │
+  │                    |                                         │
+  │                   (6)                                        │
+  │                    |                                         │
+  │                    3──(5)──5                                  │
+  │                                                              │
+  │     Available: 5──(7)──4?    3──(9)──4?                      │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ POP: (cost=7, node=4)   ← cheapest in heap                  │
+  │                                                              │
+  │   Is node 4 visited? NO → process it                         │
+  │   visited = {0, 1, 2, 3, 4, 5}                               │
+  │   mst_cost += 7  →  mst_cost = 24                           │
+  │   edges_added = 5 = V-1  → ✅ MST COMPLETE!                 │
+  │                                                              │
+  │   Visually (FINAL MST):                                      │
+  │     0──(4)──1──(2)──2                                        │
+  │             |                                                │
+  │            (6)                                               │
+  │             |                                                │
+  │             3──(5)──5──(7)──4                                 │
+  │                                                              │
+  │   Total cost: 4 + 2 + 6 + 5 + 7 = 24 ✓                     │
+  │   Same as Kruskal's (Problem 30)! ✓                          │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  REMAINING HEAP ENTRIES (all stale, never processed):
+    (8, 3) → node 3 already visited → skip
+    (9, 4) → node 4 already visited → skip
+  We can stop early since all nodes are visited.
+  ═══════════════════════════════════════════════════════════════</code></pre></div>
+<hr>
+<h3>Summary Table</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────┬──────────┬────────┬───────────┬──────────┬──────────────┐
+</span>  │ Step │ Popped   │ Cost   │ Visited?  │ Action   │ MST Cost     │
+  ├──────┼──────────┼────────┼───────────┼──────────┼──────────────┤
+  │  1   │ (0, 0)   │  0     │ NO        │ ✅ ADD   │     0        │
+  │  2   │ (4, 1)   │  4     │ NO        │ ✅ ADD   │     4        │
+  │  3   │ (2, 2)   │  2     │ NO        │ ✅ ADD   │     6        │
+  │  4   │ (4, 2)   │  4     │ YES       │ ❌ SKIP  │     6        │
+  │  5   │ (6, 3)   │  6     │ NO        │ ✅ ADD   │    12        │
+  │  6   │ (5, 5)   │  5     │ NO        │ ✅ ADD   │    17        │
+  │  7   │ (7, 4)   │  7     │ NO        │ ✅ ADD   │    24 ✅ DONE│
+  └──────┴──────────┴────────┴───────────┴──────────┴──────────────┘
+
+  6 nodes added (including start), 5 edges, cost = 24
+  1 stale entry skipped</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLETE CODE</h2>
+<h3>Primary Solution: Prim's with Min-Heap (Lazy Deletion)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">import</span><span> heapq
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">prim_mst</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Prim's Algorithm — Minimum Spanning Tree.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Strategy:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      1. Build adjacency list (Prim's explores NEIGHBORS)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      2. Start from node 0
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      3. Use min-heap: always pick cheapest edge to an unvisited node
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      4. When node is popped and unvisited → add to MST
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      5. Push all its neighbor edges to heap
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      6. Stop when all V nodes are in MST
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Similarity to Dijkstra (Problem 23):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Both use min-heap + visited set
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Both process cheapest first
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Dijkstra: heap has (total_distance, node)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Prim's:   heap has (single_edge_weight, node)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of vertices (0 to n-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [u, v, weight]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        minimum total cost, or -1 if graph is disconnected
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Step 1: Build adjacency list ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Prim's needs to explore NEIGHBORS of current tree</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Adjacency list is the natural representation</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (Kruskal's used edge list — different need)</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># undirected → both directions</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Step 2: Initialize ───</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    min_heap </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (cost, node) — start at node 0 with cost 0</span><span>
+</span><span>    mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    edges_added </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Step 3: Main loop ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> min_heap </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> edges_added </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Pop cheapest edge leading to potentially unvisited node</span><span>
+</span><span>        cost</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>min_heap</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Skip if already in MST (lazy deletion — same as Dijkstra)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Add this node to MST</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> cost
+</span><span>        edges_added </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Push all edges from this new node to unvisited neighbors</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappush</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>min_heap</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>weight</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Step 4: Check if all nodes were connected ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> edges_added </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>           </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># graph is disconnected</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mst_cost
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">6</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">8</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">9</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Minimum cost (Prim's): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">prim_mst</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">n</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> edges</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 24</span></code></pre></div>
+<hr>
+<h3>Version 2: Prim's Returning MST Edges</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">import</span><span> heapq
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">prim_mst_with_edges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Prim's that also returns WHICH edges are in the MST.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Difference: heap stores (weight, target_node, source_node)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    so we know WHICH edge was used to reach each node.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (cost, target, source) — source=-1 for starting node</span><span>
+</span><span>    min_heap </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    mst_edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> min_heap </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        cost</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>min_heap</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>        
+<span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> cost
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Record the edge (skip the starting node which has source=-1)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> source </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            mst_edges</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cost</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappush</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>min_heap</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>weight</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mst_cost</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> mst_edges
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>cost</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> mst </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> prim_mst_with_edges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">8</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">9</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Cost: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">cost</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> mst</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">u</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> ── </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">v</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">, cost = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">w</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Cost: 24
+</span>  0 ── 1, cost = 4
+  1 ── 2, cost = 2
+  1 ── 3, cost = 6
+  3 ── 5, cost = 5
+  5 ── 4, cost = 7</code></pre></div>
+<hr>
+<h3>Version 3: Prim's with O(V²) — No Heap (Dense Graph Optimization)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">prim_mst_dense</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> adj_matrix</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Prim's for DENSE graphs using adjacency matrix.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    No priority queue — just scan for minimum each time.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Time: O(V²) — optimal for dense graphs where E ≈ V²
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    When to use this version:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Graph is DENSE (many edges, close to complete graph)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Input is adjacency MATRIX (not edge list)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → V is small enough that O(V²) is acceptable
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This version avoids the O(E log V) heap overhead
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    which is O(V² log V) for dense graphs — WORSE than O(V²).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    INF </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># key[i] = cheapest edge weight connecting node i to MST</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Initially infinity (no connection to MST yet)</span><span>
+</span><span>    key </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>INF</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># in_mst[i] = True if node i is already in MST</span><span>
+</span><span>    in_mst </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Start from node 0</span><span>
+</span><span>    key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Find unvisited node with minimum key ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># This is the "manual scan" replacing the heap</span><span>
+</span><span>        u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> in_mst</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> v
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If no reachable node found, graph is disconnected</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> INF</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Add node u to MST</span><span>
+</span><span>        in_mst</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>        mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Update keys of u's neighbors ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># adj_matrix[u][v] = weight of edge u-v (0 or INF if no edge)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> in_mst</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> 
+</span><span>                adj_matrix</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> 
+</span><span>                adj_matrix</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> adj_matrix</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mst_cost
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST with adjacency matrix ───</span><span>
+</span><span>INF </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>adj_matrix </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   INF</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> INF</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> INF</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># node 0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   INF</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> INF</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># node 1</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">8</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   INF</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> INF</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># node 2</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>INF</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">8</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">9</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span>  </span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># node 3</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>INF</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> INF</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> INF</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">9</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span>  </span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># node 4</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>INF</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> INF</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> INF</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>  </span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># node 5</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Cost (dense Prim's): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">prim_mst_dense</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">6</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> adj_matrix</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 24</span></code></pre></div>
+<hr>
+<h2>STEP 7: SIDE-BY-SIDE — Dijkstra vs Prim's Code</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># DIJKSTRA (Problem 23) — Shortest path from source</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dijkstra</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    heap </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>                   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (total_dist, node)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> heap</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        d</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> u </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            new_dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> d </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w               </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ ACCUMULATE distance</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_dist </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_dist
+</span><span>                heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappush</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># PRIM'S — Minimum spanning tree</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">prims</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    heap </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>                        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (edge_weight, node)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> heap </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        w</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> u </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> w
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappush</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>weight</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ SINGLE edge weight</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mst_cost
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># SPOT THE DIFFERENCE:</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Dijkstra:  heappush(heap, (d + w, v))    ← total from source</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Prim's:    heappush(heap, (weight, v))   ← just this edge</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   That ONE LINE is the entire algorithmic difference!</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span></code></pre></div>
+<hr>
+<h2>STEP 8: COMPLEXITY ANALYSIS</h2>
+<h3>Heap-Based Prim's (Primary Version)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TIME: O(E log V)                                                  │
+  │                                                                    │
+  │  WHY:                                                              │
+  │    → We process each edge at most twice (once from each endpoint)  │
+  │    → For each edge, we do one heappush: O(log V)                   │
+  │      (heap size ≤ E, but log E = O(log V²) = O(2 log V) = O(logV))│
+  │    → Total pushes: O(E)                                            │
+  │    → Total pops: O(E) (including stale entries)                    │
+  │    → Each pop: O(log V)                                            │
+  │    → Total: O(E log V)                                             │
+  │                                                                    │
+  │  SPACE: O(V + E)                                                   │
+  │                                                                    │
+  │  WHY:                                                              │
+  │    → Adjacency list: O(V + E)                                      │
+  │    → Heap: up to O(E) entries (with stale duplicates)              │
+  │    → Visited set: O(V)                                             │
+  │    → Total: O(V + E)                                               │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Dense Matrix Prim's (Version 3)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TIME: O(V²)                                                       │
+  │                                                                    │
+  │  WHY:                                                              │
+  │    → Outer loop: V iterations (add one node per iteration)         │
+  │    → Inner scan for minimum: O(V) per iteration                    │
+  │    → Inner update of keys: O(V) per iteration                      │
+  │    → Total: V × (V + V) = O(V²)                                   │
+  │                                                                    │
+  │  SPACE: O(V)                                                       │
+  │                                                                    │
+  │  WHY:                                                              │
+  │    → key array: O(V)                                               │
+  │    → in_mst array: O(V)                                            │
+  │    → No heap, no adjacency list                                    │
+  │    → (Matrix is given as input, not counted)                       │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 9: THE COMPLETE COMPARISON — Kruskal's vs Prim's</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════════════╗
+</span>  ║                    KRUSKAL'S vs PRIM'S — FULL COMPARISON               ║
+  ╠═════════════════╦══════════════════════╦════════════════════════════════╣
+  ║  Aspect          ║  KRUSKAL'S           ║  PRIM'S                       ║
+  ╠═════════════════╬══════════════════════╬════════════════════════════════╣
+  ║  Strategy        ║  Global: sort ALL    ║  Local: grow from one node    ║
+  ║                  ║  edges, pick cheapest║  outward, always pick         ║
+  ║                  ║  non-cycle edges     ║  cheapest neighbor edge       ║
+  ╠═════════════════╬══════════════════════╬════════════════════════════════╣
+  ║  Data Structure  ║  Union-Find          ║  Min-Heap (priority queue)    ║
+  ╠═════════════════╬══════════════════════╬════════════════════════════════╣
+  ║  Input Format    ║  Edge list           ║  Adjacency list or matrix     ║
+  ║  (natural)       ║  (need to sort it)   ║  (need to explore neighbors)  ║
+  ╠═════════════════╬══════════════════════╬════════════════════════════════╣
+  ║  Time (sparse)   ║  O(E log E)          ║  O(E log V) with heap        ║
+  ║  E ≈ V           ║  ≈ O(V log V)        ║  ≈ O(V log V)               ║
+  ║                  ║  SIMILAR             ║  SIMILAR                      ║
+  ╠═════════════════╬══════════════════════╬════════════════════════════════╣
+  ║  Time (dense)    ║  O(E log E)          ║  O(V²) with matrix           ║
+  ║  E ≈ V²          ║  ≈ O(V² log V)       ║  ≈ O(V²)                     ║
+  ║                  ║  SLOWER ❌            ║  FASTER ✅                    ║
+  ╠═════════════════╬══════════════════════╬════════════════════════════════╣
+  ║  Similar to      ║  Nothing (unique)    ║  Dijkstra (Problem 23)        ║
+  ║                  ║                      ║  (same structure, diff metric)║
+  ╠═════════════════╬══════════════════════╬════════════════════════════════╣
+  ║  Handles         ║  YES — naturally     ║  NO — only finds one          ║
+  ║  disconnected?   ║  (count &lt; V-1)       ║  component's tree             ║
+  ╠═════════════════╬══════════════════════╬════════════════════════════════╣
+  ║  Tree growth     ║  Multiple fragments  ║  Single tree grows            ║
+  ║  pattern         ║  merge together      ║  outward from start           ║
+  ╠═════════════════╬══════════════════════╬════════════════════════════════╣
+  ║  Code simplicity ║  Simpler             ║  Slightly more complex        ║
+  ║                  ║  (if UF memorized)   ║  (heap management)            ║
+  ╠═════════════════╬══════════════════════╬════════════════════════════════╣
+  ║  Negative edges  ║  ✅ Works fine        ║  ✅ Works fine                 ║
+  ╚═════════════════╩══════════════════════╩════════════════════════════════╝
+
+
+  DECISION RULE:
+  ┌────────────────────────────────────────────────────────────────┐
+  │                                                                │
+  │  Is the graph SPARSE (E &lt;&lt; V²)?                                │
+  │    → Use KRUSKAL'S (sort + union-find)                         │
+  │    → Or Prim's with heap — both similar                        │
+  │                                                                │
+  │  Is the graph DENSE (E ≈ V²)?                                  │
+  │    → Use PRIM'S with matrix — O(V²) beats O(V² log V)         │
+  │                                                                │
+  │  Is the graph given as EDGE LIST?                              │
+  │    → KRUSKAL'S is more natural (sort the list directly)        │
+  │                                                                │
+  │  Is the graph given as ADJACENCY LIST/MATRIX?                  │
+  │    → PRIM'S is more natural (explore neighbors directly)       │
+  │                                                                │
+  │  Do you know Dijkstra by heart?                                │
+  │    → PRIM'S is almost identical — easy to write                │
+  │                                                                │
+  │  Do you know Union-Find by heart?                              │
+  │    → KRUSKAL'S is trivial — sort + loop + union                │
+  │                                                                │
+  │  DEFAULT: For interviews, KRUSKAL'S is usually simpler         │
+  │           to explain and code correctly.                        │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h3>Complexity Comparison Chart</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Graph density:   SPARSE ←──────────────────────→ DENSE
+</span>  Edges (E):       ~V                               ~V²
+
+  ┌──────────────────────────────────────────────────────────┐
+  │                                                          │
+  │  Kruskal's   O(V log V) ·····················O(V² log V) │
+  │                                                          │
+  │  Prim's      O(V log V) ·····················O(V²)       │
+  │  (heap)                                       ↑           │
+  │                                    Prim wins here!       │
+  │  Prim's      O(V²) ·························O(V²)       │
+  │  (matrix)     ↑                                          │
+  │     overkill for sparse!                                 │
+  │                                                          │
+  └──────────────────────────────────────────────────────────┘
+
+  Summary:
+    Sparse: Kruskal ≈ Prim(heap) ≈ O(V log V)
+    Dense:  Prim(matrix) = O(V²) &lt; Kruskal = O(V² log V)</code></pre></div>
+<hr>
+<h2>STEP 10: ADDITIONAL TEST CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 2: Disconnected graph ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>prim_mst</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: -1</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   0──(5)──1     2──(3)──3</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Prim starts at 0, can only reach {0,1}</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Can't reach {2,3} → returns -1</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 3: Complete graph (dense) ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">10</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>prim_mst</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 12</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Starting from 0:</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Pop (0,0) → add 0. Push: (10,1), (6,2), (5,3)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Pop (5,3) → add 3. Push: (7,1), (3,2)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Pop (3,2) → add 2. Push: (4,1)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Pop (4,1) → add 1.</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Cost: 0 + 5 + 3 + 4 = 12 ✓</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 4: Single node ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>prim_mst</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 0</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 5: Two nodes ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>prim_mst</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">42</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 42</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 6: Starting node doesn't matter ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Prim's gives same MST cost regardless of starting node</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (The specific MST edges might differ if ties exist)</span></code></pre></div>
+<hr>
+<h2>STEP 11: WHY PRIM'S IS CORRECT — Proof Intuition</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║  PRIM'S CORRECTNESS — Cut Property (same as Kruskal's)          ║
+  ╠═══════════════════════════════════════════════════════════════════╣
+  ║                                                                   ║
+  ║  At each step, Prim's maintains:                                  ║
+  ║    → S = set of nodes in the MST so far                           ║
+  ║    → V\S = set of nodes NOT yet in MST                            ║
+  ║                                                                   ║
+  ║  The "cut" is the partition (S, V\S).                             ║
+  ║  Prim's always picks the LIGHTEST edge crossing this cut.         ║
+  ║                                                                   ║
+  ║  By the Cut Property:                                             ║
+  ║    → The lightest edge crossing any cut is safe for MST           ║
+  ║    → Prim's always picks such an edge                             ║
+  ║    → Every edge Prim's picks is safe                              ║
+  ║    → After V-1 safe edges → valid MST ✓                          ║
+  ║                                                                   ║
+  ║  Visual:                                                          ║
+  ║                                                                   ║
+  ║    ┌─── S (in MST) ───┐     ┌── V\S (not in MST) ──┐           ║
+  ║    │                   │     │                       │           ║
+  ║    │    0 ── 1         │─$6─→│    3                  │           ║
+  ║    │         |         │     │   / \                 │           ║
+  ║    │         2         │─$8─→│  5   4                │           ║
+  ║    │                   │     │                       │           ║
+  ║    └───────────────────┘     └───────────────────────┘           ║
+  ║                                                                   ║
+  ║    Edges crossing cut: (1,3,$6) and (2,3,$8)                     ║
+  ║    Lightest: (1,3,$6) → Prim's picks this ✓                     ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Directed?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Same as Problem 30: MST is for undirected graphs.
+</span>  Directed → Minimum Spanning Arborescence (Edmonds' algorithm).
+  Prim's does NOT work on directed graphs.</code></pre></div>
+<h3>What if Negative Weights?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Prim's handles negative weights PERFECTLY.
+</span>  → Min-heap naturally prioritizes negative edges (smallest first)
+  → Negative weight = BONUS → always picked early
+  → No issues whatsoever (unlike Dijkstra which needs non-negative)
+  
+  WHY Prim's handles negatives but Dijkstra doesn't:
+    → Dijkstra: distance accumulates → negative can invalidate "done" nodes
+    → Prim's: only single edge weight matters → no accumulation issue</code></pre></div>
+<h3>What if We Start from a Different Node?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Prim's can start from ANY node.
+</span>  → The MST COST is always the same (MST is a property of the graph)
+  → The specific MST EDGES might differ (if multiple MSTs exist)
+  → Starting node doesn't affect optimality
+
+  Why? Because the cut property holds regardless of starting point.
+  The lightest crossing edge is the same no matter which side you're on.</code></pre></div>
+<hr>
+<h2>STEP 13: HANDLING THE LAZY DELETION PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║  LAZY DELETION — Shared Pattern Between Dijkstra and Prim's     ║
+  ╠═══════════════════════════════════════════════════════════════════╣
+  ║                                                                   ║
+  ║  PROBLEM:                                                         ║
+  ║    We push (weight, node) to heap.                                ║
+  ║    Later, we find a BETTER edge to the same node.                 ║
+  ║    We push the better entry too.                                  ║
+  ║    Now heap has TWO entries for the same node!                    ║
+  ║                                                                   ║
+  ║  EXAMPLE from our walkthrough:                                    ║
+  ║    Push (4, 2) when exploring node 0.                             ║
+  ║    Push (2, 2) when exploring node 1.                             ║
+  ║    Heap has both (4,2) and (2,2).                                 ║
+  ║                                                                   ║
+  ║  SOLUTION — Lazy Deletion:                                        ║
+  ║    → Don't remove the old entry (expensive to find in heap)       ║
+  ║    → When we pop an entry, check: is this node already visited?   ║
+  ║    → YES → skip (stale entry)                                     ║
+  ║    → NO  → process it                                             ║
+  ║                                                                   ║
+  ║  WHY this works:                                                  ║
+  ║    → The BETTER entry (smaller weight) is popped FIRST            ║
+  ║    → When it's processed, node is marked visited                  ║
+  ║    → The WORSE entry is popped later and skipped                  ║
+  ║    → Net effect: we always use the cheapest edge ✓                ║
+  ║                                                                   ║
+  ║  COST of lazy deletion:                                           ║
+  ║    → Heap might have up to O(E) entries instead of O(V)           ║
+  ║    → Each pop is O(log E) instead of O(log V)                     ║
+  ║    → But log E = O(log V) so no asymptotic difference             ║
+  ║    → In practice: slight memory overhead, but MUCH simpler code   ║
+  ║                                                                   ║
+  ║  ALTERNATIVE — Decrease-key:                                      ║
+  ║    → Update existing entry's priority in the heap                 ║
+  ║    → Keeps heap size at O(V)                                      ║
+  ║    → Needs indexed priority queue (complex to implement)          ║
+  ║    → NOT worth it in interviews — lazy deletion is fine           ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 14: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Forgetting visited check after heap pop             ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG:                                                          ║
+  ║    cost, node = heapq.heappop(min_heap)                          ║
+  ║    visited.add(node)                                             ║
+  ║    mst_cost += cost          ← MIGHT ADD STALE COST!            ║
+  ║                                                                  ║
+  ║  RIGHT:                                                          ║
+  ║    cost, node = heapq.heappop(min_heap)                          ║
+  ║    if node in visited:       ← CHECK FIRST!                     ║
+  ║        continue                                                  ║
+  ║    visited.add(node)                                             ║
+  ║    mst_cost += cost                                              ║
+  ║                                                                  ║
+  ║  Without this check, stale entries corrupt the MST cost.         ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Pushing visited neighbors to heap                   ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  SUBOPTIMAL:                                                     ║
+  ║    for neighbor, weight in graph[node]:                          ║
+  ║        heapq.heappush(min_heap, (weight, neighbor))              ║
+  ║                                                                  ║
+  ║  BETTER:                                                         ║
+  ║    for neighbor, weight in graph[node]:                          ║
+  ║        if neighbor not in visited:    ← FILTER before pushing   ║
+  ║            heapq.heappush(min_heap, (weight, neighbor))          ║
+  ║                                                                  ║
+  ║  Both correct, but filtering reduces heap size and speeds up.    ║
+  ║  The visited-check-on-pop still catches anything we miss.        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Using Prim's on disconnected graph                  ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Prim's starts from ONE node and grows outward.                  ║
+  ║  If graph is disconnected, it only finds the MST of the          ║
+  ║  component containing the starting node.                         ║
+  ║                                                                  ║
+  ║  FIX: Check if len(visited) == n at the end.                     ║
+  ║  If not, return -1 or "impossible".                              ║
+  ║                                                                  ║
+  ║  Kruskal's handles this more naturally:                          ║
+  ║    → Processes all edges regardless of connectivity              ║
+  ║    → At the end, count &lt; V-1 → disconnected                     ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Confusing Dijkstra and Prim's                       ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  They look IDENTICAL in structure. The ONLY difference:          ║
+  ║                                                                  ║
+  ║  Dijkstra: push (current_dist + edge_weight, neighbor)           ║
+  ║  Prim's:   push (edge_weight, neighbor)                          ║
+  ║                                                                  ║
+  ║  Getting these confused gives WRONG ANSWERS silently.            ║
+  ║  The output might look "reasonable" but be incorrect.            ║
+  ║                                                                  ║
+  ║  REMEMBER:                                                       ║
+  ║    Dijkstra → "total distance FROM SOURCE" → ACCUMULATE          ║
+  ║    Prim's   → "cheapest single edge TO TREE" → DON'T accumulate ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Parallel edges (multiple edges between same pair)   ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  edges = [[0,1,5], [0,1,3], [0,1,7]]                            ║
+  ║  → All three go into adjacency list                              ║
+  ║  → All three get pushed to heap when node 0 is processed         ║
+  ║  → (3,1) is popped first → node 1 added with cost 3             ║
+  ║  → (5,1) and (7,1) are stale → skipped                          ║
+  ║  → Correctly uses cheapest parallel edge ✓                       ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 15: WHERE PRIM'S AND DIJKSTRA GIVE DIFFERENT RESULTS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Example graph:
+</span>
+      0 ──(1)── 1 ──(5)── 2
+      |                    |
+     (10)                (1)
+      |                    |
+      3 ──────(2)──────── 4
+
+  DIJKSTRA from 0 (shortest paths):
+    dist[0] = 0
+    dist[1] = 1     (0→1, cost 1)
+    dist[2] = 6     (0→1→2, cost 1+5=6)
+    dist[3] = 10    (0→3, cost 10)
+    dist[4] = 7     (0→1→2→4, cost 1+5+1=7)
+
+  PRIM'S from 0 (minimum spanning tree):
+    add 0 (cost 0)
+    add 1 (edge cost 1: 0─1)
+    add 2 (edge cost 5: 1─2)
+    add 4 (edge cost 1: 2─4)    ← Prim picks this (cheapest EDGE)
+    add 3 (edge cost 2: 4─3)    ← Prim picks this (cheapest EDGE to tree)
+
+    MST cost: 0 + 1 + 5 + 1 + 2 = 9
+
+  DIFFERENT TREES:
+    Dijkstra tree:     0──1──2       Prim MST:        0──1──2
+                       |    |                               |
+                       3    4                          3──4─┘
+
+    Dijkstra includes 0──3 (shortest to 3)
+    Prim includes 4──3 (cheaper edge, even though longer total path)
+
+  KEY INSIGHT:
+    Dijkstra optimizes INDIVIDUAL distances from source
+    Prim optimizes TOTAL edge weight of the tree
+    Different objectives → different trees!</code></pre></div>
+<hr>
+<h2>STEP 16: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TRIGGER WORDS:                                                    │
+  │    "minimum cost to connect all"                                   │
+  │    "cheapest network"                                              │
+  │    "minimum spanning tree"                                         │
+  │    "connect all points/cities/nodes with minimum total weight"     │
+  │                                                                    │
+  │  THEN DECIDE: Kruskal's or Prim's?                                │
+  │                                                                    │
+  │  ┌──────────────────────────────────────────────────────────────┐ │
+  │  │                                                              │ │
+  │  │  "Input is edge list?"                                       │ │
+  │  │    → KRUSKAL'S (sort the list, union-find)                   │ │
+  │  │                                                              │ │
+  │  │  "Input is adjacency matrix/list?"                           │ │
+  │  │    → PRIM'S (explore neighbors, min-heap)                    │ │
+  │  │                                                              │ │
+  │  │  "Graph is dense (E close to V²)?"                           │ │
+  │  │    → PRIM'S with matrix O(V²) beats Kruskal's O(V² log V)   │ │
+  │  │                                                              │ │
+  │  │  "Graph is sparse (E close to V)?"                           │ │
+  │  │    → Either works. Kruskal's is usually simpler to code.     │ │
+  │  │                                                              │ │
+  │  │  "I already know Dijkstra by heart?"                         │ │
+  │  │    → PRIM'S — change ONE line from Dijkstra and you're done  │ │
+  │  │                                                              │ │
+  │  │  "I already know Union-Find by heart?"                       │ │
+  │  │    → KRUSKAL'S — sort + loop + union is trivial              │ │
+  │  │                                                              │ │
+  │  └──────────────────────────────────────────────────────────────┘ │
+  │                                                                    │
+  │  INTERVIEW TIP:                                                    │
+  │    Mention BOTH algorithms. Say:                                   │
+  │    "I'll use Prim's because the graph is dense / because I can     │
+  │     reuse Dijkstra's structure. Kruskal's would also work with     │
+  │     O(E log E) time using Union-Find."                             │
+  │    → Shows you know multiple approaches = STRONG signal            │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 17: CONNECTION TO PREVIOUS AND FUTURE PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────────┐
+</span>  │  BUILDS ON:                                                         │
+  │                                                                     │
+  │  Problem 23 → Dijkstra's algorithm                                 │
+  │               → Prim's is STRUCTURALLY IDENTICAL to Dijkstra        │
+  │               → Same: min-heap, visited set, process cheapest       │
+  │               → Difference: heap stores edge weight vs total dist   │
+  │                                                                     │
+  │  Problem 30 → Kruskal's MST                                        │
+  │               → Same GOAL (minimum spanning tree)                   │
+  │               → Different APPROACH (global sort vs local growth)    │
+  │               → Same ANSWER (both produce valid MST)                │
+  │                                                                     │
+  │  ALGORITHM LINEAGE:                                                 │
+  │                                                                     │
+  │    Problem 3  (BFS)                                                │
+  │        ↓                                                           │
+  │    Problem 9  (BFS shortest path — unweighted)                     │
+  │        ↓                                                           │
+  │    Problem 23 (Dijkstra — weighted shortest path with heap)        │
+  │        ↓                                                           │
+  │    Problem 31 (Prim's — MST with heap, same structure) ← HERE     │
+  │                                                                     │
+  │    The "heap-based greedy exploration" pattern evolves:             │
+  │      BFS → Dijkstra → Prim's                                      │
+  │                                                                     │
+  │  LEADS TO:                                                          │
+  │                                                                     │
+  │  Problem 32 → Min Cost to Connect All Points                       │
+  │               → Direct MST application                              │
+  │               → DENSE graph (complete graph on coordinates)         │
+  │               → Perfect case for Prim's O(V²) matrix version       │
+  │               → Kruskal's would be O(V² log V) — slower            │
+  │                                                                     │
+  └─────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>The Three Heap-Based Algorithms Compared</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │                                                                 │
+  │  BFS (Problem 3):                                               │
+  │    Queue:     FIFO (deque)                                      │
+  │    Explores:  Level by level                                    │
+  │    Finds:     Shortest path in UNWEIGHTED graph                 │
+  │    Heap key:  N/A (no priority, just FIFO order)                │
+  │                                                                 │
+  │  Dijkstra (Problem 23):                                         │
+  │    Queue:     Min-HEAP                                          │
+  │    Explores:  Nearest unvisited node (by total distance)        │
+  │    Finds:     Shortest path in WEIGHTED graph                   │
+  │    Heap key:  (total_distance_from_source, node)                │
+  │                                                                 │
+  │  Prim's (Problem 31):                                           │
+  │    Queue:     Min-HEAP                                          │
+  │    Explores:  Cheapest edge to unvisited node                   │
+  │    Finds:     MINIMUM SPANNING TREE                             │
+  │    Heap key:  (single_edge_weight, node)                        │
+  │                                                                 │
+  │  EVOLUTION:                                                     │
+  │    FIFO queue → min-heap (accumulated) → min-heap (single)     │
+  │    Same skeleton. Different priorities. Different results.      │
+  │                                                                 │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 18: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  NEW CONCEPT: PRIM'S MST — "Dijkstra's Twin for MST"              ║
+  ║                                                                    ║
+  ║  The algorithm:                                                    ║
+  ║    1. Start from any node                                          ║
+  ║    2. Push (edge_weight, neighbor) to min-heap                     ║
+  ║    3. Pop cheapest, skip if visited, else add to MST               ║
+  ║    4. Push new node's unvisited neighbors                          ║
+  ║    5. Repeat until V nodes in MST                                  ║
+  ║                                                                    ║
+  ║  THE ONE-LINE DIFFERENCE FROM DIJKSTRA:                            ║
+  ║                                                                    ║
+  ║    Dijkstra:  heappush(heap, (dist[u] + weight, v))                ║
+  ║    Prim's:    heappush(heap, (weight, v))                          ║
+  ║                        ^^^^^^                                      ║
+  ║               Single edge weight, NOT accumulated distance         ║
+  ║                                                                    ║
+  ║  TWO MST ALGORITHMS NOW KNOWN:                                     ║
+  ║                                                                    ║
+  ║    ┌────────────┐          ┌────────────┐                          ║
+  ║    │ KRUSKAL'S  │          │  PRIM'S    │                          ║
+  ║    │ (P30)      │          │  (P31)     │                          ║
+  ║    ├────────────┤          ├────────────┤                          ║
+  ║    │ Sort edges │          │ Start node │                          ║
+  ║    │ Union-Find │          │ Min-heap   │                          ║
+  ║    │ Global view│          │ Local view │                          ║
+  ║    │ Sparse ✓   │          │ Dense ✓    │                          ║
+  ║    └────────────┘          └────────────┘                          ║
+  ║                                                                    ║
+  ║  THE DECISION FRAMEWORK:                                           ║
+  ║                                                                    ║
+  ║    Sparse + edge list   → Kruskal's                                ║
+  ║    Dense + adj matrix   → Prim's (matrix version, O(V²))          ║
+  ║    Know Dijkstra well   → Prim's (change one line)                 ║
+  ║    Know Union-Find well → Kruskal's (sort + union loop)            ║
+  ║    Interview default    → whichever you're more comfortable with   ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CLEAN INTERVIEW VERSION</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">import</span><span> heapq
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">prim_mst</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Prim's MST: start from node 0, grow greedily via min-heap."""</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Build adjacency list</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    heap </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (edge_weight, node)</span><span>
+</span><span>    mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> heap </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        cost</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>         </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># lazy deletion (same as Dijkstra)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>        
+<span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> cost
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappush</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>weight</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mst_cost </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> n </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span></code></pre></div>
+<hr>
+<h3>QUICK REFERENCE: MST Algorithm Selection</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────┐
+</span>  │                                                            │
+  │  NEED MST?                                                 │
+  │    │                                                       │
+  │    ├─ Graph is SPARSE (E &lt;&lt; V²)?                           │
+  │    │    ├─ Input is edge list? → KRUSKAL'S                 │
+  │    │    └─ Input is adj list?  → PRIM'S (heap) or KRUSKAL  │
+  │    │                                                       │
+  │    ├─ Graph is DENSE (E ≈ V²)?                             │
+  │    │    ├─ Input is adj matrix? → PRIM'S (matrix, O(V²))   │
+  │    │    └─ Input is edge list?  → Either (Prim slightly ↑) │
+  │    │                                                       │
+  │    └─ Not sure?                                            │
+  │         └─ Use whichever you're most comfortable coding    │
+  │                                                            │
+  └────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<p><strong>Problem 31 Complete.</strong><br>
+<strong>Ready for Problem 32: Minimum Cost to Connect All Points (MST Application)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="15" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-30.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 31 of 50</span>
+            </div>
+            <a href="problem-32.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

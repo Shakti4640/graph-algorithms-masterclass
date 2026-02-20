@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 7: Problem 7: Number of Islands — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="15">
+<div class="px-2"><h1>Problem 7: Number of Islands</h1>
+<h2>[Algorithm Family: BFS/DFS — Connected Components on Grid]</h2>
+<h2>[Phase 1: Fundamentals — "I can represent and traverse any graph"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are a cartographer analyzing a satellite image.
+</span>The image is represented as a 2D grid where:
+  → '1' represents LAND
+  → '0' represents WATER
+
+An island is a group of '1's connected horizontally or vertically
+(4-directional). Water ('0') separates islands.
+
+Count the NUMBER OF ISLANDS.
+
+Input:
+  grid = [
+    ["1","1","0","0","0"],
+    ["1","1","0","0","0"],
+    ["0","0","1","0","0"],
+    ["0","0","0","1","1"]
+  ]
+
+Output:
+  3 islands
+
+  Island 1: top-left block of 1s
+  Island 2: single 1 in the middle
+  Island 3: bottom-right pair of 1s</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Grid and See the Graph</h2>
+<h3>The Raw Grid</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Row\Col   0     1     2     3     4
+</span>    0     [ 1 ] [ 1 ] [ 0 ] [ 0 ] [ 0 ]
+    1     [ 1 ] [ 1 ] [ 0 ] [ 0 ] [ 0 ]
+    2     [ 0 ] [ 0 ] [ 1 ] [ 0 ] [ 0 ]
+    3     [ 0 ] [ 0 ] [ 0 ] [ 1 ] [ 1 ]</code></pre></div>
+<h3>Seeing the Islands</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────┐
+</span>  │                                           │
+  │   ██ ██  ·  ·  ·       ██ = land (1)     │
+  │   ██ ██  ·  ·  ·        · = water (0)    │
+  │    ·  ·  ██  ·  ·                         │
+  │    ·  ·  ·  ██ ██                         │
+  │                                           │
+  │   ^^^^      ^^    ^^^^                    │
+  │   Island 1  I2    Island 3                │
+  │                                           │
+  └─────────────────────────────────────────┘</code></pre></div>
+<h3>The Implicit Graph (from Problem 6)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Each '1' cell is a NODE.
+</span>  Edges connect adjacent '1' cells (4-directional).
+
+  (0,0)---(0,1)              (2,2)          (3,3)---(3,4)
+    |       |
+  (1,0)---(1,1)
+
+  Three separate groups of connected '1' nodes = 3 islands
+
+  This is EXACTLY:
+    → Problem 5 (Connected Components) 
+    → on Problem 6's grid-as-graph</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════╗
+</span>  ║  Property        │  Answer           │  Why?              ║
+  ╠══════════════════╪═══════════════════╪════════════════════╣
+  ║  NODES           │  Land cells ('1') │  Only land matters ║
+  ║  EDGES           │  Adjacent land    │  4-directional     ║
+  ║  Directed?       │  NO               │  Bidirectional     ║
+  ║  Weighted?       │  NO               │  All edges equal   ║
+  ║  Connected?      │  ★ NO ★          │  3 separate islands║
+  ║  Implicit?       │  YES (grid)       │  From Problem 6    ║
+  ║  V               │  count of '1's    │  7 land cells here ║
+  ║  E               │  adjacent '1' pairs│ 5 edges here      ║
+  ╚══════════════════╧═══════════════════╧════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Naive idea: "For every pair of '1' cells, check if they're
+</span>               connected through a path of '1's"
+  
+  → Number of '1' cells: up to rows × cols = R × C
+  → Pairs: O((R×C)²)
+  → Each reachability check: O(R × C) via BFS
+  → Total: O((R×C)³)
+  
+  For 300×300 grid: (90000)³ = 7.29 × 10¹⁴ → IMPOSSIBLY SLOW
+
+  Better naive: "Scan grid repeatedly, merge adjacent 1s into groups"
+  → Still O((R×C)²) with repeated scanning
+
+  But we already know the answer from Problem 5!</code></pre></div>
+<h3>Why Brute Force Fails (and Why We Already Know Better)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  From Problem 5: Connected Components = loop + BFS/DFS
+</span>  From Problem 6: Grid = implicit graph with direction vectors
+  
+  COMBINE THEM:
+    → Loop through all cells
+    → When we find an unvisited '1': run BFS/DFS → marks entire island
+    → Count how many times we start a new BFS/DFS
+    → Each start = one new island
+    
+  This is O(R × C) — visit each cell at most once!</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │  This problem is LITERALLY:                                    │
+  │                                                                │
+  │    Problem 5 (Connected Components)                            │
+  │    +                                                           │
+  │    Problem 6 (Grid as Graph)                                   │
+  │    =                                                           │
+  │    Problem 7 (Number of Islands)                               │
+  │                                                                │
+  │  Problem 5 pattern:                                            │
+  │    count = 0                                                   │
+  │    for each node:                                              │
+  │        if not visited:                                         │
+  │            BFS/DFS(node)                                       │
+  │            count += 1                                          │
+  │                                                                │
+  │  Problem 6 adaptation:                                         │
+  │    → "node" = cell (r, c) where grid[r][c] == '1'             │
+  │    → "visited" = cell marked (changed to '0' or added to set) │
+  │    → "neighbors" = 4-directional adjacent '1' cells           │
+  │                                                                │
+  │  RESULT:                                                       │
+  │    count = 0                                                   │
+  │    for each cell (r, c):                                       │
+  │        if grid[r][c] == '1':        ← unvisited land           │
+  │            BFS/DFS(r, c)            ← sink entire island       │
+  │            count += 1               ← one more island          │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>"Sinking" an Island — The Clever Visited Trick (from Problem 6)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Instead of a visited set, we can MODIFY THE GRID:
+</span>    → When we visit a '1' cell, change it to '0' (sink it)
+    → It won't be visited again (it's now "water")
+    → Saves O(R×C) space for visited set
+    
+  This is the same trick as Problem 6 (color change as visited marker)
+  
+  TRADEOFF:
+    → Modifies input → destructive
+    → If input must be preserved → use visited set instead</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — Step by Step</h2>
+<h3>Full Trace Using DFS with Grid Modification</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Initial Grid:
+</span>    ["1","1","0","0","0"]
+    ["1","1","0","0","0"]
+    ["0","0","1","0","0"]
+    ["0","0","0","1","1"]
+  
+  islands = 0
+  
+  Scan every cell (r, c) in row-major order:</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────────┐
+</span>  │ CELL (0,0): grid[0][0] = '1' → LAND found!                        │
+  │                                                                     │
+  │ islands = 0 + 1 = 1                                                │
+  │ Start DFS(0, 0) — sink this entire island                          │
+  │                                                                     │
+  │   DFS(0,0): grid[0][0] = '0'  (sink it)                           │
+  │     Neighbors:                                                      │
+  │       UP    (-1,0): out of bounds → skip                           │
+  │       DOWN  (1,0): grid='1' → DFS(1,0)                            │
+  │         DFS(1,0): grid[1][0] = '0'                                 │
+  │           UP    (0,0): grid='0' → skip (already sunk)             │
+  │           DOWN  (2,0): grid='0' → skip (water)                    │
+  │           LEFT  (1,-1): out of bounds → skip                      │
+  │           RIGHT (1,1): grid='1' → DFS(1,1)                        │
+  │             DFS(1,1): grid[1][1] = '0'                             │
+  │               UP    (0,1): grid='1' → DFS(0,1)                    │
+  │                 DFS(0,1): grid[0][1] = '0'                         │
+  │                   UP    (-1,1): out of bounds → skip               │
+  │                   DOWN  (1,1): grid='0' → skip (sunk)             │
+  │                   LEFT  (0,0): grid='0' → skip (sunk)             │
+  │                   RIGHT (0,2): grid='0' → skip (water)            │
+  │                 Return                                              │
+  │               DOWN  (2,1): grid='0' → skip                        │
+  │               LEFT  (1,0): grid='0' → skip (sunk)                 │
+  │               RIGHT (1,2): grid='0' → skip (water)                │
+  │             Return                                                  │
+  │           Return                                                    │
+  │       LEFT  (0,-1): out of bounds → skip                          │
+  │       RIGHT (0,1): grid='0' → skip (already sunk by DFS(1,1))    │
+  │     Return                                                          │
+  │                                                                     │
+  │   DFS(0,0) complete — entire island 1 is sunk!                     │
+  │                                                                     │
+  │   Grid after:                                                       │
+  │     ["0","0","0","0","0"]     ← all 4 land cells sunk              │
+  │     ["0","0","0","0","0"]                                           │
+  │     ["0","0","1","0","0"]     ← island 2 still exists              │
+  │     ["0","0","0","1","1"]     ← island 3 still exists              │
+  │                                                                     │
+  │   Visual:                                                           │
+  │      ·  ·  ·  ·  ·                                                 │
+  │      ·  ·  ·  ·  ·         Island 1: SUNK ✓                       │
+  │      ·  ·  ██  ·  ·         Island 2: still here                   │
+  │      ·  ·  ·  ██ ██         Island 3: still here                   │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ CELLS (0,1) through (2,1): all grid = '0' → skip, skip, skip...   │
+  │                                                                     │
+  │ We scan: (0,1)='0' skip, (0,2)='0' skip, (0,3)='0' skip,         │
+  │          (0,4)='0' skip, (1,0)='0' skip, (1,1)='0' skip,         │
+  │          (1,2)='0' skip, (1,3)='0' skip, (1,4)='0' skip,         │
+  │          (2,0)='0' skip, (2,1)='0' skip                           │
+  │                                                                     │
+  │ These are either water or already-sunk land → no action            │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ CELL (2,2): grid[2][2] = '1' → LAND found!                        │
+  │                                                                     │
+  │ islands = 1 + 1 = 2                                                │
+  │ Start DFS(2, 2) — sink this island                                 │
+  │                                                                     │
+  │   DFS(2,2): grid[2][2] = '0'                                       │
+  │     UP    (1,2): grid='0' → skip                                   │
+  │     DOWN  (3,2): grid='0' → skip                                   │
+  │     LEFT  (2,1): grid='0' → skip                                   │
+  │     RIGHT (2,3): grid='0' → skip                                   │
+  │   Return — this island was just a single cell!                      │
+  │                                                                     │
+  │   Grid after:                                                       │
+  │     ["0","0","0","0","0"]                                           │
+  │     ["0","0","0","0","0"]                                           │
+  │     ["0","0","0","0","0"]     ← island 2 sunk                      │
+  │     ["0","0","0","1","1"]     ← island 3 still here                │
+  │                                                                     │
+  │   Visual:                                                           │
+  │      ·  ·  ·  ·  ·                                                 │
+  │      ·  ·  ·  ·  ·         Island 1: SUNK ✓                       │
+  │      ·  ·  ·  ·  ·         Island 2: SUNK ✓                       │
+  │      ·  ·  ·  ██ ██         Island 3: still here                   │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ CELLS (2,3) through (3,2): all grid = '0' → skip                   │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ CELL (3,3): grid[3][3] = '1' → LAND found!                        │
+  │                                                                     │
+  │ islands = 2 + 1 = 3                                                │
+  │ Start DFS(3, 3) — sink this island                                 │
+  │                                                                     │
+  │   DFS(3,3): grid[3][3] = '0'                                       │
+  │     UP    (2,3): grid='0' → skip                                   │
+  │     DOWN  (4,3): out of bounds → skip                              │
+  │     LEFT  (3,2): grid='0' → skip                                   │
+  │     RIGHT (3,4): grid='1' → DFS(3,4)                              │
+  │       DFS(3,4): grid[3][4] = '0'                                   │
+  │         UP    (2,4): grid='0' → skip                               │
+  │         DOWN  (4,4): out of bounds → skip                          │
+  │         LEFT  (3,3): grid='0' → skip (already sunk)               │
+  │         RIGHT (3,5): out of bounds → skip                          │
+  │       Return                                                        │
+  │   Return                                                            │
+  │                                                                     │
+  │   Grid after:                                                       │
+  │     ["0","0","0","0","0"]                                           │
+  │     ["0","0","0","0","0"]                                           │
+  │     ["0","0","0","0","0"]                                           │
+  │     ["0","0","0","0","0"]     ← ALL land sunk                      │
+  │                                                                     │
+  │   Visual:                                                           │
+  │      ·  ·  ·  ·  ·         Island 1: SUNK ✓                       │
+  │      ·  ·  ·  ·  ·         Island 2: SUNK ✓                       │
+  │      ·  ·  ·  ·  ·         Island 3: SUNK ✓                       │
+  │      ·  ·  ·  ·  ·                                                 │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ CELL (3,4): grid[3][4] = '0' → skip (already sunk by DFS(3,3))    │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ═══════════════════════════════════════════════════════════════════
+  SCAN COMPLETE. All cells checked.
+  
+  DFS was called 3 times (from cells (0,0), (2,2), (3,3))
+  → 3 islands found
+  
+  ANSWER: 3
+  ═══════════════════════════════════════════════════════════════════</code></pre></div>
+<h3>Summary Table</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────┬──────────┬────────────┬──────────────────┬─────────┐
+</span>  │  Cell    │  Value   │  Action    │  Cells Sunk      │ Islands │
+  ├──────────┼──────────┼────────────┼──────────────────┼─────────┤
+  │  (0,0)   │  '1'     │ DFS → sink │ (0,0)(0,1)(1,0)  │  1      │
+  │          │          │            │ (1,1)             │         │
+  │  (0,1)   │  '0'     │ skip       │                   │  1      │
+  │  ...     │  '0'     │ skip       │                   │  1      │
+  │  (2,2)   │  '1'     │ DFS → sink │ (2,2)             │  2      │
+  │  ...     │  '0'     │ skip       │                   │  2      │
+  │  (3,3)   │  '1'     │ DFS → sink │ (3,3)(3,4)        │  3      │
+  │  (3,4)   │  '0'     │ skip       │                   │  3      │
+  └──────────┴──────────┴────────────┴──────────────────┴─────────┘</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: DFS with Grid Modification (Most Common Interview Solution)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">num_islands_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Count number of islands using DFS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Strategy:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Problem 5 (components loop) + Problem 6 (grid DFS)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        For each unvisited land cell:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">            → DFS to sink the entire island
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">            → Increment count
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    "Sinking" = changing '1' to '0' = marking visited (Problem 6 trick)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> grid </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Sink all land connected to (r, c)."""</span><span>
+</span><span>        grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'0'</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># sink this cell (mark visited)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'1'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── COMPONENT COUNTING LOOP (Problem 5 pattern) ───</span><span>
+</span><span>    islands </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'1'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># found unvisited land!</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>             </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># sink entire island</span><span>
+</span><span>                islands </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>          </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># count it</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> islands
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>grid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Number of islands: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">num_islands_dfs</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: Number of islands: 3</span></code></pre></div>
+<hr>
+<h3>Version 2: BFS with Grid Modification</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">num_islands_bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Count number of islands using BFS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same logic as DFS version, just using BFS (Problem 3)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    for the traversal instead of DFS (Problem 4).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Advantage: no recursion depth limit
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Useful for very large islands on big grids.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> grid </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start_r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""BFS to sink all land connected to (start_r, start_c)."""</span><span>
+</span><span>        queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start_r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start_r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start_c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'0'</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># sink source (mark visited before enqueuing)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'1'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'0'</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># sink before enqueuing (Problem 3 rule!)</span><span>
+</span><span>                    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── COMPONENT COUNTING LOOP ───</span><span>
+</span><span>    islands </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'1'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                islands </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> islands
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>grid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Number of islands: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">num_islands_bfs</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: Number of islands: 3</span></code></pre></div>
+<hr>
+<h3>Version 3: With Visited Set (Non-Destructive)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">num_islands_visited_set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Count islands WITHOUT modifying the grid.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    When to use:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Input grid must not be modified (read-only)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Multiple queries on same grid
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Need to also collect island members or sizes
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Tradeoff: extra O(R×C) space for visited set
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> grid </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Visit all land connected to (r, c)."""</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols 
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited 
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'1'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    islands </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'1'</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                islands </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> islands
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>grid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Number of islands: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">num_islands_visited_set</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Grid is UNCHANGED after this call</span></code></pre></div>
+<hr>
+<h3>Version 4: With Island Sizes and Members</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">num_islands_detailed</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find all islands WITH their sizes and member cells.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Extension of Version 3 — also collects which cells
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    belong to each island (like Problem 5 Version 3).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> grid </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    islands </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> island</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Collect all cells of current island."""</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        island</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols 
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited 
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'1'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> island</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'1'</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                island </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> island</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                islands</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>island</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>islands</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> islands
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>grid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"0"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"1"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>count</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> islands </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> num_islands_detailed</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Number of islands: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">count</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">\n"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> island </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">enumerate</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>islands</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Island </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">i</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">+</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">1</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: cells=</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">island</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">, size=</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">len</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">island</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span>max_island </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">max</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>islands</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\nLargest island: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">max_island</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> (size: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">len</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">max_island</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">)"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Number of islands: 3
+</span>
+  Island 1: cells=[(0,0),(1,0),(1,1),(0,1)], size=4
+  Island 2: cells=[(2,2)], size=1
+  Island 3: cells=[(3,3),(3,4)], size=2
+
+Largest island: [(0,0), (1,0), (1,1), (0,1)] (size: 4)</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(R × C)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  R = number of rows, C = number of columns
+</span>
+  WHY O(R × C)?
+
+  1. Outer loop: visits every cell once
+     → R × C iterations
+     → Each iteration: O(1) check (is it '1'?)
+
+  2. DFS/BFS calls (total across ALL calls):
+     → Each cell is visited AT MOST ONCE by DFS/BFS
+     → Once sunk (or added to visited), never revisited
+     → Total DFS/BFS work across all calls = number of '1' cells
+     → ≤ R × C
+
+  3. For each DFS/BFS visited cell: check 4 neighbors → O(1)
+
+  TOTAL: O(R × C) for outer loop + O(R × C) for all DFS/BFS
+       = O(R × C)
+
+  Same reasoning as Problem 5:
+    → Outer loop distributes work, doesn't multiply it
+    → visited/sinking prevents duplicate processing
+
+  In graph terms:
+    V = R × C (all cells)
+    E ≈ 2 × R × C (adjacent pairs)
+    O(V + E) = O(R × C)</code></pre></div>
+<h3>Space Complexity</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Version 1 (grid modification):
+</span>    → DFS recursion stack: O(R × C) worst case
+    → No visited set needed
+    → Total extra: O(R × C)  [due to recursion]
+
+  Version 2 (BFS, grid modification):
+    → Queue: O(min(R, C)) in typical case
+    → O(R × C) worst case
+    → No visited set needed
+    → Total extra: O(R × C)
+
+  Version 3 (visited set):
+    → Visited set: O(R × C)
+    → Stack/queue: O(R × C)
+    → Total extra: O(R × C)
+
+  All versions: O(R × C) extra space
+
+  WHY O(R × C) recursion depth?
+    Worst case grid (spiral/snake):
+      1 1 1 1 1
+      0 0 0 0 1
+      1 1 1 0 1
+      1 0 1 0 1
+      1 1 1 1 1
+    
+    DFS follows the spiral → depth = R × C</code></pre></div>
+<hr>
+<h2>STEP 7: COMPARING ALL THREE APPROACHES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────┬──────────────┬──────────────┬────────────────┐
+</span>  │  Approach            │  Grid Modify │  Visited Set │  BFS + Modify  │
+  ├──────────────────────┼──────────────┼──────────────┼────────────────┤
+  │  Time                │  O(R×C)      │  O(R×C)      │  O(R×C)        │
+  │  Space               │  O(R×C)stack │  O(R×C)set   │  O(R×C)queue   │
+  │  Modifies input?     │  YES         │  NO          │  YES           │
+  │  Recursion limit?    │  YES         │  YES         │  NO ★          │
+  │  Implementation      │  Simplest    │  Cleanest    │  Safest        │
+  │  Interview favorite? │  ★ YES ★    │  Good        │  Good          │
+  └──────────────────────┴──────────────┴──────────────┴────────────────┘
+
+  RECOMMENDATION:
+    → Interview: DFS + grid modification (Version 1) — shortest code
+    → Production: BFS + visited set — no mutation, no recursion limit
+    → Competition: DFS + grid modification — fastest to write</code></pre></div>
+<hr>
+<h2>STEP 8: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if 8-Directional Connectivity?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Some variations say: "islands connected diagonally too"
+</span>  
+  4-directional:              8-directional:
+    1 0 1                       1 0 1
+    0 1 0                       0 1 0
+    1 0 1                       1 0 1
+  
+  4-dir: 5 separate islands    8-dir: 1 island (all connected via center!)
+  
+  Code change: just swap direction vectors
+    4-dir: [(-1,0), (1,0), (0,-1), (0,1)]
+    8-dir: [(-1,-1), (-1,0), (-1,1),
+            (0,-1),          (0,1),
+            (1,-1),  (1,0),  (1,1)]
+    
+  Already shown in Problem 6 Version 4.</code></pre></div>
+<h3>What if Grid Has More Than 2 Values?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Example: terrain types (1=land, 2=mountain, 3=forest, 0=water)
+</span>  "Count regions of SAME terrain type"
+  
+  → Run component counting for each terrain type separately
+  → Or: DFS condition becomes grid[nr][nc] == grid[r][c]
+    (same value, not just '1')
+  
+  This is a generalization of Number of Islands.</code></pre></div>
+<h3>What if We Need to Find the LARGEST Island?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Track size during DFS/BFS
+</span>  → Return maximum size across all components
+  
+  Already shown in Version 4 above.
+  
+  def dfs(r, c):
+      grid[r][c] = '0'
+      size = 1                                    # count this cell
+      for dr, dc in directions:
+          nr, nc = r + dr, c + dc
+          if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols and grid[nr][nc] == '1':
+              size += dfs(nr, nc)                  # add subtree size
+      return size</code></pre></div>
+<h3>What if Islands Can Be Made Larger? (LeetCode 827 — Making a Large Island)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Change at most one '0' to '1'. What's the maximum island size?"
+</span>  
+  Strategy:
+    1. Number each island (assign unique ID)
+    2. Record size of each island
+    3. For each '0' cell: check adjacent island IDs
+    4. Sum sizes of unique adjacent islands + 1
+    5. Return maximum
+  
+  This builds on Problem 7 but adds more complexity.
+  (Not solved here — just showing how islands problems extend)</code></pre></div>
+<hr>
+<h2>STEP 9: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: String '1' vs Integer 1                          ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  LeetCode gives grid as strings: grid[r][c] = '1' or '0'   ║
+  ║  Some variations use integers: grid[r][c] = 1 or 0          ║
+  ║                                                              ║
+  ║  WRONG:                                                      ║
+  ║    if grid[r][c] == 1:     ← fails if values are strings!   ║
+  ║                                                              ║
+  ║  RIGHT:                                                      ║
+  ║    if grid[r][c] == '1':   ← match the actual type           ║
+  ║                                                              ║
+  ║  Always check the input type first.                          ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Empty grid or grid with no land                  ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  grid = []          → return 0                               ║
+  ║  grid = [[]]        → return 0                               ║
+  ║  grid = [["0","0"]] → return 0 (no land at all)              ║
+  ║                                                              ║
+  ║  Always handle: if not grid or not grid[0]: return 0         ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Modifying grid when you shouldn't                ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  If the problem or caller needs the original grid later:     ║
+  ║    → Use visited set (Version 3) instead of sinking          ║
+  ║    → Or deep copy the grid first:                            ║
+  ║      import copy                                             ║
+  ║      grid_copy = copy.deepcopy(grid)                         ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Recursion depth for large grids                  ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Grid 300×300 = 90,000 cells                                 ║
+  ║  Worst case recursion depth = 90,000                         ║
+  ║  Python limit = ~1000 → RecursionError!                      ║
+  ║                                                              ║
+  ║  FIX: Use BFS (Version 2) or iterative DFS                   ║
+  ║  OR: sys.setrecursionlimit(90001)                            ║
+  ║      (works for LeetCode, risky in production)               ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Entire grid is land                              ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  grid = [["1","1"],["1","1"]]                                ║
+  ║  → 1 giant island                                            ║
+  ║  → DFS visits ALL cells in one call                          ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Every cell is a separate island                  ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  grid = [["1","0","1"],["0","1","0"],["1","0","1"]]          ║
+  ║  → 5 islands (checkerboard pattern)                          ║
+  ║  → DFS called 5 times, each visiting 1 cell                  ║
+  ╚══════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 10: SIDE-BY-SIDE — Problem 5 vs Problem 7</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────┬──────────────────────────────────┐
+</span>  │  Problem 5: Components          │  Problem 7: Islands              │
+  │  (Explicit Graph)               │  (Implicit Grid Graph)           │
+  ├─────────────────────────────────┼──────────────────────────────────┤
+  │                                 │                                  │
+  │  graph = build_adj_list(edges)  │  grid = given 2D array           │
+  │                                 │                                  │
+  │  for node in range(n):          │  for r in range(rows):           │
+  │    if node not in visited:      │    for c in range(cols):         │
+  │      dfs(node)                  │      if grid[r][c] == '1':      │
+  │      count += 1                 │        dfs(r, c)                │
+  │                                 │        count += 1               │
+  │                                 │                                  │
+  │  def dfs(node):                 │  def dfs(r, c):                  │
+  │    visited.add(node)            │    grid[r][c] = '0'             │
+  │    for nbr in graph[node]:      │    for dr,dc in directions:     │
+  │      if nbr not in visited:     │      nr,nc = r+dr, c+dc        │
+  │        dfs(nbr)                 │      if in_bounds and == '1':   │
+  │                                 │        dfs(nr, nc)              │
+  │                                 │                                  │
+  │  SAME PATTERN                   │  SAME PATTERN                    │
+  │  Different graph representation │  Different graph representation  │
+  │                                 │                                  │
+  └─────────────────────────────────┴──────────────────────────────────┘
+
+  THE PATTERN IS IDENTICAL:
+    1. Loop through all nodes (cells)
+    2. If unvisited (land): DFS/BFS → mark entire component
+    3. Count the DFS/BFS calls
+
+  The ONLY difference is HOW we:
+    → Represent nodes: number vs (row, col)
+    → Access neighbors: graph[node] vs direction vectors
+    → Mark visited: visited set vs grid modification</code></pre></div>
+<hr>
+<h2>STEP 11: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  SIGNAL 1: "Given a 2D grid of 0s and 1s..."                  │
+  │    → IMMEDIATELY think: grid graph problem                     │
+  │    → Cells = nodes, adjacent = edges                           │
+  │                                                                │
+  │  SIGNAL 2: "Count the number of [regions/islands/groups]"      │
+  │    → Connected components!                                     │
+  │    → Problem 5 pattern on a grid                               │
+  │                                                                │
+  │  SIGNAL 3: "Connected horizontally or vertically"              │
+  │    → 4-directional connectivity                                │
+  │    → directions = [(-1,0), (1,0), (0,-1), (0,1)]              │
+  │                                                                │
+  │  THINKING PROCESS:                                             │
+  │    "I see a 2D grid with groups to count"                      │
+  │    → "Grid = graph (Problem 6)"                                │
+  │    → "Count groups = connected components (Problem 5)"         │
+  │    → "Loop cells, DFS/BFS from each unvisited land cell"      │
+  │    → "Sink visited cells to avoid revisiting"                  │
+  │    → "Count DFS/BFS calls = count islands"                     │
+  │                                                                │
+  │  TIME TO CODE: ~3 minutes if you know the pattern              │
+  │  This is one of the most COMMON interview questions!           │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: COMBINING PREVIOUS PATTERNS                ║
+  ║                                                                    ║
+  ║   Problem 7 taught NO new algorithm!                              ║
+  ║   Instead, it taught us to COMBINE:                               ║
+  ║     → Problem 5's component counting pattern                      ║
+  ║     → Problem 6's grid-as-graph technique                         ║
+  ║                                                                    ║
+  ║   This is a CRITICAL lesson:                                      ║
+  ║   ┌──────────────────────────────────────────────────────────┐     ║
+  ║   │  Most graph problems aren't "new algorithms"             │     ║
+  ║   │  They're COMBINATIONS of patterns you already know       │     ║
+  ║   │  The skill is RECOGNIZING which patterns to combine      │     ║
+  ║   └──────────────────────────────────────────────────────────┘     ║
+  ║                                                                    ║
+  ║   PATTERN FORMULA:                                                ║
+  ║     "Count groups on grid"                                        ║
+  ║     = Component Loop (Problem 5)                                  ║
+  ║     + Grid Traversal (Problem 6)                                  ║
+  ║     + DFS or BFS (Problems 3-4)                                   ║
+  ║                                                                    ║
+  ║   This formula appears in:                                        ║
+  ║     → Problem 13 (Rotten Oranges) — with multi-source twist       ║
+  ║     → Problem 16 (Surrounded Regions) — with boundary twist       ║
+  ║     → Problem 17 (Pacific Atlantic) — with dual-source twist      ║
+  ║     → Countless interview variations                               ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>PHASE 1 COMPLETION CHECK</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   PHASE 1 PROGRESS: 7 of 8 complete                               ║
+  ║                                                                    ║
+  ║   ✅ Problem 1: Build Graph (Adjacency List)                      ║
+  ║   ✅ Problem 2: Build Graph (Adjacency Matrix)                    ║
+  ║   ✅ Problem 3: BFS Traversal                                     ║
+  ║   ✅ Problem 4: DFS Traversal                                     ║
+  ║   ✅ Problem 5: Connected Components                              ║
+  ║   ✅ Problem 6: Grid as Graph (Flood Fill)                        ║
+  ║   ✅ Problem 7: Number of Islands                                 ║
+  ║   ⬜ Problem 8: Find if Path Exists                               ║
+  ║                                                                    ║
+  ║   After Problem 8, Phase 1 goal achieved:                         ║
+  ║   "I can represent ANY graph and traverse it"                     ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CONNECTION MAP</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 1 (Build Graph)        ── store graph
+</span>  Problem 2 (Matrix)             ── matrix representation
+  Problem 3 (BFS)                ── wide traversal
+  Problem 4 (DFS)                ── deep traversal
+  Problem 5 (Components)         ── count groups
+  Problem 6 (Flood Fill)         ── grid = graph
+  Problem 7 (Islands)            ◄── YOU ARE HERE (5 + 6 combined)
+           │
+           ├──→ Problem 8  (Path Exists)
+           │     → "Can I reach target from source?"
+           │     → Simplest reachability check
+           │     → Completes Phase 1!
+           │
+           ├──→ Problem 13 (Rotten Oranges)
+           │     → Islands + multi-source BFS + level tracking
+           │
+           └──→ Problem 16 (Surrounded Regions)
+                 → Islands + boundary thinking</code></pre></div>
+<hr>
+<p><strong>Problem 7 Complete.</strong><br>
+<strong>Ready for Problem 8: Find if Path Exists?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="17" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-6.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 7 of 50</span>
+            </div>
+            <a href="problem-8.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

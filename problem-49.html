@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 49: Problem 49: 2-SAT (Satisfiability via SCC) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="21">
+<div class="px-2"><h1>Problem 49: 2-SAT (Satisfiability via SCC)</h1>
+<h2>[Algorithm Family: Implication Graph + Strongly Connected Components]</h2>
+<h2>[Phase 5: Expert — "I can design solutions for novel graph problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are assigning teams for a tournament.
+</span>There are N players, each must be on Team A or Team B.
+
+There are M constraints of the form:
+  "At least one of these two conditions must be true"
+
+Examples of constraints:
+  - "Player 1 is on Team A OR Player 2 is on Team B"
+  - "Player 3 is on Team B OR Player 4 is on Team B"
+  - "Player 1 is NOT on Team A OR Player 3 is on Team A"
+
+Determine:
+  1. Is there ANY valid team assignment satisfying ALL constraints?
+  2. If yes, find one such assignment.
+
+Input:
+  n = 4 players (x1, x2, x3, x4)
+  Each xi = True means "player i is on Team A"
+  Each xi = False means "player i is on Team B"
+  
+  Constraints (clauses):
+    (x1 OR x2)          "player 1 on A OR player 2 on A"
+    (¬x1 OR x3)         "player 1 on B OR player 3 on A"
+    (¬x2 OR ¬x3)        "player 2 on B OR player 3 on B"
+    (x4 OR ¬x1)         "player 4 on A OR player 1 on B"
+
+Output:
+  Is it satisfiable? YES
+  One valid assignment: x1=False, x2=True, x3=True, x4=True
+  
+  Verification:
+    (F OR T) = T  ✓
+    (T OR T) = T  ✓    (¬x1 = ¬False = True)
+    (F OR F) = F  ✗    Wait — let me recheck...
+    
+  Let me pick: x1=False, x2=True, x3=False, x4=True
+    (F OR T) = T  ✓
+    (T OR F) = T  ✓
+    (F OR T) = T  ✓
+    (T OR T) = T  ✓    All satisfied!
+
+Constraints:
+  → Up to 200,000 variables
+  → Up to 400,000 clauses
+  → Each clause has EXACTLY 2 literals (this is what makes it "2-SAT")
+  → Need O(V + E) solution</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — What is 2-SAT?</h2>
+<h3>Boolean Satisfiability Basics</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ═══════════════════════════════════════════════════════════════
+</span>  VOCABULARY
+  ═══════════════════════════════════════════════════════════════
+  
+  Variable:  xi ∈ {True, False}
+  Literal:   xi (positive) or ¬xi (negation)
+  Clause:    (literal₁ OR literal₂)    ← exactly 2 literals
+  Formula:   clause₁ AND clause₂ AND ... AND clauseₘ
+  
+  "2-SAT" means: every clause has EXACTLY 2 literals.
+  
+  Example formula:
+    (x1 ∨ x2) ∧ (¬x1 ∨ x3) ∧ (¬x2 ∨ ¬x3) ∧ (x4 ∨ ¬x1)
+    
+  Question: Can we assign True/False to x1,x2,x3,x4 
+            so that ALL clauses are True?
+  
+  ═══════════════════════════════════════════════════════════════
+  WHY "2" MATTERS
+  ═══════════════════════════════════════════════════════════════
+  
+  1-SAT: Each clause has 1 literal
+    → Trivial: just satisfy each literal directly
+    → O(N)
+    
+  2-SAT: Each clause has 2 literals
+    → Solvable in POLYNOMIAL time: O(V + E)
+    → THIS PROBLEM
+    
+  3-SAT: Each clause has 3 literals
+    → NP-COMPLETE! No known polynomial algorithm
+    → One of the foundational NP-complete problems
+    
+  The jump from 2 to 3 is one of the most famous
+  complexity boundaries in computer science!</code></pre></div>
+<h3>The Implication Graph Idea</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ═══════════════════════════════════════════════════════════════
+</span>  KEY INSIGHT: (A ∨ B) is equivalent to TWO implications:
+  ═══════════════════════════════════════════════════════════════
+  
+  The clause (A ∨ B) means "at least one of A, B is true"
+  
+  This is logically equivalent to:
+    ¬A → B    "if A is false, then B MUST be true"
+    ¬B → A    "if B is false, then A MUST be true"
+    
+  PROOF:
+    (A ∨ B) 
+    ≡ (¬A → B)        by material implication
+    ≡ (¬B → A)        by contrapositive of (¬A → B)... 
+    
+    Actually both are independently equivalent:
+    ¬A → B:  "if not A then B"  ≡  "A or B"  ✓
+    ¬B → A:  "if not B then A"  ≡  "B or A"  ✓
+    
+  EXAMPLE:
+    Clause: (x1 ∨ x2)
+    Implication 1: ¬x1 → x2    "if x1 is false, x2 must be true"
+    Implication 2: ¬x2 → x1    "if x2 is false, x1 must be true"
+    
+    Clause: (¬x1 ∨ x3)
+    Implication 1: x1 → x3     "if x1 is true, x3 must be true"
+    Implication 2: ¬x3 → ¬x1   "if x3 is false, x1 must be false"
+    
+  EACH clause creates TWO directed edges in the implication graph!
+  
+  ═══════════════════════════════════════════════════════════════
+  THE IMPLICATION GRAPH
+  ═══════════════════════════════════════════════════════════════
+  
+  Nodes: 2N nodes — one for each literal
+    For variable xi: node xi (positive) and node ¬xi (negative)
+    
+  Edges: 2 directed edges per clause
+    Clause (A ∨ B) → edges: ¬A → B and ¬B → A
+    
+  Total: 2N nodes, 2M edges (M clauses)</code></pre></div>
+<h3>Build the Implication Graph for Our Example</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Clauses:
+</span>    C1: (x1 ∨ x2)     → ¬x1 → x2,  ¬x2 → x1
+    C2: (¬x1 ∨ x3)    → x1 → x3,   ¬x3 → ¬x1
+    C3: (¬x2 ∨ ¬x3)   → x2 → ¬x3,  x3 → ¬x2
+    C4: (x4 ∨ ¬x1)    → ¬x4 → ¬x1, x1 → x4
+  
+  Nodes: x1, ¬x1, x2, ¬x2, x3, ¬x3, x4, ¬x4  (8 nodes)
+  
+  Edges:
+    ¬x1 → x2       (from C1)
+    ¬x2 → x1       (from C1)
+    x1 → x3        (from C2)
+    ¬x3 → ¬x1      (from C2)
+    x2 → ¬x3       (from C3)
+    x3 → ¬x2       (from C3)
+    ¬x4 → ¬x1      (from C4)
+    x1 → x4        (from C4)
+    
+  Implication Graph (ASCII):
+  
+    ¬x1 ──→ x2 ──→ ¬x3 ──→ ¬x1    (cycle: ¬x1 → x2 → ¬x3 → ¬x1)
+     ↑                        ↑
+     │                        │
+    ¬x2 ←── x3       ¬x4 ───┘
+     ↑       │
+     │       │
+    ¬x3 ←──┘
+    
+    x1 ──→ x3 ──→ ¬x2
+    │       
+    └──→ x4
+    
+    ¬x2 ──→ x1 ──→ x3
+                 └──→ x4</code></pre></div>
+<h3>Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔═══════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer                │  Why?                    ║
+╠══════════════════╪════════════════════════╪══════════════════════════╣
+║  NODES           │  2N literals           │  xi and ¬xi for each i  ║
+║  EDGES           │  2M implications       │  2 per clause            ║
+║  Directed?       │  YES                   │  Implications have dir   ║
+║  Weighted?       │  NO                    │  Just structure          ║
+║  Cyclic?         │  MAYBE                 │  Cycles are significant! ║
+║  Special         │  Implication graph     │  Encodes logical         ║
+║                  │                        │  constraints as edges    ║
+╚══════════════════╧════════════════════════╧══════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<h3>Approach: Try All Assignments</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Each variable: True or False → 2 choices
+</span>  N variables → 2^N possible assignments
+  
+  For each assignment:
+    Check if ALL M clauses are satisfied
+    If yes → return this assignment
+    If no → try next
+    
+  Time: O(2^N × M)
+  
+  For N = 20: 2^20 × M ≈ 10^6 × M — maybe OK
+  For N = 200,000: 2^200000 — IMPOSSIBLY SLOW</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  2^N is exponential — completely infeasible for large N.
+</span>  
+  But 2-SAT has special structure:
+    → Each clause has EXACTLY 2 literals
+    → This creates an implication graph
+    → The graph's SCC structure tells us EVERYTHING
+    
+  The key theorem:
+    "A 2-SAT formula is satisfiable if and only if 
+     NO variable xi and its negation ¬xi are in the 
+     SAME strongly connected component."
+     
+  WHY? If xi and ¬xi are in the same SCC:
+    → There's a path xi → ... → ¬xi (xi implies ¬xi)
+    → There's a path ¬xi → ... → xi (¬xi implies xi)
+    → Setting xi = True forces ¬xi = True → CONTRADICTION
+    → Setting xi = False forces xi = True → CONTRADICTION
+    → NO valid assignment exists for xi → UNSATISFIABLE</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE PATTERN</h2>
+<h3>The 2-SAT Algorithm</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ═══════════════════════════════════════════════════════════════
+</span>  STEP 1: Build the implication graph
+    → 2N nodes (xi and ¬xi for each variable)
+    → For each clause (A ∨ B): add edges ¬A → B and ¬B → A
+    
+  STEP 2: Find all Strongly Connected Components (Problem 36)
+    → Use Kosaraju's or Tarjan's algorithm
+    → O(V + E) = O(N + M)
+    
+  STEP 3: Check satisfiability
+    → For each variable xi:
+        If xi and ¬xi are in the SAME SCC → UNSATISFIABLE
+    → If no such variable exists → SATISFIABLE
+    
+  STEP 4: Find assignment (if satisfiable)
+    → SCCs form a DAG (condensation graph — Problem 36)
+    → Topological order of SCCs determines variable values
+    → For each variable xi:
+        If SCC(xi) comes AFTER SCC(¬xi) in topological order:
+          → xi = True
+        Else:
+          → xi = False
+  ═══════════════════════════════════════════════════════════════
+  
+  WHY topological order gives a valid assignment:
+  
+  In the condensation DAG (DAG of SCCs):
+    → If SCC_A → SCC_B (edge in condensation)
+    → All nodes in SCC_A "imply" all nodes in SCC_B
+    → If we set a literal in SCC_A to True,
+      all literals in SCC_B must also be True
+      
+  Topological order: later = "more constrained to be True"
+  
+  For variable xi:
+    → SCC(xi) and SCC(¬xi) are DIFFERENT (otherwise unsatisfiable)
+    → One comes before the other in topological order
+    → We set the LATER one to True
+    → This is consistent because implications flow forward
+    
+  KEY: Kosaraju's algorithm naturally gives reverse topological order
+  of SCCs (the SCC found FIRST has the HIGHEST topological number).</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH</h2>
+<h3>Step A: Build Implication Graph</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Clauses:
+</span>    C1: (x1 ∨ x2)     → ¬x1 → x2,  ¬x2 → x1
+    C2: (¬x1 ∨ x3)    → x1 → x3,   ¬x3 → ¬x1
+    C3: (¬x2 ∨ ¬x3)   → x2 → ¬x3,  x3 → ¬x2
+    C4: (x4 ∨ ¬x1)    → ¬x4 → ¬x1, x1 → x4
+    
+  Node encoding (for implementation):
+    Variable i (0-indexed): 
+      xi    = node 2*i
+      ¬xi   = node 2*i + 1
+      
+    x1=0, ¬x1=1, x2=2, ¬x2=3, x3=4, ¬x3=5, x4=6, ¬x4=7
+    
+  Edges (using node numbers):
+    ¬x1(1) → x2(2)
+    ¬x2(3) → x1(0)
+    x1(0)  → x3(4)
+    ¬x3(5) → ¬x1(1)
+    x2(2)  → ¬x3(5)
+    x3(4)  → ¬x2(3)
+    ¬x4(7) → ¬x1(1)
+    x1(0)  → x4(6)
+    
+  Adjacency list:
+    0(x1):  → [4(x3), 6(x4)]
+    1(¬x1): → [2(x2)]
+    2(x2):  → [5(¬x3)]
+    3(¬x2): → [0(x1)]
+    4(x3):  → [3(¬x2)]
+    5(¬x3): → [1(¬x1)]
+    6(x4):  → []
+    7(¬x4): → [1(¬x1)]</code></pre></div>
+<h3>Step B: Run Kosaraju's SCC (from Problem 36)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ═══════════════════════════════════════════════════════════════
+</span>  KOSARAJU'S PHASE 1: DFS on original graph, record finish order
+  ═══════════════════════════════════════════════════════════════
+  
+  DFS from each unvisited node, record finish times:
+  
+  Start DFS from node 0(x1):
+    0 → 4 → 3 → 0 (visited, backtrack)
+    3 finishes (push 3)
+    4 → 3 (visited), done
+    4 finishes (push 4)
+    0 → 6 → (no unvisited neighbors)
+    6 finishes (push 6)
+    0 finishes (push 0)
+    
+  Start DFS from node 1(¬x1):
+    1 → 2 → 5 → 1 (visited, backtrack)
+    5 finishes (push 5)
+    2 finishes (push 2)
+    1 finishes (push 1)
+    
+  Start DFS from node 7(¬x4):
+    7 → 1 (visited)
+    7 finishes (push 7)
+    
+  Finish order stack: [3, 4, 6, 0, 5, 2, 1, 7]
+  Process in reverse: 7, 1, 2, 5, 0, 6, 4, 3
+  
+  ═══════════════════════════════════════════════════════════════
+  KOSARAJU'S PHASE 2: DFS on REVERSED graph in reverse finish order
+  ═══════════════════════════════════════════════════════════════
+  
+  Reversed adjacency list (all edges flipped):
+    0(x1):  ← [3(¬x2)]           → reversed: 0 → []... 
+    
+  Let me compute the reversed graph properly:
+  
+  Original edges:
+    0→4, 0→6, 1→2, 2→5, 3→0, 4→3, 5→1, 7→1
+    
+  Reversed edges:
+    4→0, 6→0, 2→1, 5→2, 0→3, 3→4, 1→5, 1→7
+    
+  Reversed adjacency list:
+    0: → [3]
+    1: → [5, 7]
+    2: → [1]
+    3: → [4]
+    4: → [0]
+    5: → [2]
+    6: → [0]
+    7: → []
+    
+  Process in order: 7, 1, 2, 5, 0, 6, 4, 3
+  
+  DFS from 7: visits {7}             → SCC_0 = {7(¬x4)}
+  DFS from 1: 1→5→2→1(visited)      → SCC_1 = {1(¬x1), 5(¬x3), 2(x2)}
+  DFS from 0: 0→3→4→0(visited)      → SCC_2 = {0(x1), 3(¬x2), 4(x3)}
+  DFS from 6: 6→0(visited)          → SCC_3 = {6(x4)}
+  
+  ═══════════════════════════════════════════════════════════════
+  SCC RESULTS:
+  ═══════════════════════════════════════════════════════════════
+  
+  SCC_0: {¬x4}               comp_id[7] = 0
+  SCC_1: {¬x1, x2, ¬x3}     comp_id[1] = comp_id[2] = comp_id[5] = 1
+  SCC_2: {x1, ¬x2, x3}      comp_id[0] = comp_id[3] = comp_id[4] = 2
+  SCC_3: {x4}                comp_id[6] = 3
+  
+  Visually:
+  
+    SCC_0{¬x4} → SCC_1{¬x1, x2, ¬x3} ⟷ SCC_2{x1, ¬x2, x3} ← SCC_3{x4}
+    
+  Wait, SCC_1 and SCC_2 are separate SCCs but connected.
+  Let me verify:
+  
+  Within SCC_1: ¬x1 → x2 → ¬x3 → ¬x1  (cycle!) ✓
+  Within SCC_2: x1 → x3 → ¬x2 → x1     
+    x1→x3 ✓, x3→¬x2 ✓, ¬x2→x1 ✓ (cycle!) ✓
+  
+  Between SCC_1 and SCC_2:
+    SCC_1 → SCC_2: x2(SCC_1)→¬x3... wait x2→¬x3 and ¬x3 is in SCC_1
+    SCC_2 → SCC_1: x1(SCC_2)→x3... x3 is in SCC_2
+    
+  So they're separate SCCs with edges between them but no cycle 
+  spanning both (otherwise they'd be one SCC).</code></pre></div>
+<h3>Step C: Check Satisfiability</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For each variable xi, check if xi and ¬xi are in same SCC:
+</span>  
+  x1(node 0): comp_id = 2
+  ¬x1(node 1): comp_id = 1
+  2 ≠ 1 → OK ✓
+  
+  x2(node 2): comp_id = 1
+  ¬x2(node 3): comp_id = 2
+  1 ≠ 2 → OK ✓
+  
+  x3(node 4): comp_id = 2
+  ¬x3(node 5): comp_id = 1
+  2 ≠ 1 → OK ✓
+  
+  x4(node 6): comp_id = 3
+  ¬x4(node 7): comp_id = 0
+  3 ≠ 0 → OK ✓
+  
+  NO variable has xi and ¬xi in same SCC → SATISFIABLE! ✓</code></pre></div>
+<h3>Step D: Determine Variable Assignments</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ═══════════════════════════════════════════════════════════════
+</span>  RULE: xi = True if comp_id[xi] &gt; comp_id[¬xi]
+  ═══════════════════════════════════════════════════════════════
+  
+  WHY? In Kosaraju's, SCCs found LATER have HIGHER comp_id.
+  Later in Kosaraju's Phase 2 = earlier in topological order 
+  of the condensation DAG... 
+  
+  Actually, in Kosaraju's:
+    Phase 2 processes nodes in reverse finish order.
+    SCCs discovered FIRST in Phase 2 are SINKS in condensation DAG.
+    SCCs discovered LAST are SOURCES.
+    
+    comp_id assigned in discovery order:
+      SCC_0 discovered first → it's a sink
+      SCC_3 discovered last → it's a source
+      
+    Topological order of condensation DAG:
+      SCC_3(source) → SCC_2 → SCC_1 → SCC_0(sink)
+      
+    Higher comp_id = later in topological order = 
+    "more constrained to be True"
+    
+  ASSIGNMENT RULE (using Kosaraju's comp_id):
+    xi = True  if comp_id[xi] &gt; comp_id[¬xi]
+    xi = False if comp_id[xi] &lt; comp_id[¬xi]
+    
+  Let's apply:
+  
+  x1: comp_id[x1]=2, comp_id[¬x1]=1 → 2 &gt; 1 → x1 = True
+  x2: comp_id[x2]=1, comp_id[¬x2]=2 → 1 &lt; 2 → x2 = False
+  x3: comp_id[x3]=2, comp_id[¬x3]=1 → 2 &gt; 1 → x3 = True
+  x4: comp_id[x4]=3, comp_id[¬x4]=0 → 3 &gt; 0 → x4 = True
+  
+  Assignment: x1=True, x2=False, x3=True, x4=True
+  
+  ═══════════════════════════════════════════════════════════════
+  VERIFICATION:
+  ═══════════════════════════════════════════════════════════════
+  
+  C1: (x1 ∨ x2)    = (T ∨ F) = T  ✓
+  C2: (¬x1 ∨ x3)   = (F ∨ T) = T  ✓
+  C3: (¬x2 ∨ ¬x3)  = (T ∨ F) = T  ✓
+  C4: (x4 ∨ ¬x1)   = (T ∨ F) = T  ✓
+  
+  ALL CLAUSES SATISFIED! ✓</code></pre></div>
+<hr>
+<h3>Unsatisfiable Example</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Clauses:
+</span>    (x1 ∨ x1)       → ¬x1 → x1    (x1 must be True)
+    (¬x1 ∨ ¬x1)     → x1 → ¬x1    (x1 must be False)
+    
+  Implication edges: ¬x1 → x1 and x1 → ¬x1
+  
+  This means: x1 → ¬x1 → x1 → ... (infinite chain)
+  
+  x1 and ¬x1 are in the SAME SCC (cycle: x1 → ¬x1 → x1)
+  
+  → UNSATISFIABLE! ✗
+  
+  Makes sense: "x1 must be True AND x1 must be False" → impossible</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: Full 2-SAT Solver</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">class</span><span> </span><span class="token" style="color: rgb(43, 145, 175);">TwoSAT</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    2-SAT Solver using Implication Graph + Kosaraju's SCC.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Solves Boolean satisfiability where each clause has exactly 2 literals.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Algorithm:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      1. Build implication graph (2 edges per clause)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      2. Find SCCs using Kosaraju's (Problem 36)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      3. Check: xi and ¬xi in same SCC → UNSAT
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      4. Assign: xi = True if comp_id[xi] &gt; comp_id[¬xi]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Built on:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      - Problem 1:  Adjacency list
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      - Problem 4:  DFS traversal
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      - Problem 36: Kosaraju's SCC algorithm
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      - Problem 47: DAG structure of condensation (topological reasoning)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Node encoding:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Variable i (0-indexed):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Positive literal xi  = node 2*i
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Negative literal ¬xi = node 2*i + 1
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Negation of node u:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        u ^ 1  (XOR with 1 flips between 2*i and 2*i+1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Time:  O(N + M)  — N variables, M clauses
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Space: O(N + M)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">__init__</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Initialize solver for n variables (0-indexed: x0, x1, ..., x_{n-1}).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Graph has 2*n nodes: node 2*i = xi, node 2*i+1 = ¬xi
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> n
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>num_nodes </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>adj </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># forward graph</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>adj_rev </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># reversed graph</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">_var</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> negated</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Get node index for variable i.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        _var(i, False) = 2*i     = xi
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        _var(i, True)  = 2*i + 1 = ¬xi
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> i </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> negated </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">_neg</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Get the negation of node u.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        If u = 2*i (positive), return 2*i+1 (negative)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        If u = 2*i+1 (negative), return 2*i (positive)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        XOR with 1 does exactly this!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> u </span><span class="token" style="color: rgb(57, 58, 52);">^</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">add_clause</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Add clause (u OR v) where u and v are node indices.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        (u OR v) ≡ (¬u → v) AND (¬v → u)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Adds two directed edges to the implication graph.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Usage:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">          For clause (xi OR xj):        add_clause(_var(i), _var(j))
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">          For clause (xi OR ¬xj):       add_clause(_var(i), _var(j, True))
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">          For clause (¬xi OR ¬xj):      add_clause(_var(i, True), _var(j, True))
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        neg_u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>_neg</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        neg_v </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>_neg</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ¬u → v</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>adj</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neg_u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>adj_rev</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neg_u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ¬v → u</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>adj</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neg_v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>adj_rev</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neg_v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Convenience: add clause using variable indices and negation flags.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        add_clause_vars(i, False, j, True) adds clause (xi OR ¬xj)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>_var</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_i</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        v </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>_var</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">_kosaraju</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Kosaraju's SCC algorithm (Problem 36).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Phase 1: DFS on forward graph, record finish order
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Phase 2: DFS on reversed graph in reverse finish order
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Returns comp_id[node] for each node.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>num_nodes
+</span><span>        order </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># finish order</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Phase 1: DFS on forward graph ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs1</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (node, processed)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> processed </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> processed</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># will record finish time</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> nei </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>adj</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nei</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nei</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>num_nodes</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs1</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Phase 2: DFS on reversed graph ───</span><span>
+</span><span>        visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>num_nodes
+</span><span>        comp_id </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>num_nodes
+</span><span>        current_comp </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs2</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> comp</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                comp_id</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> comp
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> nei </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>adj_rev</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nei</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nei</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Process in reverse finish order</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">reversed</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>order</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs2</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> current_comp</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                current_comp </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> comp_id
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">solve</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Solve the 2-SAT instance.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">          (True, assignment) if satisfiable
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">            assignment[i] = True/False for variable i
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">          (False, None) if unsatisfiable
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        comp_id </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>_kosaraju</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Check satisfiability ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            pos </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>_var</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># xi</span><span>
+</span><span>            neg </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>_var</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ¬xi</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> comp_id</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> comp_id</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neg</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># xi and ¬xi in same SCC → contradiction!</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Determine assignment ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># In Kosaraju's, SCCs found first = sinks (higher topological order)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># comp_id increases as we find more SCCs</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Higher comp_id = found later = SOURCE in condensation = </span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   earlier in topological order</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># For the assignment:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   xi = True if xi's SCC is found LATER (higher comp_id)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   than ¬xi's SCC</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># This means: xi = True if comp_id[xi] &gt; comp_id[¬xi]</span><span>
+</span>        
+<span>        assignment </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>n
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            pos </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>_var</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            neg </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>_var</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            assignment</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> comp_id</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> comp_id</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neg</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> assignment
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#  TEST 1: Satisfiable</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span>
+<span>solver </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> TwoSAT</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># C1: (x0 OR x1)</span><span>
+</span><span>solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># C2: (¬x0 OR x2)</span><span>
+</span><span>solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># C3: (¬x1 OR ¬x2)</span><span>
+</span><span>solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># C4: (x3 OR ¬x0)</span><span>
+</span><span>solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span>sat</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> assignment </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>solve</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Satisfiable: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">sat</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Assignment: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">assignment</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> sat</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Verify</span><span>
+</span><span>    x </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> assignment
+</span><span>    clauses </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>        x</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>        </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>        </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>        x</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"All clauses satisfied: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">all</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">clauses</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> idx</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">enumerate</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>clauses</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Clause </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">idx</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">+</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">1</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">c</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#  TEST 2: Unsatisfiable</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"\n--- Unsatisfiable example ---"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>solver2 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> TwoSAT</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (x0 OR x0) → x0 must be True</span><span>
+</span><span>solver2</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (¬x0 OR ¬x0) → x0 must be False</span><span>
+</span><span>solver2</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span>sat2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> assignment2 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> solver2</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>solve</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Satisfiable: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">sat2</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># False</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Satisfiable: True
+</span>Assignment: [True, False, True, True]
+All clauses satisfied: True
+  Clause 1: True
+  Clause 2: True
+  Clause 3: True
+  Clause 4: True
+
+--- Unsatisfiable example ---
+Satisfiable: False</code></pre></div>
+<hr>
+<h3>Version 2: Convenience Methods for Common Patterns</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">class</span><span> </span><span class="token" style="color: rgb(43, 145, 175);">TwoSATExtended</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>TwoSAT</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Extended 2-SAT with convenience methods for common constraint patterns.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Many real-world constraints can be expressed as 2-SAT clauses.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">force_true</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Force variable i to be True.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Equivalent to clause (xi OR xi)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Implications: ¬xi → xi (if xi is false, xi must be true → must be true)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">force_false</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Force variable i to be False.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Equivalent to clause (¬xi OR ¬xi)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">at_least_one</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        At least one of the two literals must be true.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        This IS a standard 2-SAT clause.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">at_most_one</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        At most one of xi, xj can be true.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        (xi AND xj) is forbidden.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        ¬(xi AND xj) ≡ (¬xi OR ¬xj)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Common in: "these two events can't both happen"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">implies</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Implication: literal_i → literal_j
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        (A → B) ≡ (¬A OR B) ← this is a 2-SAT clause!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Usage: implies(i, False, j, False) means "if xi then xj"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ¬A OR B where A is the first literal</span><span>
+</span><span>        neg_i_flipped </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> neg_i  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># negate the first literal</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_i_flipped</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">equivalent</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        xi ↔ xj (xi if and only if xj)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        ≡ (xi → xj) AND (xj → xi)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        ≡ (¬xi OR xj) AND (¬xj OR xi)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Two clauses.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ¬xi OR xj</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ¬xj OR xi</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">xor</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        xi XOR xj (exactly one must be true)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        ≡ (xi OR xj) AND (¬xi OR ¬xj)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Two clauses.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># xi OR xj</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>      </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ¬xi OR ¬xj</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#  TEST: Schedule problem</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">schedule_example</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    4 employees, each works morning (True) or evening (False).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Constraints:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      - Employee 0 and Employee 1 can't both work morning (conflict)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      - Employee 2 must work morning (required for morning meeting)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      - If Employee 0 works morning, Employee 3 must work morning
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      - Employee 1 and Employee 3: exactly one works morning
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    solver </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> TwoSATExtended</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># E0 and E1 can't both work morning</span><span>
+</span><span>    solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>at_most_one</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># E2 must work morning</span><span>
+</span><span>    solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>force_true</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If E0 morning → E3 morning</span><span>
+</span><span>    solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>implies</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># E1 XOR E3 (exactly one works morning)</span><span>
+</span><span>    solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>xor</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    sat</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> assignment </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>solve</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Schedule problem:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Satisfiable: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">sat</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> sat</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        shifts </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"Morning"</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> a </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"Evening"</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> a </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> assignment</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Employee </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">i</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">shifts</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">i</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+
+<span>schedule_example</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Schedule problem:
+</span>  Satisfiable: True
+  Employee 0: Evening
+  Employee 1: Morning
+  Employee 2: Morning
+  Employee 3: Evening</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(N + M)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────┐
+</span>  │  Operation                       │  Time                     │
+  ├──────────────────────────────────┼───────────────────────────┤
+  │  Build implication graph          │  O(M) — 2 edges/clause   │
+  │  Kosaraju's SCC:                 │                           │
+  │    Phase 1: DFS on forward graph │  O(2N + 2M) = O(N + M)   │
+  │    Phase 2: DFS on reversed graph│  O(2N + 2M) = O(N + M)   │
+  │  Check satisfiability            │  O(N)                     │
+  │  Determine assignment            │  O(N)                     │
+  ├──────────────────────────────────┼───────────────────────────┤
+  │  TOTAL                           │  O(N + M)                 │
+  └──────────────────────────────────┴───────────────────────────┘
+  
+  WHY O(N + M)?
+  
+  Implication graph has:
+    Vertices: 2N (one per literal)
+    Edges: 2M (two per clause)
+    
+  Kosaraju's SCC is O(V + E) = O(2N + 2M) = O(N + M)
+  Everything else is O(N)
+  Total: O(N + M)</code></pre></div>
+<h3>Space Complexity: O(N + M)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────┐
+</span>  │  Component                       │  Space                    │
+  ├──────────────────────────────────┼───────────────────────────┤
+  │  Forward adjacency list           │  O(N + M)                 │
+  │  Reversed adjacency list          │  O(N + M)                 │
+  │  Visited arrays                   │  O(N)                     │
+  │  Component ID array               │  O(N)                     │
+  │  Finish order stack               │  O(N)                     │
+  ├──────────────────────────────────┼───────────────────────────┤
+  │  TOTAL                           │  O(N + M)                 │
+  └──────────────────────────────────┴───────────────────────────┘</code></pre></div>
+<h3>Comparison with Brute Force</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────┬──────────────────┬──────────────────────┐
+</span>  │  Approach          │  Time            │  Notes               │
+  ├────────────────────┼──────────────────┼──────────────────────┤
+  │  Brute Force       │  O(2^N × M)      │  Try all assignments │
+  │  2-SAT (SCC)       │  O(N + M)        │  Polynomial!         │
+  └────────────────────┴──────────────────┴──────────────────────┘
+  
+  For N = 200,000 and M = 400,000:
+    Brute force: 2^200000 × 400000 → HEAT DEATH OF UNIVERSE
+    2-SAT SCC:   600,000 operations → &lt; 1 second</code></pre></div>
+<hr>
+<h2>STEP 7: WHY THE ASSIGNMENT RULE WORKS — DEEP INTUITION</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ═══════════════════════════════════════════════════════════════
+</span>  THE CONDENSATION DAG
+  ═══════════════════════════════════════════════════════════════
+  
+  After finding SCCs, collapse each SCC into a single node.
+  The result is a DAG (directed acyclic graph — Problem 47).
+  
+  For our example:
+    SCC_0{¬x4} → SCC_1{¬x1, x2, ¬x3} → SCC_2{x1, ¬x2, x3} → SCC_3{x4}
+    
+    Wait, let me verify the edges between SCCs:
+    
+    Original edges crossing SCCs:
+      ¬x4(SCC_0) → ¬x1(SCC_1): edge exists ✓
+      x1(SCC_2) → x4(SCC_3): edge exists ✓
+    
+    Condensation DAG:
+      SCC_0 → SCC_1    (¬x4 implies ¬x1)
+      SCC_2 → SCC_3    (x1 implies x4)
+      
+    And within-SCC cycles are collapsed.
+    
+  ═══════════════════════════════════════════════════════════════
+  THE SYMMETRY PROPERTY
+  ═══════════════════════════════════════════════════════════════
+  
+  CRUCIAL OBSERVATION:
+  The implication graph has a SYMMETRY:
+    For every edge ¬A → B, there's an edge ¬B → A (contrapositive).
+    
+  This means: if literal L is in SCC_k, 
+              then ¬L is in some SCC_k' where k' ≠ k (if satisfiable).
+              
+  Moreover: the condensation DAG has a MIRROR structure:
+    If SCC_k contains L and SCC_k' contains ¬L,
+    and SCC_k → SCC_j in the condensation,
+    then SCC_j' → SCC_k' in the condensation (where j' mirrors j).
+    
+  This mirror property ensures:
+    If we pick "later in topological order = True",
+    the assignment is CONSISTENT with all implications.
+    
+  ═══════════════════════════════════════════════════════════════
+  WHY "LATER = TRUE" WORKS
+  ═══════════════════════════════════════════════════════════════
+  
+  Suppose xi is in SCC_a and ¬xi is in SCC_b.
+  
+  If comp_id[SCC_a] &gt; comp_id[SCC_b] (a is later in Kosaraju):
+    → We set xi = True
+    → SCC_a is a SOURCE-like node in condensation (found later)
+    → SCC_b is a SINK-like node (found earlier)
+    
+  This is consistent because:
+    → All implications FROM xi lead to literals in same/later SCCs
+    → Those literals are also set to True (their comp_ids are ≥)
+    → All implications FROM ¬xi lead to literals in same/later SCCs
+    → But ¬xi is False, so these implications are vacuously satisfied
+      (False → anything = True)
+    
+  The formal proof uses the mirror structure of the condensation
+  and induction on the topological order.</code></pre></div>
+<hr>
+<h2>STEP 8: COMMON 2-SAT PATTERNS IN COMPETITIVE PROGRAMMING</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ═══════════════════════════════════════════════════════════════
+</span>  PATTERN 1: "Choose one of two options for each item"
+  ═══════════════════════════════════════════════════════════════
+  
+  N items, each has 2 possible states (True/False).
+  Constraints between pairs of items.
+  
+  Direct 2-SAT modeling.
+  
+  ═══════════════════════════════════════════════════════════════
+  PATTERN 2: "At most one of xi, xj can be true"
+  ═══════════════════════════════════════════════════════════════
+  
+  ¬(xi ∧ xj) ≡ (¬xi ∨ ¬xj) ← one 2-SAT clause
+  
+  ═══════════════════════════════════════════════════════════════
+  PATTERN 3: "At least one of xi, xj must be true"
+  ═══════════════════════════════════════════════════════════════
+  
+  (xi ∨ xj) ← one 2-SAT clause (the basic clause)
+  
+  ═══════════════════════════════════════════════════════════════
+  PATTERN 4: "Exactly one of xi, xj must be true" (XOR)
+  ═══════════════════════════════════════════════════════════════
+  
+  (xi ∨ xj) ∧ (¬xi ∨ ¬xj) ← two 2-SAT clauses
+  
+  ═══════════════════════════════════════════════════════════════
+  PATTERN 5: "If xi then xj" (Implication)
+  ═══════════════════════════════════════════════════════════════
+  
+  (xi → xj) ≡ (¬xi ∨ xj) ← one 2-SAT clause
+  
+  ═══════════════════════════════════════════════════════════════
+  PATTERN 6: "xi if and only if xj" (Equivalence)
+  ═══════════════════════════════════════════════════════════════
+  
+  (xi → xj) ∧ (xj → xi) ≡ (¬xi ∨ xj) ∧ (¬xj ∨ xi) ← two clauses
+  
+  ═══════════════════════════════════════════════════════════════
+  PATTERN 7: "xi must be true" (Force)
+  ═══════════════════════════════════════════════════════════════
+  
+  (xi ∨ xi) ← one clause (both literals are the same)
+  Implications: ¬xi → xi (xi is forced true)
+  
+  ═══════════════════════════════════════════════════════════════
+  PATTERN 8: Graph coloring with 2 colors + constraints
+  ═══════════════════════════════════════════════════════════════
+  
+  xi = True means node i gets color A, False means color B.
+  "Node i and node j must have different colors" = XOR(xi, xj)
+  "Node i and node j must have same color" = equivalent(xi, xj)
+  
+  This connects to Problem 12 (Bipartite Check)!
+  Bipartite = 2-colorable = a special case of 2-SAT.</code></pre></div>
+<hr>
+<h2>STEP 9: PRACTICAL APPLICATION — GRAPH 2-COLORING WITH EXTRA CONSTRAINTS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">coloring_with_constraints</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> must_differ</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> must_same</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> forced_colors</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Color N nodes with 2 colors (0 or 1) subject to:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      - must_differ: pairs that must have DIFFERENT colors
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      - must_same: pairs that must have SAME color
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      - forced_colors: list of (node, color) forcing specific colors
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This EXTENDS Problem 12 (Bipartite Check):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Bipartite check only has "must_differ" edges.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      This also allows "must_same" and forced colors.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    2-SAT modeling:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      xi = True → node i gets color 1
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      xi = False → node i gets color 0
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    solver </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> TwoSATExtended</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> must_differ</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>xor</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># exactly one gets color 1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> must_same</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>equivalent</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># both same color</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> color </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> forced_colors</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> color </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>force_true</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>force_false</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    sat</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> assignment </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>solve</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> sat</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> a </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> a </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> assignment</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 5 nodes: 0-1 different, 1-2 different, 2-3 same, node 0 forced to color 1</span><span>
+</span><span>result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> coloring_with_constraints</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>
+</span><span>    </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    must_differ</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    must_same</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    forced_colors</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Coloring: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">result</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Expected: node 0=1, node 1=0, node 2=1, node 3=1, node 4=any</span></code></pre></div>
+<hr>
+<h2>STEP 10: WHAT IF THE PROBLEM WERE...</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ═══════════════════════════════════════════════════════════════
+</span>  WHAT IF: 3-SAT (3 literals per clause)?
+  ═══════════════════════════════════════════════════════════════
+  
+  → NP-COMPLETE! No known polynomial algorithm
+  → Must use exponential algorithms (backtracking, DPLL, CDCL)
+  → Or SAT solvers (MiniSat, Z3) — highly optimized but still exponential
+  → 2-SAT is the BOUNDARY of tractability for SAT
+  
+  ═══════════════════════════════════════════════════════════════
+  WHAT IF: "At most one of x1, x2, x3 is true" (3 variables)?
+  ═══════════════════════════════════════════════════════════════
+  
+  → Can be broken into pairwise constraints:
+    at_most_one(x1, x2): (¬x1 ∨ ¬x2)
+    at_most_one(x1, x3): (¬x1 ∨ ¬x3)
+    at_most_one(x2, x3): (¬x2 ∨ ¬x3)
+  → 3 clauses for 3 variables → O(k²) clauses for k variables
+  → For large k: too many clauses!
+  → Use auxiliary variables to reduce to O(k) clauses
+  
+  ═══════════════════════════════════════════════════════════════
+  WHAT IF: Need ALL satisfying assignments (not just one)?
+  ═══════════════════════════════════════════════════════════════
+  
+  → Exponentially many possible assignments
+  → 2-SAT gives ONE assignment efficiently
+  → Enumerating all is generally exponential
+  → Can determine which variables are FORCED (same in all solutions)
+    by checking implications in the condensation DAG
+  
+  ═══════════════════════════════════════════════════════════════
+  WHAT IF: Weighted 2-SAT (maximize satisfied clauses)?
+  ═══════════════════════════════════════════════════════════════
+  
+  → MAX-2-SAT: NP-hard even for 2 literals per clause!
+  → Different from deciding satisfiability
+  → Approximation algorithms exist (0.94 approximation ratio)
+  
+  ═══════════════════════════════════════════════════════════════
+  WHAT IF: Used Tarjan's SCC instead of Kosaraju's?
+  ═══════════════════════════════════════════════════════════════
+  
+  → Works equally well (Problem 36 discusses both)
+  → Tarjan's finds SCCs in ONE DFS pass (vs Kosaraju's two passes)
+  → Tarjan's gives reverse topological order directly
+  → Slightly more complex but same O(V + E) complexity</code></pre></div>
+<hr>
+<h2>STEP 11: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Wrong node encoding (off by one)                 ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Variable i has TWO nodes: 2*i and 2*i+1                    ║
+  ║  Negation: u ^ 1 (XOR with 1)                               ║
+  ║                                                              ║
+  ║  WRONG: using i and i+n for positive/negative               ║
+  ║    → Negation formula becomes complex: neg(u) = (u+n)%2n    ║
+  ║    → Error-prone!                                            ║
+  ║                                                              ║
+  ║  RIGHT: using 2*i and 2*i+1                                 ║
+  ║    → Negation is just u ^ 1 (bit flip)                      ║
+  ║    → Clean and fast                                          ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Forgetting BOTH implications per clause          ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Clause (A ∨ B) requires TWO edges:                          ║
+  ║    ¬A → B  AND  ¬B → A                                      ║
+  ║                                                              ║
+  ║  Adding only one: graph loses information → wrong SCC        ║
+  ║  → Might report satisfiable when it's not, or vice versa    ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Wrong comparison direction for assignment         ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Kosaraju's Phase 2 assigns comp_id in discovery order.     ║
+  ║  First SCC found = comp_id 0 = SINK in condensation.        ║
+  ║                                                              ║
+  ║  Assignment: xi = True if comp_id[xi] &gt; comp_id[¬xi]       ║
+  ║                                                              ║
+  ║  Using &lt; instead of &gt; → every variable INVERTED → still     ║
+  ║  satisfies all clauses (by symmetry), but gives the         ║
+  ║  "opposite" assignment.                                      ║
+  ║                                                              ║
+  ║  However, if you mix up AND get the SCC order wrong,        ║
+  ║  you might get an INVALID assignment.                        ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Not handling isolated variables                  ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  A variable with no clauses → not constrained               ║
+  ║  Its nodes are separate SCCs                                 ║
+  ║  comp_id[xi] ≠ comp_id[¬xi] → satisfiable ✓                ║
+  ║  Assignment depends on which comp_id is larger               ║
+  ║  → Effectively arbitrary (both True and False work)         ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 5: Stack overflow with recursive DFS                ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  2N nodes can be up to 400,000                               ║
+  ║  Recursive DFS → stack overflow in Python                    ║
+  ║                                                              ║
+  ║  FIX: Use iterative DFS (as in our implementation)          ║
+  ║  The code above uses stack-based DFS for both phases.        ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Zero clauses                                     ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  No constraints → always satisfiable                        ║
+  ║  Any assignment works                                        ║
+  ║  Each literal is its own SCC                                ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Single variable                                  ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  (x0 ∨ x0): forces x0 = True                                ║
+  ║  (¬x0 ∨ ¬x0): forces x0 = False                             ║
+  ║  Both together: unsatisfiable                                ║
+  ║  Just one: satisfiable with forced value                     ║
+  ╚══════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: CONNECTIONS TO PREVIOUS AND FUTURE PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  BUILDS ON:                                                     │
+  │                                                                 │
+  │  Problem 1:  Adjacency list — stores the implication graph     │
+  │  Problem 4:  DFS traversal — backbone of Kosaraju's algorithm  │
+  │  Problem 11: Cycle detection in directed graph                 │
+  │              → Cycles in implication graph = SCCs              │
+  │              → Cycle containing xi AND ¬xi = unsatisfiable     │
+  │  Problem 12: Bipartite check (2-coloring)                      │
+  │              → 2-coloring IS a special case of 2-SAT           │
+  │              → "Adjacent nodes different color" = XOR clauses  │
+  │  Problem 19: Topological sort (Kahn's)                         │
+  │              → Condensation of SCCs forms a DAG                │
+  │              → Topological order of condensation → assignment  │
+  │  Problem 36: Kosaraju's SCC — THE core subroutine             │
+  │              → Finding SCCs is the heart of 2-SAT              │
+  │              → Same algorithm, applied to implication graph    │
+  │  Problem 47: DAG DP                                            │
+  │              → Condensation DAG has topological structure      │
+  │              → Assignment follows topological reasoning        │
+  ├─────────────────────────────────────────────────────────────────┤
+  │  ENABLES:                                                       │
+  │                                                                 │
+  │  Problem 50: Centroid decomposition                            │
+  │              → Different advanced technique, but same theme:   │
+  │                "Transform problem into graph, exploit structure"│
+  │                                                                 │
+  │  Beyond this guide:                                             │
+  │    → MAX-2-SAT (NP-hard optimization variant)                  │
+  │    → 2-SAT with optimization (binary search + 2-SAT)          │
+  │    → Implication graphs in constraint propagation              │
+  │    → Horn-SAT, XOR-SAT (other polynomial SAT fragments)       │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 13: THE GRAND PICTURE — LOGIC PROBLEMS AS GRAPH PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ═══════════════════════════════════════════════════════════════
+</span>  THE TRANSFORMATION PIPELINE
+  ═══════════════════════════════════════════════════════════════
+  
+  REAL-WORLD PROBLEM
+    │
+    ▼
+  LOGIC FORMULATION (Boolean constraints)
+    │  "Player 1 on Team A OR Player 2 on Team B"
+    │  → (x1 ∨ ¬x2)
+    │
+    ▼
+  IMPLICATION GRAPH (directed graph)
+    │  (x1 ∨ ¬x2) → edges: ¬x1 → ¬x2 and x2 → x1
+    │
+    ▼
+  SCC ANALYSIS (Kosaraju's/Tarjan's)
+    │  Find strongly connected components
+    │
+    ▼
+  CONDENSATION DAG
+    │  Collapse SCCs into single nodes
+    │
+    ▼
+  TOPOLOGICAL REASONING
+    │  Assignment based on topological order
+    │
+    ▼
+  SOLUTION
+    "x1 = True, x2 = False, ..."
+    
+  This pipeline shows the ULTIMATE POWER of graph algorithms:
+    Logic problem → Graph → Graph algorithm → Solution
+    
+  The problem has NO obvious graph structure.
+  We CREATED the graph by modeling logical constraints as edges.
+  Then standard graph algorithms solve it efficiently.
+  
+  ═══════════════════════════════════════════════════════════════
+  THIS PATTERN APPEARS EVERYWHERE
+  ═══════════════════════════════════════════════════════════════
+  
+  Problem 6:  Grid → implicit graph → BFS/DFS
+  Problem 15: Words → implicit graph (word ladder) → BFS
+  Problem 38: States → state-space graph → BFS
+  Problem 49: Logic → implication graph → SCC
+  
+  Common thread: 
+    "The input isn't a graph, but I can MODEL it as one.
+     Then graph algorithms give me the answer."
+     
+  This is the GRAPH THINKING FRAMEWORK from the very beginning:
+    Step 1: "What are the NODES and EDGES?"
+    Step 2: "What TYPE of graph?"
+    Step 3: "What am I looking for?"
+    Step 4: "What ALGORITHM matches?"
+    Step 5: "What DATA STRUCTURES do I need?"</code></pre></div>
+<hr>
+<h2>STEP 14: ADVANCED — BINARY SEARCH + 2-SAT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">max_threshold_2sat</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> pairs</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> values</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Advanced pattern: Binary Search on Answer + 2-SAT feasibility check.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Problem: N items, each has a value. Choose one item from each pair.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Maximize the MINIMUM value among chosen items.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Approach:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Binary search on the answer T (threshold).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      For each T, create 2-SAT:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        If value[i] &lt; T → force item i to NOT be chosen
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        (reduce choices, check if still satisfiable)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Largest T where 2-SAT is satisfiable = answer.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This pattern appears in competitive programming:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      "Optimize something" → "Binary search on answer" → 
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      "Check feasibility with 2-SAT"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Time: O((N + M) × log(max_value))
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    all_values </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">sorted</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>values</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">is_feasible</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>threshold</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        solver </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> TwoSAT</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Add pair constraints: exactly one from each pair</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> pairs</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># at least one</span><span>
+</span><span>            solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add_clause_vars</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>      </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># at most one</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Force out items below threshold</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> values</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> threshold</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>force_false</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># can't choose item i</span><span>
+</span>        
+<span>        sat</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> _ </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> solver</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>solve</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> sat
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Binary search on threshold</span><span>
+</span><span>    lo</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> hi </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>all_values</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> all_values</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> lo </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> hi</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        mid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>lo </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> hi</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">//</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> is_feasible</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>all_values</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>mid</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> all_values</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>mid</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>            lo </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> mid </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            hi </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> mid </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result</span></code></pre></div>
+<hr>
+<h2>STEP 15: COMPLETE SUMMARY — THE 2-SAT ALGORITHM</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ═══════════════════════════════════════════════════════════════
+</span>  2-SAT IN FIVE LINES OF PSEUDOCODE
+  ═══════════════════════════════════════════════════════════════
+  
+  1. For each clause (A ∨ B):
+       Add edges ¬A → B and ¬B → A to implication graph
+       
+  2. Run SCC algorithm on implication graph
+  
+  3. If any variable xi has comp[xi] == comp[¬xi]:
+       Return UNSATISFIABLE
+       
+  4. For each variable xi:
+       xi = True if comp[xi] &gt; comp[¬xi]  (Kosaraju ordering)
+       
+  5. Return assignment
+  
+  That's it. The entire algorithm.
+  All the complexity is in understanding WHY it works.</code></pre></div>
+<hr>
+<h2>STEP 16: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  "I see BINARY CHOICES for each item with PAIRWISE CONSTRAINTS"   │
+  │       → 2-SAT                                                     │
+  │       → Each item: True or False                                  │
+  │       → Each constraint involves exactly 2 items                  │
+  │                                                                    │
+  │  "I see 'at least one of these two must hold'"                    │
+  │       → That's a 2-SAT clause (A ∨ B)                            │
+  │                                                                    │
+  │  "I see 'these two can't both be true'"                           │
+  │       → (¬A ∨ ¬B) — a 2-SAT clause                               │
+  │                                                                    │
+  │  "I see 'if A then B'"                                            │
+  │       → (¬A ∨ B) — a 2-SAT clause                                │
+  │                                                                    │
+  │  "Assign one of two options to each entity"                       │
+  │       → 2-coloring with constraints → 2-SAT                      │
+  │                                                                    │
+  │  "Can I satisfy all these constraints?"                           │
+  │       → If each constraint has ≤ 2 literals → 2-SAT              │
+  │       → If any constraint has 3+ literals → probably NP-hard     │
+  │                                                                    │
+  │  RECOGNITION SIGNALS:                                              │
+  │    → Binary choice per item (A or B, True or False, 0 or 1)      │
+  │    → Pairwise constraints between items                           │
+  │    → Words: "at least one", "can't both", "if...then"            │
+  │    → Need to determine satisfiability + find assignment           │
+  │                                                                    │
+  │  THINKING CHAIN:                                                   │
+  │    "Binary choices + pairwise constraints"                        │
+  │    → "Can I model each constraint as (literal ∨ literal)?"       │
+  │    → YES → "Build implication graph"                              │
+  │    → "Run SCC"                                                    │
+  │    → "Check xi and ¬xi not in same SCC"                          │
+  │    → "Assign based on topological order of SCCs"                  │
+  │                                                                    │
+  │  ANTI-PATTERN (not 2-SAT):                                       │
+  │    → "At least 2 of these 3 must be true" → 3-SAT territory     │
+  │    → "Exactly k items must be chosen" → not 2-SAT               │
+  │    → "Maximize satisfied constraints" → MAX-SAT (NP-hard)       │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 17: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: 2-SAT VIA IMPLICATION GRAPH + SCC         ║
+  ║                                                                    ║
+  ║   1. THE TRANSFORMATION:                                          ║
+  ║      Logic constraints → Implication graph → SCC → Solution      ║
+  ║      Each clause (A ∨ B) → two edges: ¬A → B, ¬B → A            ║
+  ║                                                                    ║
+  ║   2. SATISFIABILITY CHECK:                                        ║
+  ║      xi and ¬xi in same SCC → UNSATISFIABLE                      ║
+  ║      Otherwise → SATISFIABLE                                      ║
+  ║                                                                    ║
+  ║   3. ASSIGNMENT:                                                   ║
+  ║      xi = True if comp_id[xi] &gt; comp_id[¬xi] (Kosaraju)         ║
+  ║      Based on topological order of condensation DAG               ║
+  ║                                                                    ║
+  ║   4. COMPLEXITY: O(N + M)                                         ║
+  ║      Linear in variables and clauses                              ║
+  ║      Contrast with 3-SAT: NP-complete!                           ║
+  ║                                                                    ║
+  ║   5. THE BIGGER LESSON:                                           ║
+  ║      Problems that DON'T look like graph problems                 ║
+  ║      CAN be modeled as graphs                                     ║
+  ║      Logic → Implication Graph                                    ║
+  ║      Grid → Implicit Graph (Problem 6)                            ║
+  ║      Words → Transformation Graph (Problem 15)                    ║
+  ║      States → State-Space Graph (Problem 38)                      ║
+  ║                                                                    ║
+  ║   "The art of graph algorithms is not just SOLVING graphs,        ║
+  ║    but SEEING graphs where others see only constraints."          ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CONNECTION TO NEXT PROBLEM</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 49: 2-SAT — Logic problem solved via graph structure (SCC)
+</span>    → Modeled constraints as implication graph
+    → Used SCC to determine satisfiability
+    → Shows: "non-graph problems can become graph problems"
+    
+  Problem 50: Centroid Decomposition — The final technique
+    → Advanced tree decomposition for efficient path queries
+    → Divide-and-conquer ON TREES
+    → "Split tree at centroid → recurse on subtrees"
+    → Enables O(N log N) solutions to problems that seem to need O(N²)
+    → The CULMINATION of tree techniques:
+        Problem 4 (DFS) + Problem 45 (LCA) + Problem 46 (Tree DP)
+        all come together in centroid decomposition
+    
+  After Problem 50:
+    → Complete algorithm selection cheatsheet
+    → Decision trees for all major graph algorithm families
+    → Bridge to competitive programming and beyond</code></pre></div>
+<hr>
+<p><strong>Problem 49 Complete.</strong><br>
+<strong>Ready for Problem 50: Centroid Decomposition?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="25" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-48.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 49 of 50</span>
+            </div>
+            <a href="problem-50.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

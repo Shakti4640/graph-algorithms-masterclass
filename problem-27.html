@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 27: Problem 27: Union-Find / Disjoint Set Union (DSU) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="31">
+<div class="px-2"><h1>Problem 27: Union-Find / Disjoint Set Union (DSU)</h1>
+<h2>[Algorithm Family: Union-Find — Dynamic Connectivity Data Structure]</h2>
+<h2>[Phase 3: Standard Interview — "I can solve real interview problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are managing a social network that starts with N people,
+</span>each in their own separate friend group.
+
+Over time, friendships form between people.
+When person A befriends person B, their ENTIRE friend groups merge.
+
+You need to efficiently support TWO operations:
+  → union(a, b): Merge the friend groups of person a and person b
+  → find(a): Determine which friend group person a belongs to
+  → connected(a, b): Are a and b in the same friend group?
+
+Given N people (numbered 0 to N-1) and a sequence of union operations,
+answer connectivity queries efficiently.
+
+Example:
+  n = 7  (people 0-6)
+  
+  Operations:
+    union(0, 1)    → 0 and 1 are now in the same group
+    union(2, 3)    → 2 and 3 are now in the same group
+    union(4, 5)    → 4 and 5 are now in the same group
+    connected(0, 3) → false (0's group={0,1}, 3's group={2,3})
+    union(1, 3)    → merge {0,1} and {2,3} → {0,1,2,3}
+    connected(0, 3) → true (both in {0,1,2,3})
+    union(5, 6)    → merge {4,5} and {6} → {4,5,6}
+    connected(0, 6) → false ({0,1,2,3} vs {4,5,6})
+    connected(4, 6) → true (both in {4,5,6})</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Watch the Groups Evolve</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  INITIAL STATE: Every person is their own group
+</span>  
+  [0]  [1]  [2]  [3]  [4]  [5]  [6]
+  
+  ══════════════════════════════════════════════════════════
+  After union(0, 1):
+  ══════════════════════════════════════════════════════════
+  
+  [0, 1]  [2]  [3]  [4]  [5]  [6]
+  
+  Group of 0 = Group of 1 = {0, 1}
+  
+  ══════════════════════════════════════════════════════════
+  After union(2, 3):
+  ══════════════════════════════════════════════════════════
+  
+  [0, 1]  [2, 3]  [4]  [5]  [6]
+  
+  ══════════════════════════════════════════════════════════
+  After union(4, 5):
+  ══════════════════════════════════════════════════════════
+  
+  [0, 1]  [2, 3]  [4, 5]  [6]
+  
+  ══════════════════════════════════════════════════════════
+  connected(0, 3)? → find(0) vs find(3)
+  ══════════════════════════════════════════════════════════
+  
+  find(0) → group {0, 1}
+  find(3) → group {2, 3}
+  Different groups → NOT connected → FALSE
+  
+  ══════════════════════════════════════════════════════════
+  After union(1, 3):
+  ══════════════════════════════════════════════════════════
+  
+  [0, 1, 2, 3]  [4, 5]  [6]
+  
+  Person 1 is in {0,1}, person 3 is in {2,3}
+  Merge entire groups: {0,1} ∪ {2,3} = {0,1,2,3}
+  
+  ══════════════════════════════════════════════════════════
+  connected(0, 3)? → find(0) vs find(3)
+  ══════════════════════════════════════════════════════════
+  
+  find(0) → group {0, 1, 2, 3}
+  find(3) → group {0, 1, 2, 3}
+  Same group → CONNECTED → TRUE
+  
+  ══════════════════════════════════════════════════════════
+  After union(5, 6):
+  ══════════════════════════════════════════════════════════
+  
+  [0, 1, 2, 3]  [4, 5, 6]
+  
+  ══════════════════════════════════════════════════════════
+  Final state: 2 groups
+  ══════════════════════════════════════════════════════════
+  
+  Group A: {0, 1, 2, 3}
+  Group B: {4, 5, 6}</code></pre></div>
+<h3>How Is This a Graph Problem?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Each union(a, b) = adding an undirected edge a — b              │
+  │  Each connected(a, b) = "are a and b in the same component?"     │
+  │                                                                  │
+  │  This is EXACTLY the connected components problem (Problem 5)!   │
+  │                                                                  │
+  │  BUT with a twist: edges are added DYNAMICALLY over time.        │
+  │  We need to answer queries BETWEEN edge additions.               │
+  │                                                                  │
+  │  Problem 5 approach: build full graph, then BFS/DFS              │
+  │    → Works only when all edges are known upfront                 │
+  │    → If we add an edge, must re-run BFS/DFS → O(V+E) each time! │
+  │                                                                  │
+  │  Union-Find approach: incrementally maintain components           │
+  │    → Each union: O(α(N)) ≈ O(1)                                 │
+  │    → Each query: O(α(N)) ≈ O(1)                                 │
+  │    → MUCH faster for dynamic scenarios!                          │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<h3>Approach 1: Store Groups as Sets</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Maintain a list of sets. For each union, find both sets and merge.
+</span>  
+  groups = [{0}, {1}, {2}, {3}, {4}, {5}, {6}]
+  
+  union(0, 1):
+    → Find set containing 0: {0}
+    → Find set containing 1: {1}
+    → Merge: {0, 1}
+    → groups = [{0,1}, {2}, {3}, {4}, {5}, {6}]
+  
+  connected(a, b):
+    → Find set containing a
+    → Find set containing b
+    → Same set? → connected</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  find(a): scan ALL groups to find which contains a → O(N)
+</span>  union(a, b): find both groups O(N) + merge O(N) = O(N)
+  
+  For M operations on N elements:
+    Total: O(M × N)
+    
+    N = 100,000, M = 100,000:
+    → 10^10 operations → TOO SLOW
+    
+  We need: O(1) or O(log N) per operation
+  Union-Find achieves: O(α(N)) ≈ O(1) per operation!</code></pre></div>
+<h3>Approach 2: BFS/DFS for Each Query</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Build adjacency list. For each connected(a, b), run BFS/DFS.
+</span>  
+  → Each query: O(V + E)
+  → M queries: O(M × (V + E))
+  → Still too slow for many queries!
+  
+  Union-Find is designed SPECIFICALLY for this pattern:
+  "Dynamic connectivity with interleaved unions and queries"</code></pre></div>
+<hr>
+<h2>STEP 3: THE UNION-FIND IDEA — Trees as Groups</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  CORE IDEA: Represent each group as a TREE.                      │
+  │                                                                  │
+  │  → Each element points to a PARENT                               │
+  │  → The ROOT of the tree = the group's REPRESENTATIVE             │
+  │  → Two elements in same group ↔ same root                        │
+  │                                                                  │
+  │  OPERATIONS:                                                     │
+  │    find(x): follow parent pointers up to the ROOT                │
+  │    union(x, y): make one root point to the other root            │
+  │    connected(x, y): find(x) == find(y)?                          │
+  │                                                                  │
+  │  DATA STRUCTURE:                                                 │
+  │    parent[i] = parent of node i                                  │
+  │    Initially: parent[i] = i (everyone is their own root)         │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘
+  
+  VISUAL:
+  
+  Initial: each node is its own root (parent = self)
+  
+    0    1    2    3    4    5    6
+    ↑    ↑    ↑    ↑    ↑    ↑    ↑
+   self self self self self self self
+   
+   parent = [0, 1, 2, 3, 4, 5, 6]
+  
+  After union(0, 1): make 1's root point to 0's root
+  
+    0 ← 1    2    3    4    5    6
+    
+    parent = [0, 0, 2, 3, 4, 5, 6]
+              ↑  ↑
+           root  1 now points to 0
+  
+  After union(2, 3):
+  
+    0 ← 1    2 ← 3    4    5    6
+    
+    parent = [0, 0, 2, 2, 4, 5, 6]
+  
+  After union(1, 3):
+    find(1) → parent[1] = 0 → parent[0] = 0 → root = 0
+    find(3) → parent[3] = 2 → parent[2] = 2 → root = 2
+    Make root 2 point to root 0:
+    
+    0 ← 1
+    ↑
+    2 ← 3
+    
+    parent = [0, 0, 0, 2, 4, 5, 6]
+                   ↑
+                2 now points to 0
+  
+  connected(0, 3)?
+    find(0): parent[0] = 0 → root = 0
+    find(3): parent[3] = 2 → parent[2] = 0 → root = 0
+    Same root! → CONNECTED ✓</code></pre></div>
+<h3>The Problem: Trees Can Get TALL</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Worst case without optimization:
+</span>  
+  union(0, 1): 0 ← 1
+  union(0, 2): 0 ← 1
+               ↑
+               2
+  union(0, 3): 0 ← 1
+               ↑
+               2
+               ↑
+               3
+  union(0, 4): 0 ← 1
+               ↑
+               2
+               ↑
+               3
+               ↑
+               4
+  
+  This creates a CHAIN of height N.
+  find(4): follow 4→3→2→0 = O(N) hops!
+  
+  TWO OPTIMIZATIONS fix this:
+    1. Union by Rank (keep trees SHORT)
+    2. Path Compression (flatten trees during find)
+    
+  Together: O(α(N)) ≈ O(1) per operation!</code></pre></div>
+<hr>
+<h2>STEP 4: THE TWO OPTIMIZATIONS</h2>
+<h3>Optimization 1: Union by Rank</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  IDEA: Always attach the SHORTER tree under the TALLER tree.     │
+  │                                                                  │
+  │  rank[x] = upper bound on height of tree rooted at x            │
+  │                                                                  │
+  │  When merging two trees:                                         │
+  │    → If rank[rootA] &lt; rank[rootB]: attach A under B              │
+  │    → If rank[rootA] &gt; rank[rootB]: attach B under A              │
+  │    → If equal: attach either, increment winner's rank            │
+  │                                                                  │
+  │  WHY THIS HELPS:                                                 │
+  │    → Tree height stays O(log N) instead of O(N)                  │
+  │    → find() follows at most O(log N) pointers                    │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘
+  
+  EXAMPLE:
+  
+  Without rank (WRONG):
+    Always attach second to first:
+    
+    union(0,1): 0←1          height 1
+    union(0,2): 0←1←2        height 2  ← chain growing!
+    union(0,3): 0←1←2←3      height 3
+    
+  With rank (CORRECT):
+    Attach shorter under taller:
+    
+    union(0,1): 0←1           rank[0]=1
+    union(2,3): 2←3           rank[2]=1
+    union(0,2): 0←1           rank[0]=1, rank[2]=1 → equal
+                ↑              → attach 2 under 0, rank[0]=2
+                2←3
+                
+    Height = 2 (not 3)!
+    
+    For N elements: height ≤ log₂(N)</code></pre></div>
+<h3>Optimization 2: Path Compression</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  IDEA: During find(x), make EVERY node on the path point         │
+  │        directly to the ROOT.                                     │
+  │                                                                  │
+  │  After find(4):                                                  │
+  │                                                                  │
+  │  BEFORE:           AFTER:                                        │
+  │    0                 0                                            │
+  │    ↑                 ↑↑↑                                          │
+  │    1                 1 2 4                                        │
+  │    ↑                   ↑                                          │
+  │    2                   3                                          │
+  │    ↑                                                             │
+  │    3                 (path 4→3→2→1→0 compressed:                 │
+  │    ↑                  4→0, 3→0 via 2→0, 2→0, 1→0)               │
+  │    4                                                             │
+  │                                                                  │
+  │  FUTURE find(4): 4→0 = just 1 hop! (was 4 hops)                │
+  │  FUTURE find(3): 3→2→0 = 2 hops (was 3 hops)                   │
+  │                                                                  │
+  │  Each find() FLATTENS the tree for future queries.               │
+  │  The tree gets shorter and shorter over time!                    │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘
+  
+  TWO STYLES OF PATH COMPRESSION:
+  
+  Style 1: FULL PATH COMPRESSION (recursive)
+    → Every node on path points directly to root
+    → def find(x):
+    →     if parent[x] != x:
+    →         parent[x] = find(parent[x])  ← recursive compression
+    →     return parent[x]
+  
+  Style 2: PATH HALVING (iterative)
+    → Every other node points to its grandparent
+    → def find(x):
+    →     while parent[x] != x:
+    →         parent[x] = parent[parent[x]]  ← skip to grandparent
+    →         x = parent[x]
+    →     return x
+    
+  Both achieve O(α(N)) amortized. Style 1 is more common.</code></pre></div>
+<h3>Combined: O(α(N)) Per Operation</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  α(N) = Inverse Ackermann function                               │
+  │                                                                  │
+  │  For ALL practical values of N:                                  │
+  │    α(N) ≤ 4                                                      │
+  │                                                                  │
+  │  Even for N = number of atoms in the universe:                   │
+  │    α(N) = 4                                                      │
+  │                                                                  │
+  │  So α(N) is EFFECTIVELY constant: O(α(N)) ≈ O(1)               │
+  │                                                                  │
+  │  ┌─────────────────────────────────────────┐                     │
+  │  │  N          │  α(N)                     │                     │
+  │  ├─────────────┼───────────────────────────┤                     │
+  │  │  1          │  0                        │                     │
+  │  │  2-3        │  1                        │                     │
+  │  │  4-7        │  2                        │                     │
+  │  │  8-2047     │  3                        │                     │
+  │  │  2048-10^80 │  4                        │                     │
+  │  └─────────────┴───────────────────────────┘                     │
+  │                                                                  │
+  │  For interviews: just say "effectively O(1) per operation"       │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 5: ALGORITHM WALKTHROUGH — With Both Optimizations</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  n = 7
+</span>  parent = [0, 1, 2, 3, 4, 5, 6]  ← everyone is own root
+  rank   = [0, 0, 0, 0, 0, 0, 0]  ← all trees height 0
+
+  ══════════════════════════════════════════════════════════
+  union(0, 1)
+  ══════════════════════════════════════════════════════════
+  
+  find(0): parent[0]=0 → root = 0
+  find(1): parent[1]=1 → root = 1
+  
+  Roots are different → merge!
+  rank[0]=0, rank[1]=0 → equal → attach 1 under 0, rank[0]++
+  
+  parent[1] = 0
+  rank[0] = 1
+  
+  parent = [0, 0, 2, 3, 4, 5, 6]
+  rank   = [1, 0, 0, 0, 0, 0, 0]
+  
+  Tree:  0 ← 1
+
+  ══════════════════════════════════════════════════════════
+  union(2, 3)
+  ══════════════════════════════════════════════════════════
+  
+  find(2)=2, find(3)=3 → different roots
+  rank[2]=0, rank[3]=0 → equal → attach 3 under 2, rank[2]++
+  
+  parent[3] = 2
+  rank[2] = 1
+  
+  parent = [0, 0, 2, 2, 4, 5, 6]
+  rank   = [1, 0, 1, 0, 0, 0, 0]
+  
+  Trees:  0←1    2←3
+
+  ══════════════════════════════════════════════════════════
+  union(4, 5)
+  ══════════════════════════════════════════════════════════
+  
+  find(4)=4, find(5)=5 → different roots
+  rank[4]=0, rank[5]=0 → equal → attach 5 under 4, rank[4]++
+  
+  parent[5] = 4
+  rank[4] = 1
+  
+  parent = [0, 0, 2, 2, 4, 4, 6]
+  rank   = [1, 0, 1, 0, 1, 0, 0]
+  
+  Trees:  0←1    2←3    4←5    6
+
+  ══════════════════════════════════════════════════════════
+  connected(0, 3)?
+  ══════════════════════════════════════════════════════════
+  
+  find(0): parent[0]=0 → root = 0
+  find(3): parent[3]=2, parent[2]=2 → root = 2
+  
+  0 ≠ 2 → NOT connected → FALSE ✓
+
+  ══════════════════════════════════════════════════════════
+  union(1, 3) — This merges {0,1} and {2,3}
+  ══════════════════════════════════════════════════════════
+  
+  find(1): parent[1]=0, parent[0]=0 → root = 0
+  find(3): parent[3]=2, parent[2]=2 → root = 2
+  
+  Roots 0 and 2 are different → merge!
+  rank[0]=1, rank[2]=1 → equal → attach 2 under 0, rank[0]++
+  
+  parent[2] = 0
+  rank[0] = 2
+  
+  parent = [0, 0, 0, 2, 4, 4, 6]
+                   ↑
+              2 now points to 0
+  rank   = [2, 0, 1, 0, 1, 0, 0]
+  
+  Tree:   0
+         ↗ ↖
+        1   2
+            ↑
+            3
+  
+  Group {0, 1, 2, 3} all have root 0.
+
+  ══════════════════════════════════════════════════════════
+  connected(0, 3)?
+  ══════════════════════════════════════════════════════════
+  
+  find(0): parent[0]=0 → root = 0
+  find(3): parent[3]=2 → parent[2]=0 → root = 0
+  
+  ★ PATH COMPRESSION activates here!
+  During find(3): 3→2→0
+  After compression: parent[3] = 0 (shortcut!)
+  
+  parent = [0, 0, 0, 0, 4, 4, 6]
+                      ↑
+                 3 now points directly to 0!
+  
+  0 == 0 → CONNECTED → TRUE ✓
+  
+  Tree after compression:
+      0
+    ↗ ↑ ↖
+   1  2  3     ← 3 now directly under 0 (was under 2)
+  
+  Future find(3): just 1 hop instead of 2!
+
+  ══════════════════════════════════════════════════════════
+  union(5, 6)
+  ══════════════════════════════════════════════════════════
+  
+  find(5): parent[5]=4, parent[4]=4 → root = 4
+  find(6): parent[6]=6 → root = 6
+  
+  rank[4]=1, rank[6]=0 → rank[4] &gt; rank[6] → attach 6 under 4
+  
+  parent[6] = 4
+  
+  parent = [0, 0, 0, 0, 4, 4, 4]
+  rank   = [2, 0, 1, 0, 1, 0, 0]
+  
+  Tree:  4
+        ↗ ↖
+       5   6
+
+  ══════════════════════════════════════════════════════════
+  FINAL STATE
+  ══════════════════════════════════════════════════════════
+  
+  parent = [0, 0, 0, 0, 4, 4, 4]
+  
+  Group 1: {0, 1, 2, 3}  root = 0
+  Group 2: {4, 5, 6}     root = 4
+  
+  Tree 1:    0          Tree 2:   4
+           ↗ ↑ ↖               ↗ ↖
+          1  2  3              5   6</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLETE CODE</h2>
+<h3>Version 1: Full Union-Find with Both Optimizations</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">class</span><span> </span><span class="token" style="color: rgb(43, 145, 175);">UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Union-Find (Disjoint Set Union) data structure.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Supports:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → find(x): find root/representative of x's group
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → union(x, y): merge groups containing x and y
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → connected(x, y): are x and y in the same group?
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Optimizations:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Path Compression: during find, make every node point to root
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Union by Rank: attach shorter tree under taller tree
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Combined: O(α(N)) ≈ O(1) per operation
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">__init__</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Initialize N elements, each in its own group.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        parent[i] = i means "i is its own root" (self-loop)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        rank[i] = 0 means "tree of height 0" (single node)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># parent[i] = i initially</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n              </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># all ranks start at 0</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>count </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> n                   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># number of distinct groups</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Find the ROOT (representative) of x's group.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        PATH COMPRESSION: make every node on the path point to root.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Flattens the tree for future queries.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Recursive: find root first, then update parent on way back.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># x is not the root → recurse to find root</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ compression!</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Merge the groups containing x and y.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        UNION BY RANK: attach shorter tree under taller tree.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Keeps trees balanced (height ≤ log N).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Returns True if groups were different (actual merge happened).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Returns False if x and y were already in the same group.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        root_x </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        root_y </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Already in same group → nothing to do</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> root_x </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> root_y</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ UNION BY RANK: attach smaller tree under bigger tree</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># root_x's tree is shorter → attach under root_y</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_y
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># root_y's tree is shorter → attach under root_x</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_x
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Equal rank → attach either, increment winner's rank</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_x
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>count </span><span class="token" style="color: rgb(57, 58, 52);">-=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># one fewer group</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">connected</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Are x and y in the same group?
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Simply check if they have the same root.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">get_count</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Return number of distinct groups."""</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>count
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>uf </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Initial groups: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">uf</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">get_count</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 7</span><span>
+</span>
+<span>uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"After 3 unions: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">uf</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">get_count</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 4</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"connected(0, 3): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">uf</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">connected</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">3</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># False</span><span>
+</span>
+<span>uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"After union(1,3): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">uf</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">get_count</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 3</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"connected(0, 3): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">uf</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">connected</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">3</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># True</span><span>
+</span>
+<span>uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"After union(5,6): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">uf</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">get_count</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 2</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"connected(0, 6): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">uf</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">connected</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">6</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># False</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"connected(4, 6): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">uf</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">connected</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">4</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">6</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># True</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Initial groups: 7
+</span>After 3 unions: 4
+connected(0, 3): False
+After union(1,3): 3
+connected(0, 3): True
+After union(5,6): 2
+connected(0, 6): False
+connected(4, 6): True</code></pre></div>
+<hr>
+<h3>Version 2: Iterative Find (No Recursion Limit)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">class</span><span> </span><span class="token" style="color: rgb(43, 145, 175);">UnionFindIterative</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Iterative version — avoids Python recursion limit.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Uses PATH HALVING instead of full path compression.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Path halving: each node skips to its grandparent.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    → Simpler iterative code
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    → Same amortized O(α(N)) complexity
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">__init__</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>count </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Find root with PATH HALVING.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Each step: point to grandparent, then move to grandparent.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ PATH HALVING: skip to grandparent</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>            x </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> x
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        root_x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> root_y </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> root_x </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> root_y</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_y
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_x
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_x
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>count </span><span class="token" style="color: rgb(57, 58, 52);">-=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">connected</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>y</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<hr>
+<h3>Version 3: Union by Size (Alternative to Rank)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">class</span><span> </span><span class="token" style="color: rgb(43, 145, 175);">UnionFindBySize</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Union by SIZE instead of rank.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    size[root] = number of elements in root's group.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Attach smaller group under larger group.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    ADVANTAGE over rank:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → size is always accurate (rank is an upper bound)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Can answer "how big is x's group?" directly
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same O(α(N)) amortized complexity.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">__init__</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>size </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n      </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ each element starts as group of size 1</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>count </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        root_x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> root_y </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> root_x </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> root_y</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ UNION BY SIZE: attach smaller under larger</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>size</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>size</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_y
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>size</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>size</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># update size</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_x
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>size</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>size</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># update size</span><span>
+</span>        
+<span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>count </span><span class="token" style="color: rgb(57, 58, 52);">-=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">connected</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">group_size</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Return size of x's group."""</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>size</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>uf </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> UnionFindBySize</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Group size of 0: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">uf</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">group_size</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 4</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Group size of 5: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">uf</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">group_size</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">5</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 1</span></code></pre></div>
+<hr>
+<h3>Version 4: Compact Function-Based (Interview Quick-Write)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">make_uf</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Quick Union-Find using closures — minimal code for interviews."""</span><span>
+</span><span>    parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    rank </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        rx</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ry </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> rx </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> ry</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>ry</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            rx</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ry </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> ry</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> rx
+</span><span>        parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>ry</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> rx
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>ry</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> find</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> union
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── USAGE ───</span><span>
+</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> union </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> make_uf</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># True</span></code></pre></div>
+<hr>
+<h2>STEP 7: COMPLEXITY ANALYSIS</h2>
+<h3>Per-Operation Complexity: O(α(N))</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │                                                                 │
+  │  Without optimizations:                                         │
+  │    find(): O(N) worst case (long chain)                         │
+  │    union(): O(N) (dominated by find)                            │
+  │                                                                 │
+  │  With Union by Rank only:                                       │
+  │    find(): O(log N) (tree height bounded by log N)              │
+  │    union(): O(log N)                                            │
+  │                                                                 │
+  │  With Path Compression only:                                    │
+  │    find(): O(log N) amortized                                   │
+  │    union(): O(log N) amortized                                  │
+  │                                                                 │
+  │  With BOTH (rank + compression):                                │
+  │    find(): O(α(N)) amortized  ≈ O(1) ★                        │
+  │    union(): O(α(N)) amortized ≈ O(1) ★                        │
+  │                                                                 │
+  │  For M operations on N elements:                                │
+  │    Total: O(M × α(N)) ≈ O(M)                                  │
+  │                                                                 │
+  │  This is ALMOST as fast as direct array access!                 │
+  │                                                                 │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Space Complexity: O(N)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  parent array:  O(N)                                           │
+  │  rank array:    O(N)                                           │
+  │                                                                 │
+  │  TOTAL: O(N)                                                   │
+  │                                                                 │
+  │  Very efficient — just two arrays of size N.                    │
+  │  No adjacency list, no heap, no queue needed.                   │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: HOW THIS CONNECTS TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Problem 5 (Connected Components — BFS/DFS):                     │
+  │    → "How many separate groups exist?"                           │
+  │    → BFS/DFS from each unvisited node → O(V+E)                  │
+  │    → Works when graph is STATIC (all edges known upfront)        │
+  │    → Union-Find solves SAME problem but DYNAMICALLY              │
+  │      (edges added over time, queries interleaved)               │
+  │                                                                  │
+  │  Problem 8 (Find if Path Exists):                                │
+  │    → "Are A and B connected?"                                    │
+  │    → BFS/DFS: O(V+E) per query                                  │
+  │    → Union-Find: O(α(N)) per query after building                │
+  │                                                                  │
+  │  Problem 10 (Cycle Detection — Undirected):                      │
+  │    → DFS with parent tracking: back edge = cycle                 │
+  │    → Union-Find alternative: if union(a,b) finds a and b        │
+  │      already connected → edge a-b creates a CYCLE!              │
+  │    → Problem 29 will explore this connection                     │
+  │                                                                  │
+  │  WHEN TO USE WHICH:                                              │
+  │    Static graph + one-time analysis → BFS/DFS (Problems 5, 8)   │
+  │    Dynamic edges + repeated queries → Union-Find (Problem 27)    │
+  │    Need shortest path → BFS/DFS (Union-Find can't do this!)     │
+  │    Need component count over time → Union-Find ★                 │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 9: WHEN TO USE UNION-FIND VS ALTERNATIVES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────┬──────────────────────────────────────┐
+</span>  │  Approach                    │  When to use                         │
+  ├──────────────────────────────┼──────────────────────────────────────┤
+  │  BFS/DFS (Problem 5)         │  Static graph, one-time analysis     │
+  │                              │  Need traversal order or paths       │
+  │                              │  Need shortest path                  │
+  │                              │                                      │
+  │  Union-Find (Problem 27)     │  ★ Dynamic edges (added over time)   │
+  │                              │  ★ Repeated connectivity queries     │
+  │                              │  ★ "Are X and Y in same group?"      │
+  │                              │  ★ Counting components dynamically   │
+  │                              │  ★ MST algorithms (Kruskal, Prob 30) │
+  │                              │  ★ Cycle detection (Prob 29)         │
+  │                              │                                      │
+  │  Both work for:              │  Connected components on static graph│
+  │                              │  (UF builds graph edge by edge,      │
+  │                              │   BFS/DFS processes all at once)     │
+  └──────────────────────────────┴──────────────────────────────────────┘
+  
+  UNION-FIND LIMITATIONS:
+    → Can only MERGE groups (union), never SPLIT them
+    → Can't find shortest paths between nodes
+    → Can't list all members of a group efficiently
+    → Can't handle edge DELETION (only addition)
+    
+  UNION-FIND STRENGTHS:
+    → O(α(N)) ≈ O(1) per operation — blazingly fast
+    → Simple to implement (&lt; 20 lines)
+    → Foundation for Kruskal's MST (Problem 30)
+    → Elegant for "are these in the same group?" queries</code></pre></div>
+<hr>
+<h2>STEP 10: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if We Needed to SPLIT Groups?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Union-Find can only MERGE (union), never SPLIT.
+</span>  
+  If edges can be REMOVED:
+    → Union-Find doesn't support this
+    → Need different data structure (link-cut trees, etc.)
+    → Or process operations in REVERSE (offline algorithm)
+    
+  Trick: If you know ALL operations upfront:
+    → Process in reverse: deletions become additions
+    → Use Union-Find on the reversed sequence
+    → This is a common competitive programming technique</code></pre></div>
+<h3>What if Nodes Are Strings, Not Numbers?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Use a dictionary to map strings to integers:
+</span>  
+  name_to_id = {}
+  next_id = 0
+  
+  def get_id(name):
+      nonlocal next_id
+      if name not in name_to_id:
+          name_to_id[name] = next_id
+          next_id += 1
+      return name_to_id[name]
+  
+  uf = UnionFind(max_n)
+  uf.union(get_id("Alice"), get_id("Bob"))</code></pre></div>
+<h3>What if We Need Weighted Union-Find?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "What is the DISTANCE between X and Y within their group?"
+</span>  
+  → Weighted Union-Find: track relative distance to root
+  → find(x) returns (root, distance_to_root)
+  → union(x, y, w) means "x and y are distance w apart"
+  → More complex — used in problems like "equations evaluation"
+  
+  This is an advanced extension (not covered here).</code></pre></div>
+<h3>What if the Graph Is Directed?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Union-Find is for UNDIRECTED connectivity.
+</span>  
+  Directed connectivity = "can A reach B?"
+  → This is NOT symmetric (A reaches B ≠ B reaches A)
+  → Union-Find can't handle this
+  → Need DFS/BFS for directed reachability
+  → Or Strongly Connected Components (Problem 36)</code></pre></div>
+<hr>
+<h2>STEP 11: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Forgetting path compression in find()                ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG (no compression):                                         ║
+  ║    def find(x):                                                  ║
+  ║        while parent[x] != x:                                     ║
+  ║            x = parent[x]                                         ║
+  ║        return x                                                  ║
+  ║                                                                  ║
+  ║  → Works correctly but O(log N) per find instead of O(α(N))    ║
+  ║  → For most interview problems: still accepted                   ║
+  ║  → But always include compression for best practice              ║
+  ║                                                                  ║
+  ║  RIGHT (with compression):                                       ║
+  ║    def find(x):                                                  ║
+  ║        if parent[x] != x:                                        ║
+  ║            parent[x] = find(parent[x])  ← THE KEY LINE          ║
+  ║        return parent[x]                                          ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Union without finding roots first                    ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG:                                                          ║
+  ║    parent[x] = y    ← directly connecting x to y                ║
+  ║                                                                  ║
+  ║  This connects x to y, but x might not be a root!               ║
+  ║  Must find ROOTS first, then connect roots.                      ║
+  ║                                                                  ║
+  ║  RIGHT:                                                          ║
+  ║    root_x = find(x)                                              ║
+  ║    root_y = find(y)                                              ║
+  ║    parent[root_x] = root_y   ← connect ROOTS                    ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Not checking if already in same group                ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If root_x == root_y → already in same group → no merge!        ║
+  ║                                                                  ║
+  ║  Without this check:                                             ║
+  ║    → count decrements incorrectly                                ║
+  ║    → rank might increase incorrectly                             ║
+  ║    → Subtle bugs in problems that use return value               ║
+  ║                                                                  ║
+  ║  ALWAYS: if root_x == root_y: return False                       ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Recursion limit with path compression                ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Recursive find() can hit Python's recursion limit               ║
+  ║  for very long chains (before compression kicks in).             ║
+  ║                                                                  ║
+  ║  FIX: Use iterative find with path halving (Version 2)           ║
+  ║  OR: Use two-pass iterative full compression:                    ║
+  ║                                                                  ║
+  ║    def find(x):                                                  ║
+  ║        root = x                                                  ║
+  ║        while parent[root] != root:                               ║
+  ║            root = parent[root]     # find root                   ║
+  ║        while parent[x] != root:                                  ║
+  ║            parent[x], x = root, parent[x]  # compress           ║
+  ║        return root                                               ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Union of same element                                ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  union(3, 3) → find(3)=3, find(3)=3 → same root → return False ║
+  ║  → No merge, no count change → correct ✓                         ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Single element                                       ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  n = 1 → parent = [0] → find(0) = 0 → count = 1                ║
+  ║  → No unions possible → just one group → correct ✓               ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Group/merge/connect elements dynamically"              │
+  │         → Union-Find                                               │
+  │                                                                    │
+  │  SIGNAL 2: "Are X and Y in the same group/component?"             │
+  │         → connected() query → Union-Find                           │
+  │                                                                    │
+  │  SIGNAL 3: "Process edges one by one, answer queries between"      │
+  │         → Dynamic connectivity → Union-Find                        │
+  │                                                                    │
+  │  SIGNAL 4: "How many groups/components are there?"                 │
+  │         → Track count during unions → Union-Find                   │
+  │                                                                    │
+  │  SIGNAL 5: "Does adding this edge create a cycle?"                 │
+  │         → If already connected → YES → Union-Find (Problem 29)    │
+  │                                                                    │
+  │  SIGNAL 6: "Minimum spanning tree" / "cheapest to connect all"    │
+  │         → Kruskal's algorithm uses Union-Find (Problem 30)        │
+  │                                                                    │
+  │  THINKING CHAIN:                                                   │
+  │  "Dynamic grouping with connectivity queries"                      │
+  │     → Union-Find data structure                                    │
+  │        → parent[] array + find() with path compression             │
+  │           → union() with rank/size                                 │
+  │              → O(α(N)) per operation ≈ O(1)                        │
+  │                                                                    │
+  │  SIMILAR PROBLEMS:                                                 │
+  │    → Number of Provinces (Problem 28 — next!)                      │
+  │    → Redundant Connection (Problem 29)                             │
+  │    → Kruskal's MST (Problem 30)                                   │
+  │    → Accounts Merge                                                │
+  │    → Longest Consecutive Sequence                                  │
+  │    → Satisfiability of Equality Equations                          │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 13: UNION-FIND vs BFS/DFS — Decision Framework</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  "I need to find connected components..."                        │
+  │                                                                  │
+  │  → Is the graph STATIC (all edges known upfront)?                │
+  │    → YES: BFS/DFS (Problem 5) — simpler, same result            │
+  │    → NO (edges added dynamically): Union-Find ★                  │
+  │                                                                  │
+  │  → Do I need PATHS or just CONNECTIVITY?                         │
+  │    → Paths: BFS/DFS (Union-Find can't give paths)               │
+  │    → Just connectivity: Union-Find (faster for many queries)     │
+  │                                                                  │
+  │  → Do I need SHORTEST paths?                                     │
+  │    → YES: BFS/Dijkstra (Union-Find can't do shortest paths)     │
+  │    → NO, just "same group?": Union-Find                          │
+  │                                                                  │
+  │  → Do I need to process edges one at a time?                     │
+  │    → YES (check cycle after each edge): Union-Find (Problem 29)  │
+  │    → NO: either works                                            │
+  │                                                                  │
+  │  → Is the problem about MST?                                     │
+  │    → YES: Union-Find for Kruskal's (Problem 30)                  │
+  │                                                                  │
+  │  RULE OF THUMB:                                                  │
+  │    "Union-Find for connectivity, BFS/DFS for paths"              │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: UNION-FIND (DISJOINT SET UNION)           ║
+  ║                                                                    ║
+  ║   → Data structure for DYNAMIC CONNECTIVITY                       ║
+  ║   → Two operations: find(x) and union(x, y)                      ║
+  ║   → Represents groups as TREES with parent pointers               ║
+  ║                                                                    ║
+  ║   → TWO OPTIMIZATIONS (both essential):                           ║
+  ║     1. Path Compression: flatten tree during find()               ║
+  ║        parent[x] = find(parent[x])                                ║
+  ║     2. Union by Rank/Size: attach shorter under taller            ║
+  ║        if rank[rx] &lt; rank[ry]: parent[rx] = ry                   ║
+  ║                                                                    ║
+  ║   → Combined: O(α(N)) ≈ O(1) per operation                       ║
+  ║     (α = inverse Ackermann, ≤ 4 for all practical N)             ║
+  ║                                                                    ║
+  ║   → USE WHEN: dynamic grouping + connectivity queries             ║
+  ║   → DON'T USE WHEN: need paths, shortest paths, or edge deletion ║
+  ║                                                                    ║
+  ║   → FOUNDATION FOR:                                                ║
+  ║     Problem 28: Number of Provinces (component counting)          ║
+  ║     Problem 29: Redundant Connection (cycle detection)            ║
+  ║     Problem 30: Kruskal's MST (minimum spanning tree)            ║
+  ║                                                                    ║
+  ║   → THE TEMPLATE (memorize):                                      ║
+  ║     parent = list(range(n))                                       ║
+  ║     def find(x):                                                  ║
+  ║         if parent[x] != x:                                        ║
+  ║             parent[x] = find(parent[x])                           ║
+  ║         return parent[x]                                          ║
+  ║     def union(x, y):                                              ║
+  ║         rx, ry = find(x), find(y)                                 ║
+  ║         if rx != ry: parent[rx] = ry                              ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h3>CONNECTION TO NEXT PROBLEM</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 27 → Union-Find data structure (the tool itself)
+</span>  Problem 28 → Number of Provinces (Union-Find application)
+  
+  Problem 28 applies Union-Find to count connected components:
+    → Given an adjacency MATRIX (not list!) of friendships
+    → "How many friend groups (provinces) exist?"
+    → This is connected components (Problem 5) but solved with Union-Find
+    → We'll compare: BFS/DFS approach vs Union-Find approach
+    → Shows when each is more natural
+    
+  Problem 28 also revisits adjacency MATRIX (Problem 2),
+  giving us practice with matrix input + Union-Find.</code></pre></div>
+<hr>
+<p><strong>Problem 27 Complete.</strong><br>
+<strong>Ready for Problem 28: Number of Provinces (Union-Find Application)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+
+
+<!-- ========== data-index="5" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-26.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 27 of 50</span>
+            </div>
+            <a href="problem-28.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

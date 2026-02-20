@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 41: Problem 41: Reconstruct Itinerary (Eulerian Path) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="15">
+<div class="px-2"><h1>Problem 41: Reconstruct Itinerary (Eulerian Path)</h1>
+<h2>[Algorithm Family: Eulerian Path — Hierholzer's Algorithm]</h2>
+<h2>[Phase 4: Advanced — "I can handle complex multi-concept problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are given a list of airline tickets represented as pairs
+</span>[from, to] where each ticket represents a direct flight 
+from airport "from" to airport "to".
+
+You must use ALL tickets exactly once and reconstruct the itinerary.
+
+The itinerary must:
+  → Start from "JFK"
+  → Use every ticket EXACTLY once
+  → If multiple valid itineraries exist, return the one with the
+    smallest lexicographic order (alphabetically earliest)
+
+Input:
+  tickets = [["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],
+             ["ATL","JFK"],["ATL","SFO"]]
+
+Output: ["JFK","ATL","JFK","SFO","ATL","SFO"]
+
+Explanation:
+  JFK → ATL → JFK → SFO → ATL → SFO
+  Uses all 5 tickets exactly once.
+  
+Input:
+  tickets = [["MUC","LHR"],["JFK","MUC"],["SFO","SJC"],["LHR","SFO"]]
+
+Output: ["JFK","MUC","LHR","SFO","SJC"]
+
+Explanation:
+  JFK → MUC → LHR → SFO → SJC
+  Simple chain using all 4 tickets.</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<h3>Example 1: Complex with Multiple Paths</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  tickets = [["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],
+</span>             ["ATL","JFK"],["ATL","SFO"]]
+
+  Nodes (airports): JFK, SFO, ATL
+  Edges (tickets):  5 directed edges
+
+       ┌────────────────────────────┐
+       │          ┌─────────────┐   │
+       ↓          │             │   │
+      JFK ───────→ ATL ───────→ SFO
+       │           ↑             │
+       │           │             │
+       └───────────┘─────────────┘
+       
+  More precisely with ALL edges:
+
+      JFK ──→ SFO    (ticket 1)
+      JFK ──→ ATL    (ticket 2)
+      SFO ──→ ATL    (ticket 3)
+      ATL ──→ JFK    (ticket 4)
+      ATL ──→ SFO    (ticket 5)
+
+  Edge-by-edge view:
+
+               ┌──── 1 ────→ SFO ──── 3 ────┐
+               │                              ↓
+      JFK ─────┤                             ATL
+               │                              │
+               └──── 2 ────→ ATL              │
+                              │               │
+               ┌──── 4 ──────┘    ┌── 5 ─────┘
+               ↓                  ↓
+              JFK               SFO
+
+  Out-degrees:  JFK: 2,  ATL: 2,  SFO: 1
+  In-degrees:   JFK: 1,  ATL: 2,  SFO: 2</code></pre></div>
+<h3>Example 2: Simple Chain</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  tickets = [["MUC","LHR"],["JFK","MUC"],["SFO","SJC"],["LHR","SFO"]]
+</span>
+      JFK ──→ MUC ──→ LHR ──→ SFO ──→ SJC
+
+  Simple path: each node visited once (except endpoints).
+  Every edge (ticket) used exactly once.</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║  Property        │  Answer                  │  Why?               ║
+  ╠══════════════════╪══════════════════════════╪═════════════════════╣
+  ║  NODES           │  Airports                │  Places to visit    ║
+  ║  EDGES           │  Tickets (flights)       │  Directed routes    ║
+  ║  Directed?       │  YES                     │  JFK→ATL ≠ ATL→JFK ║
+  ║  Weighted?       │  NO                      │  Just connectivity  ║
+  ║  Multi-edges?    │  YES possible            │  Can have 2 tickets ║
+  ║                  │                          │  JFK→ATL            ║
+  ║  Cyclic?         │  YES (Example 1)         │  JFK→ATL→JFK cycle ║
+  ║  What we seek?   │  Use EVERY EDGE once     │  Eulerian PATH      ║
+  ╚══════════════════╧══════════════════════════╧═════════════════════╝</code></pre></div>
+<h3>CRITICAL DISTINCTION: Eulerian vs Hamiltonian</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  EULERIAN PATH:                                                    │
+  │    → Visit every EDGE exactly once                                 │
+  │    → Nodes CAN be revisited                                        │
+  │    → Solvable in O(V + E) — polynomial time!                      │
+  │    → THIS PROBLEM                                                  │
+  │                                                                    │
+  │  HAMILTONIAN PATH:                                                 │
+  │    → Visit every NODE exactly once                                 │
+  │    → Edges may be skipped                                          │
+  │    → NP-complete — no known polynomial solution!                   │
+  │    → Much harder                                                   │
+  │                                                                    │
+  │  EASY MEMORY TRICK:                                                │
+  │    → Euler → Edges (both start with E)                             │
+  │    → Hamilton → ... (nodes, the harder one)                        │
+  │                                                                    │
+  │  Example showing the difference:                                   │
+  │                                                                    │
+  │    A ──→ B ──→ C                                                   │
+  │    ↑           │                                                   │
+  │    └───────────┘                                                   │
+  │                                                                    │
+  │    Eulerian path: A→B→C→A (uses all 3 edges, visits A twice)      │
+  │    Hamiltonian path: A→B→C (visits all 3 nodes, skips edge C→A)   │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 2: WHEN DOES AN EULERIAN PATH EXIST?</h2>
+<h3>Theory: Conditions for Eulerian Path in Directed Graph</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  EULERIAN CIRCUIT (start == end):                                  │
+  │    → Every node has in_degree == out_degree                        │
+  │    → Graph is connected (considering only edge-connected nodes)    │
+  │                                                                    │
+  │  EULERIAN PATH (start ≠ end):                                     │
+  │    → Exactly ONE node has out_degree = in_degree + 1 (start)      │
+  │    → Exactly ONE node has in_degree = out_degree + 1 (end)        │
+  │    → All other nodes: in_degree == out_degree                      │
+  │    → Graph is connected                                            │
+  │                                                                    │
+  │  NO EULERIAN PATH/CIRCUIT:                                         │
+  │    → If more than 2 nodes have degree imbalance                    │
+  │    → Or graph is disconnected                                      │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Verify Example 1</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  JFK: out_degree=2, in_degree=1 → out - in = +1 → START node ✓
+</span>  ATL: out_degree=2, in_degree=2 → balanced ✓
+  SFO: out_degree=1, in_degree=2 → in - out = +1 → END node ✓
+  
+  Exactly one node with out &gt; in (JFK) → start
+  Exactly one node with in &gt; out (SFO) → end
+  
+  Eulerian PATH exists from JFK to SFO ✓
+  (Problem guarantees JFK is start, which matches!)</code></pre></div>
+<h3>Verify Example 2</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  JFK: out=1, in=0 → out - in = +1 → START ✓
+</span>  MUC: out=1, in=1 → balanced ✓
+  LHR: out=1, in=1 → balanced ✓
+  SFO: out=1, in=1 → balanced ✓
+  SJC: out=0, in=1 → in - out = +1 → END ✓
+  
+  Eulerian PATH exists from JFK to SJC ✓</code></pre></div>
+<hr>
+<h2>STEP 3: BRUTE FORCE FIRST</h2>
+<h3>Naive Approach: Try All Permutations of Tickets</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Generate all orderings of tickets
+</span>  → Check if ordering forms a valid path (each ticket's "from" 
+    matches previous ticket's "to")
+  → Among valid paths starting from JFK, pick lexicographically smallest
+
+  With E tickets: E! permutations
+  5 tickets → 120 permutations
+  20 tickets → 2.4 × 10^18 → IMPOSSIBLE</code></pre></div>
+<h3>Better Naive: DFS with Backtracking</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → From JFK, try each outgoing ticket
+</span>  → Recursively try to use all remaining tickets
+  → If stuck (can't use all tickets), BACKTRACK and try different ticket
+  → Track which tickets are used (not which nodes are visited!)
+
+  This works but:
+  → Worst case: exponential backtracking
+  → For certain graph structures, many dead ends
+  → Need to be smart about ordering (lexicographic requirement)</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  The backtracking approach can be exponential.
+</span>  
+  Example of bad case:
+    Many edges from each node → branching factor is high
+    Wrong choice early → must undo many steps
+    
+  We need an algorithm that NEVER backtracks
+  → Hierholzer's algorithm: O(V + E), guaranteed correct!</code></pre></div>
+<hr>
+<h2>STEP 4: IDENTIFYING THE GRAPH PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  THINKING PROCESS:
+</span>
+  "Use every TICKET exactly once"
+    → Use every EDGE exactly once
+    → EULERIAN PATH problem!
+    → NOT Hamiltonian (which would be "visit every AIRPORT once")
+
+  "Must start from JFK"
+    → Start node is fixed
+    → Need Eulerian path from JFK
+
+  "Lexicographically smallest"
+    → When multiple choices exist, pick alphabetically first
+    → Sort adjacency lists alphabetically
+    → Greedy choice: always visit smallest airport next
+
+  "What algorithm finds Eulerian paths?"
+    → Hierholzer's algorithm
+    → DFS-based, builds path in REVERSE
+    → O(V + E) time
+    → Key trick: POST-ORDER insertion (add to result AFTER exhausting all edges)</code></pre></div>
+<h3>Why Simple Greedy DFS Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  TRAP: "Just always go to the smallest neighbor"
+</span>
+  Example:
+    tickets = [["JFK","AAA"],["JFK","BBB"],["BBB","JFK"]]
+
+    Graph:
+      JFK ──→ AAA
+      JFK ──→ BBB ──→ JFK
+    
+    Greedy (always pick smallest):
+      JFK → AAA → STUCK! (AAA has no outgoing edges)
+      But we haven't used tickets BBB→JFK and JFK→BBB!
+    
+    Correct path:
+      JFK → BBB → JFK → AAA
+      (Must go to BBB first to complete the cycle, THEN go to AAA)
+
+  WHY GREEDY FAILS:
+    → Going to AAA first is a DEAD END
+    → AAA has no outgoing edges
+    → We get stuck with unused tickets
+    → Need to visit AAA LAST, not first
+    
+  THIS IS THE CORE CHALLENGE OF EULERIAN PATH PROBLEMS.</code></pre></div>
+<h3>Hierholzer's Insight: Post-Order Trick</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  HIERHOLZER'S KEY IDEA:
+</span>    → Do DFS, always picking smallest neighbor
+    → BUT: add node to result AFTER all its edges are exhausted
+    → Then REVERSE the result
+    
+  This naturally handles dead ends:
+    → Dead-end nodes get added to result FIRST
+    → They end up at the END of the final path (after reversal)
+    → Non-dead-end nodes are added later
+    → They end up at the BEGINNING of the final path
+
+  Trace on the tricky example:
+    tickets = [["JFK","AAA"],["JFK","BBB"],["BBB","JFK"]]
+    
+    Sorted adjacency list:
+      JFK: [AAA, BBB]  (AAA &lt; BBB alphabetically)
+      BBB: [JFK]
+      AAA: []
+
+    DFS from JFK:
+      → Visit JFK
+        → Pick smallest: AAA
+          → Visit AAA
+            → No outgoing edges → ADD AAA to result
+            → result = [AAA]
+          → Back to JFK
+        → Pick next: BBB
+          → Visit BBB
+            → Pick smallest: JFK
+              → Visit JFK
+                → No more outgoing edges → ADD JFK to result
+                → result = [AAA, JFK]
+              → Back to BBB
+            → No more outgoing edges → ADD BBB to result
+            → result = [AAA, JFK, BBB]
+          → Back to JFK
+        → No more outgoing edges → ADD JFK to result
+        → result = [AAA, JFK, BBB, JFK]
+    
+    REVERSE: [JFK, BBB, JFK, AAA] ✓
+    
+    Path: JFK → BBB → JFK → AAA
+    Uses all 3 tickets exactly once!
+    Lexicographically smallest!</code></pre></div>
+<hr>
+<h2>STEP 5: ALGORITHM WALKTHROUGH</h2>
+<h3>The Hierholzer's Algorithm</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  1. Build adjacency list from tickets
+</span>  2. Sort each adjacency list in REVERSE alphabetical order
+     (so we can pop from the end efficiently — 
+      popping smallest = pop from end of reverse-sorted list)
+     OR sort normally and use a min-heap/deque
+  3. DFS from "JFK":
+     → While current node has unused outgoing edges:
+         → Take the smallest available edge (ticket)
+         → Remove that edge (mark as used)
+         → DFS to the destination
+     → After ALL edges from current node are used:
+         → Add current node to result (POST-ORDER)
+  4. REVERSE result to get the actual path</code></pre></div>
+<h3>Step-by-Step Trace: Example 1</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  tickets = [["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],
+</span>             ["ATL","JFK"],["ATL","SFO"]]
+
+  Step 1: Build adjacency list (sorted reverse-alphabetically)
+    (Reverse sort so we can pop() from end to get smallest)
+    
+    JFK: [SFO, ATL]     ← ATL is at end (smallest, popped first)
+    SFO: [ATL]
+    ATL: [SFO, JFK]     ← JFK is at end (smallest, popped first)
+    
+  Step 2: DFS from JFK
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  CALL STACK TRACE:                                                 │
+  │                                                                    │
+  │  dfs(JFK)                                                          │
+  │    │  JFK has edges: [SFO, ATL] → pop ATL (smallest)              │
+  │    │                                                               │
+  │    ├── dfs(ATL)                                                    │
+  │    │    │  ATL has edges: [SFO, JFK] → pop JFK (smallest)         │
+  │    │    │                                                          │
+  │    │    ├── dfs(JFK)                                               │
+  │    │    │    │  JFK has edges: [SFO] → pop SFO (only option)      │
+  │    │    │    │                                                     │
+  │    │    │    ├── dfs(SFO)                                          │
+  │    │    │    │    │  SFO has edges: [ATL] → pop ATL               │
+  │    │    │    │    │                                                │
+  │    │    │    │    ├── dfs(ATL)                                     │
+  │    │    │    │    │    │  ATL has edges: [SFO] → pop SFO          │
+  │    │    │    │    │    │                                           │
+  │    │    │    │    │    ├── dfs(SFO)                                │
+  │    │    │    │    │    │    │  SFO has edges: [] → EMPTY!          │
+  │    │    │    │    │    │    │  POST-ORDER: add SFO to result      │
+  │    │    │    │    │    │    │  result = [SFO]                      │
+  │    │    │    │    │    │                                           │
+  │    │    │    │    │    │  ATL has edges: [] → EMPTY!               │
+  │    │    │    │    │    │  POST-ORDER: add ATL to result           │
+  │    │    │    │    │    │  result = [SFO, ATL]                     │
+  │    │    │    │    │                                                │
+  │    │    │    │    │  SFO has edges: [] → EMPTY!                   │
+  │    │    │    │    │  POST-ORDER: add SFO to result               │
+  │    │    │    │    │  result = [SFO, ATL, SFO]                    │
+  │    │    │    │                                                     │
+  │    │    │    │  JFK has edges: [] → EMPTY!                        │
+  │    │    │    │  POST-ORDER: add JFK to result                    │
+  │    │    │    │  result = [SFO, ATL, SFO, JFK]                   │
+  │    │    │                                                          │
+  │    │    │  ATL has edges: [] → EMPTY!                              │
+  │    │    │  POST-ORDER: add ATL to result                          │
+  │    │    │  result = [SFO, ATL, SFO, JFK, ATL]                   │
+  │    │                                                               │
+  │    │  JFK has edges: [] → EMPTY!                                  │
+  │    │  POST-ORDER: add JFK to result                               │
+  │    │  result = [SFO, ATL, SFO, JFK, ATL, JFK]                   │
+  │                                                                    │
+  │  Step 3: REVERSE result                                            │
+  │  [JFK, ATL, JFK, SFO, ATL, SFO] ✓                                │
+  │                                                                    │
+  │  Path: JFK → ATL → JFK → SFO → ATL → SFO                        │
+  │  Tickets used:                                                     │
+  │    JFK→ATL ✓  ATL→JFK ✓  JFK→SFO ✓  SFO→ATL ✓  ATL→SFO ✓      │
+  │  All 5 tickets used exactly once ✓                                 │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Why Post-Order + Reverse Works</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  INTUITION: Think of it as "recording the way back"               │
+  │                                                                    │
+  │  When we hit a dead end (node with no more edges):                │
+  │    → This node must be the LAST stop on some segment of the path  │
+  │    → Record it first (post-order)                                  │
+  │    → After reversal, it appears at the end                        │
+  │                                                                    │
+  │  When we backtrack from a dead end:                                │
+  │    → We continue exploring remaining edges from earlier nodes      │
+  │    → These nodes get recorded AFTER the dead end                   │
+  │    → After reversal, they appear BEFORE the dead end              │
+  │                                                                    │
+  │  RESULT: Dead ends naturally fall to the end of the path,         │
+  │          while nodes with remaining edges form the beginning.      │
+  │                                                                    │
+  │  FORMAL ARGUMENT:                                                  │
+  │    In an Eulerian path, we can decompose the path into:           │
+  │      Main path + detours (sub-circuits)                            │
+  │    Post-order DFS naturally nests detours correctly:               │
+  │      → Enter a detour, complete it, then continue main path       │
+  │      → Post-order records detour nodes first (they're deeper)     │
+  │      → After reversal, detour appears in correct position         │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Visual: Post-Order vs Pre-Order</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Graph:
+</span>    JFK → AAA
+    JFK → BBB → JFK
+
+  PRE-ORDER DFS (WRONG — greedy gets stuck):
+    Visit JFK → record JFK
+    Visit AAA → record AAA
+    STUCK! Still have unused edges.
+    result = [JFK, AAA, ???]
+
+  POST-ORDER DFS (CORRECT — Hierholzer):
+    Visit JFK
+      Visit AAA (smallest)
+        No edges → record AAA
+      Back to JFK
+      Visit BBB (next smallest)
+        Visit JFK
+          No edges → record JFK
+        No edges → record BBB
+      No edges → record JFK
+    
+    Post-order result: [AAA, JFK, BBB, JFK]
+    Reverse: [JFK, BBB, JFK, AAA] ✓</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLETE CODE</h2>
+<h3>Solution 1: Recursive (Clean and Elegant)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find_itinerary</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>tickets</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Reconstruct itinerary using all tickets exactly once.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Hierholzer's algorithm for Eulerian path:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Build sorted adjacency list
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → DFS with POST-ORDER recording
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Reverse result
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Why post-order?
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Dead ends get recorded first
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → After reversal, dead ends appear at the END of path
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → This avoids the "greedy gets stuck" problem
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Why sort adjacency lists?
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Ensures lexicographically smallest itinerary
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → We always try the smallest destination first
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        tickets: list of [from, to] pairs
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        List of airports in order of visit.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Build adjacency list ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Sort destinations in REVERSE order so we can pop() from end</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># pop() from end of list is O(1) — efficient!</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># pop() gives the SMALLEST destination (since reverse-sorted)</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> src</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dst </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> tickets</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>src</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dst</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Sort each destination list in REVERSE alphabetical order</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> src </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>src</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>sort</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>reverse</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Hierholzer's DFS ───</span><span>
+</span><span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>airport</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># While there are unused tickets from this airport</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>airport</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Take the smallest destination (pop from end of reverse-sorted list)</span><span>
+</span><span>            next_airport </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>airport</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Recursively visit</span><span>
+</span><span>            dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>next_airport</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># POST-ORDER: add to result AFTER all edges exhausted</span><span>
+</span><span>        result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>airport</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Reverse to get correct order</span><span>
+</span><span>    result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>reverse</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST CASES ───</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 1: Complex with cycle</span><span>
+</span><span>tickets1 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>            </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 1: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">find_itinerary</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">tickets1</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: ["JFK","ATL","JFK","SFO","ATL","SFO"]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 2: Simple chain</span><span>
+</span><span>tickets2 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"MUC"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"LHR"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"MUC"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"SJC"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"LHR"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 2: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">find_itinerary</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">tickets2</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: ["JFK","MUC","LHR","SFO","SJC"]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 3: Tricky dead-end case</span><span>
+</span><span>tickets3 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"AAA"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"BBB"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"BBB"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 3: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">find_itinerary</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">tickets3</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: ["JFK","BBB","JFK","AAA"]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 4: Single ticket</span><span>
+</span><span>tickets4 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 4: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">find_itinerary</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">tickets4</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: ["JFK","ATL"]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 5: Eulerian circuit (returns to start)</span><span>
+</span><span>tickets5 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 5: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">find_itinerary</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">tickets5</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: ["JFK","ATL","SFO","JFK"]</span></code></pre></div>
+<hr>
+<h3>Solution 2: Iterative (Avoids Stack Overflow)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find_itinerary_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>tickets</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Iterative version of Hierholzer's algorithm.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Uses an explicit stack instead of recursion.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Important for large inputs where recursion depth
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    could exceed Python's limit (~1000 by default).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    The iterative approach simulates the recursive DFS:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Push current airport onto stack
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → If current airport has outgoing edges: take smallest, push destination
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → If no outgoing edges: pop from stack, add to result (post-order)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Build adjacency list (reverse sorted for pop efficiency)</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> src</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dst </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> tickets</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>src</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dst</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> src </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>src</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>sort</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>reverse</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Peek at top of stack (current airport)</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Has unused outgoing edges → take smallest, continue DFS</span><span>
+</span><span>            next_airport </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>next_airport</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># No more outgoing edges → POST-ORDER: add to result</span><span>
+</span><span>            result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Reverse for correct order</span><span>
+</span><span>    result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>reverse</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>tickets </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>           </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Iterative: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">find_itinerary_iterative</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">tickets</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: ["JFK","ATL","JFK","SFO","ATL","SFO"]</span></code></pre></div>
+<h3>Iterative Trace on Tricky Example</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  tickets = [["JFK","AAA"],["JFK","BBB"],["BBB","JFK"]]
+</span>
+  graph (reverse sorted):
+    JFK: [BBB, AAA]     ← pop() gives AAA first (smallest)
+    BBB: [JFK]
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Step 1:                                                           │
+  │    stack = [JFK]                                                   │
+  │    current = JFK, has edges [BBB, AAA]                            │
+  │    → pop AAA from JFK's list → push AAA                           │
+  │    stack = [JFK, AAA]                                              │
+  │    graph[JFK] = [BBB]                                              │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Step 2:                                                           │
+  │    stack = [JFK, AAA]                                              │
+  │    current = AAA, has edges [] → EMPTY!                           │
+  │    → POST-ORDER: pop AAA from stack, add to result                │
+  │    stack = [JFK]                                                   │
+  │    result = [AAA]                                                  │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Step 3:                                                           │
+  │    stack = [JFK]                                                   │
+  │    current = JFK, has edges [BBB]                                  │
+  │    → pop BBB from JFK's list → push BBB                           │
+  │    stack = [JFK, BBB]                                              │
+  │    graph[JFK] = []                                                 │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Step 4:                                                           │
+  │    stack = [JFK, BBB]                                              │
+  │    current = BBB, has edges [JFK]                                  │
+  │    → pop JFK from BBB's list → push JFK                           │
+  │    stack = [JFK, BBB, JFK]                                         │
+  │    graph[BBB] = []                                                 │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Step 5:                                                           │
+  │    stack = [JFK, BBB, JFK]                                         │
+  │    current = JFK (top), has edges [] → EMPTY!                     │
+  │    → POST-ORDER: pop JFK, add to result                           │
+  │    stack = [JFK, BBB]                                              │
+  │    result = [AAA, JFK]                                             │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Step 6:                                                           │
+  │    stack = [JFK, BBB]                                              │
+  │    current = BBB, has edges [] → EMPTY!                           │
+  │    → POST-ORDER: pop BBB, add to result                           │
+  │    stack = [JFK]                                                   │
+  │    result = [AAA, JFK, BBB]                                       │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Step 7:                                                           │
+  │    stack = [JFK]                                                   │
+  │    current = JFK, has edges [] → EMPTY!                           │
+  │    → POST-ORDER: pop JFK, add to result                           │
+  │    stack = []                                                      │
+  │    result = [AAA, JFK, BBB, JFK]                                  │
+  └────────────────────────────────────────────────────────────────────┘
+
+  Stack empty → DONE
+  Reverse result: [JFK, BBB, JFK, AAA] ✓
+
+  Verification:
+    JFK→BBB (ticket ✓) → BBB→JFK (ticket ✓) → JFK→AAA (ticket ✓)
+    All 3 tickets used exactly once ✓
+    Lexicographically smallest ✓ 
+    (alternative JFK→AAA→??? gets stuck, so this IS the only valid path)</code></pre></div>
+<hr>
+<h3>Solution 3: Using Min-Heap for Sorted Neighbors</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> heapq
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find_itinerary_heap</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>tickets</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Alternative: use min-heap instead of reverse-sorted list.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Advantage: no need to sort — just push all destinations,
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    heappop always gives smallest.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same Hierholzer's algorithm, different data structure for
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    "get smallest unused neighbor."
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Push destinations into min-heap for each source</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> src</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dst </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> tickets</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappush</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>src</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dst</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Pop smallest destination from heap</span><span>
+</span><span>            next_airport </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>next_airport</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>reverse</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test</span><span>
+</span><span>tickets </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>           </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Heap version: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">find_itinerary_heap</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">tickets</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: ["JFK","ATL","JFK","SFO","ATL","SFO"]</span></code></pre></div>
+<hr>
+<h2>STEP 7: COMPLEXITY ANALYSIS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │  Let V = number of unique airports, E = number of tickets       │
+  │                                                                  │
+  │  SOLUTION 1 &amp; 2 (Sorted List):                                  │
+  │                                                                  │
+  │  TIME: O(E log E)                                                │
+  │    → Building adjacency list: O(E)                              │
+  │    → Sorting all adjacency lists: O(E log E) total              │
+  │      (sum of all destination lists = E, sorting costs E log E)  │
+  │    → DFS traversal: O(E) — each edge visited exactly once      │
+  │    → Reverse result: O(E)                                       │
+  │    → TOTAL: O(E log E)                                          │
+  │                                                                  │
+  │  SPACE: O(V + E)                                                 │
+  │    → Adjacency list: O(V + E)                                   │
+  │    → Result list: O(E + 1) = O(E)                               │
+  │    → Recursion stack / explicit stack: O(E) in worst case       │
+  │    → TOTAL: O(V + E)                                            │
+  │                                                                  │
+  │  WHY O(E) for stack?                                             │
+  │    → In worst case, path goes deep before any backtracking      │
+  │    → Stack depth = length of path = E + 1 nodes                 │
+  │                                                                  │
+  ├──────────────────────────────────────────────────────────────────┤
+  │                                                                  │
+  │  SOLUTION 3 (Heap):                                              │
+  │                                                                  │
+  │  TIME: O(E log E)                                                │
+  │    → Building heaps: O(E) total (heapify)                       │
+  │    → Each heappop during DFS: O(log E) per pop                  │
+  │    → E total pops → O(E log E)                                  │
+  │    → TOTAL: O(E log E)                                          │
+  │                                                                  │
+  │  SPACE: O(V + E) — same as above                                │
+  │                                                                  │
+  ├──────────────────────────────────────────────────────────────────┤
+  │                                                                  │
+  │  NOTE: Without the lexicographic requirement,                   │
+  │  Hierholzer's runs in O(V + E) — no sorting needed.             │
+  │  The E log E factor comes entirely from the sorting requirement.│
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: THE EULERIAN PATH FRAMEWORK</h2>
+<h3>When Does Each Type Exist?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                      ║
+  ║  UNDIRECTED GRAPH:                                                   ║
+  ║                                                                      ║
+  ║  Eulerian Circuit (closed path using all edges):                     ║
+  ║    → ALL vertices have EVEN degree                                   ║
+  ║    → Graph is connected                                              ║
+  ║                                                                      ║
+  ║  Eulerian Path (open path using all edges):                          ║
+  ║    → Exactly 0 or 2 vertices have ODD degree                        ║
+  ║    → If 2 odd-degree vertices: they are start and end               ║
+  ║    → If 0 odd-degree vertices: Eulerian circuit (start = end)       ║
+  ║    → Graph is connected                                              ║
+  ║                                                                      ║
+  ╠══════════════════════════════════════════════════════════════════════╣
+  ║                                                                      ║
+  ║  DIRECTED GRAPH (this problem):                                      ║
+  ║                                                                      ║
+  ║  Eulerian Circuit:                                                   ║
+  ║    → ALL vertices: in_degree == out_degree                           ║
+  ║    → Graph is weakly connected                                       ║
+  ║                                                                      ║
+  ║  Eulerian Path:                                                      ║
+  ║    → Exactly ONE vertex: out_degree = in_degree + 1 (START)         ║
+  ║    → Exactly ONE vertex: in_degree = out_degree + 1 (END)          ║
+  ║    → All others: in_degree == out_degree                             ║
+  ║    → Graph is weakly connected                                       ║
+  ║                                                                      ║
+  ╚══════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<h3>Checking Existence (Utility Function)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">has_eulerian_path</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_nodes</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> directed</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Check if an Eulerian path or circuit exists.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      "circuit" — Eulerian circuit exists
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      "path"    — Eulerian path exists (not circuit)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      "none"    — neither exists
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Also returns start node for Eulerian path.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> directed</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        in_deg </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">int</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        out_deg </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">int</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            out_deg</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>            in_deg</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        all_nodes </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>in_deg</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>keys</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">|</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>out_deg</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>keys</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        start_nodes </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># out &gt; in by 1</span><span>
+</span><span>        end_nodes </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># in &gt; out by 1</span><span>
+</span><span>        start </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> all_nodes</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            diff </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> out_deg</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> in_deg</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> diff </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                start_nodes </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>                start </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> node
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> diff </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                end_nodes </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> diff </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"none"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> start_nodes </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> end_nodes </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"circuit"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">next</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">iter</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>all_nodes</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> start_nodes </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> end_nodes </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"path"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"none"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># undirected</span><span>
+</span><span>        degree </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">int</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>            degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        odd_count </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">sum</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> d </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> degree</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>values</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> d </span><span class="token" style="color: rgb(57, 58, 52);">%</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> odd_count </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"circuit"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">next</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">iter</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>degree</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>keys</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> odd_count </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            start </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">next</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> d </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> degree</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>items</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> d </span><span class="token" style="color: rgb(57, 58, 52);">%</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"path"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"none"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>         </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"JFK"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"ATL"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"SFO"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>result_type</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> has_eulerian_path</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> directed</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Type: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">result_type</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">, Start: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">start</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: Type: path, Start: JFK</span></code></pre></div>
+<hr>
+<h2>STEP 9: UNDIRECTED EULERIAN PATH (BONUS)</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find_eulerian_path_undirected</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find Eulerian path in an UNDIRECTED graph.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Key differences from directed version:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Each edge can be traversed in EITHER direction
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Must track which edges are USED (not just which destinations)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Degree condition: 0 or 2 odd-degree vertices
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Uses Hierholzer's algorithm adapted for undirected graphs.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Store edges with indices for tracking usage</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">enumerate</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Sort for consistent ordering</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>sort</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>reverse</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Find start node</span><span>
+</span><span>    start </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># default</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">%</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            start </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> node
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">break</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Track used edges</span><span>
+</span><span>    used </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Find next unused edge</span><span>
+</span><span>        found </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edge_idx </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> used</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>edge_idx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                used</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>edge_idx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                found </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">break</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> found</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>reverse</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test: Undirected graph</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   A --- B --- C</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   |         |</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   D --------+</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Undirected Euler: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">find_eulerian_path_undirected</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">4</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> edges</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: Eulerian circuit: [0, 1, 2, 3, 0]</span></code></pre></div>
+<hr>
+<h2>STEP 10: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Pre-order instead of post-order                     ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG:                                                          ║
+  ║    result.append(airport)    ← BEFORE recursing                  ║
+  ║    dfs(next_airport)                                             ║
+  ║                                                                  ║
+  ║  RIGHT:                                                          ║
+  ║    dfs(next_airport)         ← recurse FIRST                    ║
+  ║    result.append(airport)    ← AFTER all edges exhausted        ║
+  ║                                                                  ║
+  ║  Pre-order = greedy that gets stuck on dead ends                 ║
+  ║  Post-order = dead ends naturally fall to end of path            ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Forgetting to reverse the result                     ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Post-order builds result in REVERSE order!                      ║
+  ║  Dead ends are added first → they should be at the END          ║
+  ║  MUST reverse at the end                                         ║
+  ║                                                                  ║
+  ║  Without reversal: [SFO, ATL, SFO, JFK, ATL, JFK]              ║
+  ║  With reversal:    [JFK, ATL, JFK, SFO, ATL, SFO] ✓            ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Not sorting for lexicographic order                  ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If we don't sort, we might get a valid Eulerian path            ║
+  ║  but not the lexicographically SMALLEST one.                     ║
+  ║                                                                  ║
+  ║  Example: JFK → [SFO, ATL]                                      ║
+  ║    Unsorted: might try SFO first → different path               ║
+  ║    Sorted: tries ATL first → lexicographically smaller          ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Using visited set on NODES instead of EDGES          ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG: "Don't revisit nodes"                                    ║
+  ║  → Eulerian path CAN revisit nodes! (JFK→ATL→JFK)              ║
+  ║                                                                  ║
+  ║  RIGHT: Track which EDGES (tickets) are used                     ║
+  ║  → Hierholzer's does this by REMOVING edges from adjacency list  ║
+  ║  → graph[src].pop() = use and remove the ticket                  ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 5: Recursion depth for large inputs                     ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Python default recursion limit: ~1000                           ║
+  ║  If E &gt; 1000: recursive solution may crash!                      ║
+  ║                                                                  ║
+  ║  FIX: Use iterative version (Solution 2)                         ║
+  ║  OR: sys.setrecursionlimit(E + 100)                              ║
+  ║                                                                  ║
+  ║  Interview: mention this limitation, offer iterative alternative  ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Duplicate tickets                                    ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  tickets = [["JFK","ATL"],["JFK","ATL"],["ATL","JFK"]]         ║
+  ║  → Two tickets from JFK to ATL (multi-edge)                     ║
+  ║  → graph[JFK] = [ATL, ATL] (both stored!)                      ║
+  ║  → Algorithm handles this naturally — pops one at a time         ║
+  ║  → Path: JFK→ATL→JFK→ATL  (uses all 3 tickets)                 ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 11: WHAT IF THE GRAPH WERE...</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │  "What if it were undirected?"                                     │
+  │                                                                    │
+  │  → Same Hierholzer's algorithm                                     │
+  │  → But must track which EDGES are used (not just remove from list)│
+  │  → Because undirected edge appears in BOTH adjacency lists        │
+  │  → Use edge indices to mark used/unused                            │
+  │  → Degree condition changes: 0 or 2 ODD-degree vertices          │
+  │  → See Solution: find_eulerian_path_undirected above              │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  "What if we needed to visit every NODE once (Hamiltonian)?"      │
+  │                                                                    │
+  │  → COMPLETELY different problem                                    │
+  │  → NP-complete — no known polynomial algorithm                    │
+  │  → Must use backtracking, DP with bitmask, or approximation      │
+  │  → DP bitmask: O(2^N × N²) — only feasible for N ≤ ~20         │
+  │  → Hierholzer's does NOT apply                                    │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  "What if no valid Eulerian path existed?"                         │
+  │                                                                    │
+  │  → Check degree conditions first                                   │
+  │  → If conditions not met → return impossible                       │
+  │  → Problem statement guarantees a valid itinerary exists           │
+  │  → But in general: always check existence before running algorithm│
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  "What if we didn't need lexicographic order?"                     │
+  │                                                                    │
+  │  → Skip the sorting step                                          │
+  │  → Algorithm becomes O(V + E) instead of O(E log E)              │
+  │  → Any valid Eulerian path is acceptable                           │
+  │  → Simpler and faster                                              │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  "What if we needed the LONGEST path using some subset of edges?" │
+  │                                                                    │
+  │  → This is NOT Eulerian (which uses ALL edges)                    │
+  │  → This becomes an optimization problem                           │
+  │  → Generally NP-hard                                               │
+  │  → Different algorithmic approach entirely                         │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: CONNECTION TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 1  → Adjacency list (how we store the flight graph)
+</span>  Problem 4  → DFS traversal (Hierholzer's is a modified DFS)
+  Problem 11 → Cycle detection directed (Eulerian circuit = special cycle)
+  Problem 19 → Topological sort (both deal with directed graphs and ordering,
+               but topo sort = node ordering, Euler = edge ordering)
+  Problem 37 → Building graph from non-obvious input (tickets → adjacency list)
+
+  WHAT'S NEW HERE vs previous DFS problems:
+
+  ┌──────────────┬────────────────────────────────┬────────────────────┐
+  │  Problem     │  DFS Goal                      │  What We Track     │
+  ├──────────────┼────────────────────────────────┼────────────────────┤
+  │  4  Basic    │  Visit all NODES               │  visited nodes     │
+  │  10 Cycle    │  Detect back edge              │  visited + parent  │
+  │  11 Dir Cycle│  Detect back edge in DAG       │  3-state coloring  │
+  │  20 Topo Sort│  Order NODES by dependencies   │  post-order nodes  │
+  │  41 Euler    │  Use all EDGES exactly once    │  remaining edges   │
+  │     (THIS)   │  Post-order + reverse          │  (pop from adj list)│
+  └──────────────┴────────────────────────────────┴────────────────────┘
+
+  KEY DISTINCTION:
+    Most graph problems: "visit nodes, track visited NODES"
+    Eulerian path:       "use edges, track used EDGES"</code></pre></div>
+<hr>
+<h2>STEP 13: WHEN TO USE THIS VS ALTERNATIVES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  "Use every EDGE exactly once"                                     │
+  │    → Eulerian path/circuit                                         │
+  │    → Hierholzer's algorithm                                        │
+  │    → O(V + E) [or O(E log E) with lexicographic requirement]      │
+  │                                                                    │
+  │  "Visit every NODE exactly once"                                   │
+  │    → Hamiltonian path/circuit                                      │
+  │    → NP-complete (backtracking / DP bitmask)                       │
+  │    → O(2^N × N²) with DP                                         │
+  │                                                                    │
+  │  "Find any path from A to B"                                       │
+  │    → BFS/DFS (Problem 8)                                           │
+  │                                                                    │
+  │  "Find SHORTEST path from A to B"                                  │
+  │    → BFS/Dijkstra (Problems 9, 23)                                 │
+  │                                                                    │
+  │  "Order nodes by dependencies"                                     │
+  │    → Topological sort (Problem 19-22)                              │
+  │                                                                    │
+  │  RECOGNIZING EULERIAN:                                             │
+  │    → Keywords: "use all edges", "use all tickets",                 │
+  │      "traverse all roads", "complete circuit"                      │
+  │    → Each edge must be used EXACTLY ONCE                           │
+  │    → Nodes CAN be revisited                                        │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 14: REAL-WORLD APPLICATIONS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  WHERE EULERIAN PATHS APPEAR:                                      ║
+  ║                                                                    ║
+  ║  1. CHINESE POSTMAN PROBLEM                                        ║
+  ║     → Mail carrier must traverse every street                      ║
+  ║     → Minimize total distance (revisiting streets if needed)       ║
+  ║     → If graph has Eulerian circuit → optimal (no revisits)       ║
+  ║     → If not → add minimum edges to make it Eulerian              ║
+  ║                                                                    ║
+  ║  2. DNA SEQUENCING (de Bruijn graphs)                              ║
+  ║     → Short DNA fragments are edges                                ║
+  ║     → Overlapping k-mers form the graph                           ║
+  ║     → Eulerian path through de Bruijn graph = assembled sequence  ║
+  ║     → Fundamental in bioinformatics!                               ║
+  ║                                                                    ║
+  ║  3. CIRCUIT BOARD ROUTING                                          ║
+  ║     → Trace every connection exactly once                          ║
+  ║     → Minimize pen-up/pen-down operations                         ║
+  ║                                                                    ║
+  ║  4. NETWORK TESTING                                                ║
+  ║     → Test every link in a network                                 ║
+  ║     → Optimal testing route = Eulerian path                       ║
+  ║                                                                    ║
+  ║  5. THE ORIGINAL PROBLEM: KÖNIGSBERG BRIDGES (1736)               ║
+  ║     → Can you cross every bridge exactly once?                     ║
+  ║     → Euler proved: impossible (4 odd-degree nodes)               ║
+  ║     → Birth of graph theory!                                       ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<h3>The Königsberg Bridges</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Historical context — the problem that STARTED graph theory:
+</span>
+       North Bank
+    ┌──────────────────┐
+    │                  │
+  ──┼──  bridge a  ──┼──
+    │                  │
+    │    Island 1      │       Island 2
+    │   ┌────────┐     │      ┌────────┐
+  ──┼───┤        ├─────┼──────┤        ├──
+    │   │        │     │      │        │
+  ──┼───┤        ├─────┼──    └────────┘
+    │   └────────┘     │
+    │                  │
+  ──┼──  bridge g  ──┼──
+    │                  │
+    └──────────────────┘
+       South Bank
+
+  Graph: 4 nodes, 7 edges
+  Degrees: North=3, South=3, Island1=5, Island2=3
+  ALL nodes have ODD degree → NO Eulerian path exists!
+  
+  Euler's proof (1736): Eulerian path requires at most 2 odd-degree nodes.
+  4 odd-degree nodes → impossible.</code></pre></div>
+<hr>
+<h2>STEP 15: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Use every edge/ticket/road/connection exactly once"    │
+  │    → This is the DEFINING characteristic of Eulerian path         │
+  │    → Not "visit every node" (that's Hamiltonian)                   │
+  │    → Not "find shortest path" (that's BFS/Dijkstra)               │
+  │                                                                    │
+  │  SIGNAL 2: "Reconstruct a route/itinerary/sequence"               │
+  │    → Using ALL given connections                                   │
+  │    → Possibly revisiting locations                                 │
+  │                                                                    │
+  │  SIGNAL 3: "Starting from a fixed point, use all tickets"          │
+  │    → Fixed start + use all edges = Eulerian path from start       │
+  │                                                                    │
+  │  SIGNAL 4: "Lexicographically smallest" combined with above        │
+  │    → Sort adjacency lists + Hierholzer's                           │
+  │                                                                    │
+  │  MY THOUGHT PROCESS:                                               │
+  │                                                                    │
+  │    "Use all tickets exactly once"                                  │
+  │      → Tickets are EDGES, airports are NODES                       │
+  │      → Use all EDGES once = Eulerian path                          │
+  │                                                                    │
+  │    "Reconstruct the itinerary"                                     │
+  │      → Find the actual Eulerian path                               │
+  │      → Hierholzer's algorithm                                      │
+  │                                                                    │
+  │    "Lexicographically smallest"                                    │
+  │      → Sort destinations alphabetically                            │
+  │      → Always pick smallest available destination                  │
+  │                                                                    │
+  │    "Dead end problem?"                                             │
+  │      → Yes! Greedy can get stuck                                   │
+  │      → Post-order trick: record AFTER exhausting all edges        │
+  │      → Reverse at end                                              │
+  │                                                                    │
+  │  TEMPLATE:                                                         │
+  │    1. Build sorted adjacency list                                  │
+  │    2. DFS with post-order recording                                │
+  │    3. Reverse result                                               │
+  │    4. That's it!                                                   │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 16: HIERHOLZER'S CORE PATTERN SUMMARY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  HIERHOLZER'S ALGORITHM — THE PATTERN:                             ║
+  ║                                                                    ║
+  ║  def hierholzer(start, graph):                                     ║
+  ║      result = []                                                   ║
+  ║      stack = [start]                                               ║
+  ║                                                                    ║
+  ║      while stack:                                                  ║
+  ║          current = stack[-1]                                       ║
+  ║          if graph[current]:          # has unused edges            ║
+  ║              next = graph[current].pop()  # take an edge           ║
+  ║              stack.append(next)           # continue DFS           ║
+  ║          else:                       # dead end (no more edges)    ║
+  ║              result.append(stack.pop())   # POST-ORDER record     ║
+  ║                                                                    ║
+  ║      result.reverse()               # reverse post-order = path   ║
+  ║      return result                                                 ║
+  ║                                                                    ║
+  ╠════════════════════════════════════════════════════════════════════╣
+  ║                                                                    ║
+  ║  THREE LINES THAT MATTER:                                          ║
+  ║                                                                    ║
+  ║  1. graph[current].pop()     → USE and REMOVE the edge            ║
+  ║  2. result.append(stack.pop()) → POST-ORDER (after all edges gone)║
+  ║  3. result.reverse()          → Flip to get correct direction      ║
+  ║                                                                    ║
+  ║  WHY IT WORKS:                                                     ║
+  ║                                                                    ║
+  ║  → DFS naturally follows edges until stuck                         ║
+  ║  → "Stuck" = dead end = must be END of path (or sub-circuit)      ║
+  ║  → Recording at dead end + reversing = correct ordering            ║
+  ║  → Dead ends go to FRONT of result after reversal                  ║
+  ║    Wait — dead ends are recorded FIRST in result list,             ║
+  ║    after reversal they go to the END. ✓                            ║
+  ║  → Nodes with remaining edges continue DFS after backtracking     ║
+  ║  → They get recorded LATER, ending up at the BEGINNING ✓         ║
+  ║                                                                    ║
+  ╠════════════════════════════════════════════════════════════════════╣
+  ║                                                                    ║
+  ║  VARIATIONS:                                                       ║
+  ║                                                                    ║
+  ║  Lexicographic order:                                              ║
+  ║    → Sort adjacency lists (reverse sort + pop from end)            ║
+  ║    → OR use min-heap per node                                      ║
+  ║                                                                    ║
+  ║  Directed vs Undirected:                                           ║
+  ║    → Directed: just pop from adjacency list                        ║
+  ║    → Undirected: must track edge indices (each edge in 2 lists)   ║
+  ║                                                                    ║
+  ║  Circuit vs Path:                                                  ║
+  ║    → Circuit: start from any node (all degrees balanced)           ║
+  ║    → Path: start from the node with out_degree = in_degree + 1    ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 17: COMPLETE WORKED EXAMPLE — VISUAL FLOW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Let's trace the FULL picture for Example 1 with visual state:
+</span>
+  tickets = [["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],
+             ["ATL","JFK"],["ATL","SFO"]]
+
+  graph (reverse sorted — pop gives smallest):
+    JFK: [SFO, ATL]
+    ATL: [SFO, JFK]
+    SFO: [ATL]
+
+  ════════════════════════════════════════════════════════════════
+
+  State 1: stack=[JFK]
+  
+    JFK has edges → pop ATL → push ATL
+    Edge used: JFK──→ATL (ticket 2)
+    
+    Remaining graph:
+      JFK: [SFO]          ATL: [SFO, JFK]       SFO: [ATL]
+    
+    stack = [JFK, ATL]     result = []
+
+  ════════════════════════════════════════════════════════════════
+
+  State 2: stack=[JFK, ATL]
+  
+    ATL has edges → pop JFK → push JFK
+    Edge used: ATL──→JFK (ticket 4)
+    
+    Remaining graph:
+      JFK: [SFO]          ATL: [SFO]            SFO: [ATL]
+    
+    stack = [JFK, ATL, JFK]     result = []
+
+  ════════════════════════════════════════════════════════════════
+
+  State 3: stack=[JFK, ATL, JFK]
+  
+    JFK has edges → pop SFO → push SFO
+    Edge used: JFK──→SFO (ticket 1)
+    
+    Remaining graph:
+      JFK: []              ATL: [SFO]            SFO: [ATL]
+    
+    stack = [JFK, ATL, JFK, SFO]     result = []
+
+  ════════════════════════════════════════════════════════════════
+
+  State 4: stack=[JFK, ATL, JFK, SFO]
+  
+    SFO has edges → pop ATL → push ATL
+    Edge used: SFO──→ATL (ticket 3)
+    
+    Remaining graph:
+      JFK: []              ATL: [SFO]            SFO: []
+    
+    stack = [JFK, ATL, JFK, SFO, ATL]     result = []
+
+  ════════════════════════════════════════════════════════════════
+
+  State 5: stack=[JFK, ATL, JFK, SFO, ATL]
+  
+    ATL has edges → pop SFO → push SFO
+    Edge used: ATL──→SFO (ticket 5)
+    
+    Remaining graph:
+      JFK: []              ATL: []               SFO: []
+      ALL EDGES USED!
+    
+    stack = [JFK, ATL, JFK, SFO, ATL, SFO]     result = []
+
+  ════════════════════════════════════════════════════════════════
+
+  State 6: stack=[JFK, ATL, JFK, SFO, ATL, SFO]
+  
+    SFO has NO edges → DEAD END → pop SFO → add to result
+    
+    stack = [JFK, ATL, JFK, SFO, ATL]     result = [SFO]
+
+  ════════════════════════════════════════════════════════════════
+
+  State 7: stack=[JFK, ATL, JFK, SFO, ATL]
+  
+    ATL has NO edges → pop ATL → add to result
+    
+    stack = [JFK, ATL, JFK, SFO]     result = [SFO, ATL]
+
+  ════════════════════════════════════════════════════════════════
+
+  State 8: stack=[JFK, ATL, JFK, SFO]
+  
+    SFO has NO edges → pop SFO → add to result
+    
+    stack = [JFK, ATL, JFK]     result = [SFO, ATL, SFO]
+
+  ════════════════════════════════════════════════════════════════
+
+  State 9: stack=[JFK, ATL, JFK]
+  
+    JFK has NO edges → pop JFK → add to result
+    
+    stack = [JFK, ATL]     result = [SFO, ATL, SFO, JFK]
+
+  ════════════════════════════════════════════════════════════════
+
+  State 10: stack=[JFK, ATL]
+  
+    ATL has NO edges → pop ATL → add to result
+    
+    stack = [JFK]     result = [SFO, ATL, SFO, JFK, ATL]
+
+  ════════════════════════════════════════════════════════════════
+
+  State 11: stack=[JFK]
+  
+    JFK has NO edges → pop JFK → add to result
+    
+    stack = []     result = [SFO, ATL, SFO, JFK, ATL, JFK]
+
+  ════════════════════════════════════════════════════════════════
+
+  Stack empty → DONE!
+
+  result = [SFO, ATL, SFO, JFK, ATL, JFK]
+  
+  REVERSE → [JFK, ATL, JFK, SFO, ATL, SFO] ✓
+
+  VERIFY each ticket:
+    JFK→ATL ✓ (ticket 2)
+    ATL→JFK ✓ (ticket 4)
+    JFK→SFO ✓ (ticket 1)
+    SFO→ATL ✓ (ticket 3)
+    ATL→SFO ✓ (ticket 5)
+    
+  All 5 tickets used exactly once ✓
+  Starts from JFK ✓
+  Lexicographically smallest ✓</code></pre></div>
+<hr>
+<h2>STEP 18: THE "WHY POST-ORDER" DEEP DIVE</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  The most confusing part of Hierholzer's is WHY post-order works.
+</span>  Let's build intuition with a DECOMPOSITION view.
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │                                                                    │
+  │  DECOMPOSITION VIEW:                                               │
+  │                                                                    │
+  │  Any Eulerian path can be decomposed into:                         │
+  │    → A "main spine" from start to end                              │
+  │    → "Side circuits" branching off the spine                       │
+  │                                                                    │
+  │  Example 1 decomposition:                                          │
+  │                                                                    │
+  │    Main spine: JFK ──→ ATL ──→ SFO                                │
+  │    Side circuit at JFK: JFK ──→ SFO ──→ ATL ──→ JFK              │
+  │                                                                    │
+  │    Wait, that doesn't work with 5 edges...                        │
+  │                                                                    │
+  │    Actually: the path IS the full traversal:                       │
+  │    JFK → ATL → JFK → SFO → ATL → SFO                             │
+  │                                                                    │
+  │    Decompose:                                                      │
+  │      Spine: JFK → ATL → SFO (last segment)                       │
+  │      Detour at JFK: JFK → ATL → JFK (a cycle)                    │
+  │      Detour at ATL: (none extra)                                   │
+  │                                                                    │
+  │    The full path weaves detours INTO the spine:                    │
+  │      JFK → [detour: ATL → JFK] → SFO → [detour: ATL] → SFO      │
+  │                                                                    │
+  │  POST-ORDER NATURALLY HANDLES THIS:                                │
+  │    → DFS goes deep into detours first                              │
+  │    → Records detour endpoints first (post-order)                   │
+  │    → Records spine nodes later                                     │
+  │    → After reversal: spine first, detours inserted correctly       │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Simplified Analogy</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Think of it like writing a story:
+</span>
+  POST-ORDER = writing the ENDING first, then the MIDDLE, then the BEGINNING
+  
+  When you HIT A DEAD END in DFS:
+    → "This must be an ending of some segment"
+    → Write it down
+    
+  When you BACKTRACK:
+    → "I'm back to a junction with more to explore"
+    → Explore the remaining, write those endings too
+    → THEN write this junction down
+    
+  When you REVERSE everything:
+    → Beginnings appear first, middles next, endings last
+    → The story reads correctly!
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │                                                                    │
+  │  DFS writes the story BACKWARDS (endings first)                    │
+  │  Reverse reads the story FORWARDS (beginnings first)               │
+  │                                                                    │
+  │  This is the SAME insight as DFS topological sort (Problem 20):   │
+  │    → Post-order DFS + reverse = topological order                  │
+  │    → Post-order DFS + reverse = Eulerian path order                │
+  │                                                                    │
+  │  BOTH use the "record AFTER finishing" + "reverse" trick!         │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 19: COMPARISON WITH TOPOLOGICAL SORT POST-ORDER</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                      │
+  │  Topological Sort (Problem 20):                                      │
+  │    → DFS on DAG                                                     │
+  │    → Post-order: add node AFTER all descendants visited             │
+  │    → Reverse → topological order                                    │
+  │    → Tracks: visited NODES                                          │
+  │    → Uses each EDGE once in DFS, visits each NODE once              │
+  │                                                                      │
+  │  Eulerian Path (Problem 41):                                         │
+  │    → DFS on graph (may have cycles)                                 │
+  │    → Post-order: add node AFTER all edges from it exhausted         │
+  │    → Reverse → Eulerian path                                        │
+  │    → Tracks: used EDGES (by removing from adjacency list)           │
+  │    → Uses each EDGE once, may visit NODES multiple times            │
+  │                                                                      │
+  │  SIMILARITY:                                                         │
+  │    Both: "record after finishing" + reverse                          │
+  │                                                                      │
+  │  DIFFERENCE:                                                         │
+  │    Topo sort: "finished" = all NEIGHBORS visited (node-centric)    │
+  │    Euler path: "finished" = all EDGES used (edge-centric)          │
+  │                                                                      │
+  └──────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPTS LEARNED:                                            ║
+  ║                                                                    ║
+  ║   1. EULERIAN PATH vs HAMILTONIAN PATH:                            ║
+  ║      → Eulerian: visit every EDGE once (polynomial — O(V+E))      ║
+  ║      → Hamiltonian: visit every NODE once (NP-complete)            ║
+  ║      → Memory trick: Euler → Edges (both start with E)            ║
+  ║                                                                    ║
+  ║   2. EXISTENCE CONDITIONS (directed graph):                        ║
+  ║      → Eulerian circuit: all nodes in_deg == out_deg               ║
+  ║      → Eulerian path: exactly one +1, one -1, rest balanced       ║
+  ║                                                                    ║
+  ║   3. HIERHOLZER'S ALGORITHM:                                       ║
+  ║      → DFS + POST-ORDER recording + REVERSE                       ║
+  ║      → Dead ends naturally fall to end of path                     ║
+  ║      → Avoids the "greedy gets stuck" problem                      ║
+  ║      → Key: pop edges from adjacency list (use and remove)        ║
+  ║                                                                    ║
+  ║   4. THE POST-ORDER + REVERSE TRICK:                               ║
+  ║      → Same idea as DFS topological sort (Problem 20)              ║
+  ║      → "Record AFTER all work done" + reverse = correct order     ║
+  ║      → Powerful pattern: appears in topo sort AND Euler path      ║
+  ║                                                                    ║
+  ║   5. LEXICOGRAPHIC ORDERING:                                       ║
+  ║      → Sort adjacency lists                                        ║
+  ║      → Always pick smallest available next destination             ║
+  ║      → Combined with post-order: globally optimal ordering         ║
+  ║                                                                    ║
+  ║   MANTRA:                                                          ║
+  ║   "Use ALL edges once → Eulerian → Hierholzer's →                 ║
+  ║    DFS with post-order recording → reverse result"                 ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<p><strong>Problem 41 Complete.</strong><br>
+<strong>Ready for Problem 42: Bidirectional BFS?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="19" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-40.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 41 of 50</span>
+            </div>
+            <a href="problem-42.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

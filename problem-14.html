@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 14: Problem 14: 01 Matrix (Nearest Zero) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="29">
+<div class="px-2"><h1>Problem 14: 01 Matrix (Nearest Zero)</h1>
+<h2>[Algorithm Family: Multi-Source BFS — Reverse Thinking]</h2>
+<h2>[Phase 2: Core Patterns — "I know WHICH traversal and WHY"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are designing an emergency evacuation system for a building.
+</span>The building floor plan is a 2D grid where:
+  → 0 represents an EXIT
+  → 1 represents a regular room
+
+For EVERY room in the building, calculate the SHORTEST DISTANCE
+to the nearest exit (number of rooms you must pass through,
+moving only up/down/left/right).
+
+Exits have distance 0 (they ARE the exit).
+
+Input:
+  grid = [
+    [0, 0, 0],
+    [0, 1, 0],
+    [1, 1, 1]
+  ]
+
+Output:
+  [
+    [0, 0, 0],
+    [0, 1, 0],
+    [1, 2, 1]
+  ]
+
+  Explanation:
+    (2,0): nearest exit is (1,0) or (0,0) → distance 1... wait
+    Let me recalculate:
+    (2,0): nearest 0 is at (1,0) → distance 1
+    (2,1): nearest 0 is at (0,1) or (1,0) or (1,2) → distance 2
+    (2,2): nearest 0 is at (1,2) → distance 1</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Grid</h2>
+<h3>The Grid</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Row\Col   0     1     2
+</span>    0     [ 0 ] [ 0 ] [ 0 ]
+    1     [ 0 ] [ 1 ] [ 0 ]
+    2     [ 1 ] [ 1 ] [ 1 ]
+
+  Legend:
+    0 = 🟩 exit (distance = 0)
+    1 = 🟥 room (distance = ?)
+
+    🟩  🟩  🟩
+    🟩  🟥  🟩
+    🟥  🟥  🟥</code></pre></div>
+<h3>What We Need to Find</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For EVERY cell: distance to NEAREST 0
+</span>
+  Cell (0,0) = 0 → it IS a zero → distance = 0
+  Cell (0,1) = 0 → distance = 0
+  Cell (1,1) = 1 → nearest zeros: (0,1), (1,0), (1,2) all at distance 1
+  Cell (2,0) = 1 → nearest zero: (1,0) at distance 1
+  Cell (2,1) = 1 → nearest zeros: (1,0) or (1,2) at distance 2
+  Cell (2,2) = 1 → nearest zero: (1,2) at distance 1
+
+  Answer:
+    [0, 0, 0]
+    [0, 1, 0]
+    [1, 2, 1]</code></pre></div>
+<h3>A Larger Example</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Input:                        Output:
+</span>    [0, 1, 1, 0, 1]              [0, 1, 1, 0, 1]
+    [1, 1, 1, 1, 1]              [1, 2, 2, 1, 2]
+    [1, 1, 1, 1, 1]              [2, 3, 3, 2, 3]
+    [1, 1, 1, 1, 0]              [3, 3, 2, 1, 0]
+
+  Visual: ripples spreading outward from each 0:
+  
+    [0] ─1─ ─1─ [0] ─1─        Zeros are sources.
+     │           │              Distance increases as you move away.
+     1   ─2─ ─2─ 1   ─2─       Each cell gets the distance to its
+     │           │              NEAREST zero, not any specific one.
+     2   ─3─ ─3─ 2   ─3─
+                  │
+     3   ─3─ ─2─ 1  [0]</code></pre></div>
+<hr>
+<h2>STEP 2: THE WRONG APPROACH — BFS from Each 1-Cell</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Naive idea: "For each 1-cell, run BFS to find the nearest 0-cell."
+</span>  
+  → Number of 1-cells: up to R × C
+  → Each BFS: O(R × C) to find nearest 0
+  → Total: O((R × C)²)
+  
+  For 1000×1000 grid: (10⁶)² = 10¹² → TOO SLOW
+
+  This is the SAME mistake as running separate BFS per source
+  in Problem 13 (Rotten Oranges).</code></pre></div>
+<h3>Another Wrong Approach — BFS from Each 0-Cell Separately</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Run BFS from each 0-cell. For each 1-cell, take the minimum 
+</span>   distance across all BFS runs."
+  
+  → K zero-cells, each BFS is O(R × C)
+  → Total: O(K × R × C) → could be O((R × C)²)
+  → Still too slow!
+  
+  Same issue as the brute force in Problem 13.</code></pre></div>
+<h3>Why These Fail (And What We Already Know)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  From Problem 13 (Rotten Oranges), we learned:
+</span>  
+  ┌──────────────────────────────────────────────────────────────┐
+  │  "Instead of running BFS from each source separately,        │
+  │   put ALL sources in the queue at once.                      │
+  │   Single BFS from all sources = O(R × C)."                  │
+  │                                                              │
+  │  Problem 13: sources = rotten oranges (value 2)              │
+  │  Problem 14: sources = zero cells (value 0)                  │
+  │                                                              │
+  │  SAME PATTERN! Just different "source" definition.           │
+  └──────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN — Reverse Thinking</h2>
+<h3>The Key Insight: Start from the ANSWER</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  FORWARD thinking (wrong/slow):                                │
+  │    "For each 1-cell, search OUTWARD to find the nearest 0"    │
+  │    → Separate search for each cell → O((R×C)²)                │
+  │                                                                │
+  │  REVERSE thinking (correct/fast):                              │
+  │    "Start from ALL 0-cells, spread OUTWARD"                    │
+  │    → Each 1-cell gets reached by the NEAREST 0 first          │
+  │    → Multi-source BFS from all 0s → O(R×C)                    │
+  │                                                                │
+  │  THIS IS THE CONCEPTUAL LEAP OF THIS PROBLEM:                 │
+  │  "Don't search FROM the question. Search FROM the answer."    │
+  │                                                                │
+  │  Instead of asking "where is the nearest 0?"                   │
+  │  Ask "how far can each 0 reach?"                               │
+  │  The first 0 to reach a cell = the nearest one.               │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Mapping to Problem 13</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 13 (Rotten Oranges):
+</span>    Sources: all rotten oranges (value 2)
+    Targets: all fresh oranges (value 1)
+    Question: "How long until all fresh oranges are reached?"
+    Answer: maximum BFS level
+
+  Problem 14 (01 Matrix):
+    Sources: all zero cells (value 0)
+    Targets: all one cells (value 1)
+    Question: "For each 1-cell, what's the distance to nearest 0?"
+    Answer: BFS level of each cell = distance to nearest 0
+
+  THE ALGORITHM IS IDENTICAL.
+  Only the output format differs:
+    Problem 13: return the maximum distance (single number)
+    Problem 14: return the distance for EVERY cell (2D array)</code></pre></div>
+<h3>Why Multi-Source BFS Gives Correct "Nearest" Distance</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Multi-source BFS from all 0-cells:
+</span>    Level 0: all 0-cells (distance 0 to nearest zero = themselves!)
+    Level 1: all cells adjacent to any 0-cell (distance 1)
+    Level 2: all cells 2 steps from nearest 0-cell (distance 2)
+    ...
+
+  When a 1-cell is first reached by BFS:
+    → It's at BFS level k
+    → This means the nearest 0-cell is k steps away
+    → No closer 0 exists (BFS explores nearest first — Problem 9)
+    → dist[cell] = k is correct!
+
+  BFS from all 0s simultaneously = "which 0 can reach me fastest?"
+  = "how far is my nearest 0?"</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — Step by Step</h2>
+<h3>Larger Example for Better Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Input Grid:
+</span>    [0, 1, 1]
+    [1, 1, 1]
+    [1, 1, 0]
+
+  Expected Output:
+    [0, 1, 2]
+    [1, 2, 1]
+    [2, 1, 0]</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════════╗
+</span>  ║  INITIALIZATION                                                       ║
+  ╠═══════════════════════════════════════════════════════════════════════╣
+  ║                                                                       ║
+  ║  Scan grid for ALL 0-cells → add to queue                            ║
+  ║  Set 1-cells to infinity (unvisited)                                  ║
+  ║                                                                       ║
+  ║  dist matrix (our answer):                                            ║
+  ║    [ 0,  ∞,  ∞]                                                      ║
+  ║    [ ∞,  ∞,  ∞]                                                      ║
+  ║    [ ∞,  ∞,  0]                                                      ║
+  ║                                                                       ║
+  ║  Queue: [(0,0), (2,2)]    ← BOTH zero-cells!                         ║
+  ║                                                                       ║
+  ║  Visual — two sources spreading:                                      ║
+  ║    [0]  ?   ?                                                         ║
+  ║     ?   ?   ?                                                         ║
+  ║     ?   ?  [0]                                                        ║
+  ╚═══════════════════════════════════════════════════════════════════════╝
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ LEVEL 0: Process all zero-cells (initial sources)                   │
+  │                                                                     │
+  │   level_size = 2 (two zeros in queue)                               │
+  │                                                                     │
+  │   Process (0,0) — distance 0:                                       │
+  │     Check neighbors:                                                │
+  │       UP    (-1,0): out of bounds                                   │
+  │       DOWN  (1,0):  dist = ∞ → set dist[1][0] = 0+1 = 1, enqueue  │
+  │       LEFT  (0,-1): out of bounds                                   │
+  │       RIGHT (0,1):  dist = ∞ → set dist[0][1] = 0+1 = 1, enqueue  │
+  │                                                                     │
+  │   Process (2,2) — distance 0:                                       │
+  │     Check neighbors:                                                │
+  │       UP    (1,2):  dist = ∞ → set dist[1][2] = 0+1 = 1, enqueue  │
+  │       DOWN  (3,2):  out of bounds                                   │
+  │       LEFT  (2,1):  dist = ∞ → set dist[2][1] = 0+1 = 1, enqueue  │
+  │       RIGHT (2,3):  out of bounds                                   │
+  │                                                                     │
+  │   dist matrix:                                                      │
+  │     [ 0,  1,  ∞]                                                    │
+  │     [ 1,  ∞,  1]                                                    │
+  │     [ ∞,  1,  0]                                                    │
+  │                                                                     │
+  │   Queue: [(1,0), (0,1), (1,2), (2,1)]                              │
+  │                                                                     │
+  │   Visual — ripples spreading from both corners:                     │
+  │     [0]  1   ?        Two ripple fronts!                            │
+  │      1   ?   1        From top-left and bottom-right.               │
+  │      ?   1  [0]                                                     │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ LEVEL 1: Process all cells at distance 1                            │
+  │                                                                     │
+  │   level_size = 4                                                    │
+  │                                                                     │
+  │   Process (1,0) — distance 1:                                       │
+  │     UP    (0,0): dist=0 (already set) → skip                       │
+  │     DOWN  (2,0): dist=∞ → set dist[2][0] = 1+1 = 2, enqueue       │
+  │     LEFT  (1,-1): out of bounds                                     │
+  │     RIGHT (1,1): dist=∞ → set dist[1][1] = 1+1 = 2, enqueue       │
+  │                                                                     │
+  │   Process (0,1) — distance 1:                                       │
+  │     UP    (-1,1): out of bounds                                     │
+  │     DOWN  (1,1): dist=2 (ALREADY SET by (1,0)!) → skip             │
+  │     LEFT  (0,0): dist=0 → skip                                     │
+  │     RIGHT (0,2): dist=∞ → set dist[0][2] = 1+1 = 2, enqueue       │
+  │                                                                     │
+  │   Process (1,2) — distance 1:                                       │
+  │     UP    (0,2): dist=2 (just set by (0,1)) → skip                 │
+  │     DOWN  (2,2): dist=0 → skip                                     │
+  │     LEFT  (1,1): dist=2 (already set) → skip                       │
+  │     RIGHT (1,3): out of bounds                                      │
+  │                                                                     │
+  │   Process (2,1) — distance 1:                                       │
+  │     UP    (1,1): dist=2 (already set) → skip                       │
+  │     DOWN  (3,1): out of bounds                                      │
+  │     LEFT  (2,0): dist=2 (already set) → skip                       │
+  │     RIGHT (2,2): dist=0 → skip                                     │
+  │                                                                     │
+  │   dist matrix:                                                      │
+  │     [ 0,  1,  2]                                                    │
+  │     [ 1,  2,  1]                                                    │
+  │     [ 2,  1,  0]                                                    │
+  │                                                                     │
+  │   Queue: [(2,0), (1,1), (0,2)]                                     │
+  │                                                                     │
+  │   Visual — ripples have met in the middle:                          │
+  │     [0]  1   2                                                      │
+  │      1   2   1        The two ripple fronts MET at (1,1)!          │
+  │      2   1  [0]       (1,1) got distance 2 from BOTH sources.      │
+  │                       First one to reach it wins (both give 2).    │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ LEVEL 2: Process all cells at distance 2                            │
+  │                                                                     │
+  │   level_size = 3                                                    │
+  │                                                                     │
+  │   Process (2,0): all neighbors already have dist ≤ 2 → no new cells│
+  │   Process (1,1): all neighbors already have dist ≤ 2 → no new cells│
+  │   Process (0,2): all neighbors already have dist ≤ 2 → no new cells│
+  │                                                                     │
+  │   Queue: [] ← EMPTY                                                 │
+  │   BFS ends                                                          │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ═══════════════════════════════════════════════════════════════════
+  FINAL ANSWER:
+    [0, 1, 2]
+    [1, 2, 1]
+    [2, 1, 0]
+  
+  Every cell has the distance to its NEAREST zero ✓
+  
+  Verification:
+    (0,0)=0: IS a zero → dist=0 ✓
+    (0,2)=2: nearest 0 is (0,1) at dist 1... 
+    
+  Wait, (0,2) in original grid is 1, and nearest 0 is (0,1) which is 
+  at distance 1, or (0,0) at distance 2... hmm.
+  
+  Original grid:
+    [0, 1, 1]    ← (0,1) is 1, not 0!
+    [1, 1, 1]
+    [1, 1, 0]
+  
+  So (0,2) nearest 0: (0,0) at distance 2, or (2,2) at distance 4
+  Nearest = (0,0) at distance 2 ✓
+  
+  (1,1) nearest 0: (0,0) at distance 2, or (2,2) at distance 2
+  Nearest = 2 ✓ (equidistant from both!)
+  ═══════════════════════════════════════════════════════════════════</code></pre></div>
+<h3>The "Two Ripples Meeting" Visualization</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Two zeros at opposite corners: (0,0) and (2,2)
+</span>
+  Ripple from (0,0):          Ripple from (2,2):
+    [0]  1   2                   4   3   2
+     1   2   3                   3   2   1
+     2   3   4                   2   1  [0]
+
+  COMBINED (minimum at each cell):
+    [0]  1   2
+     1   2   1
+     2   1  [0]
+
+  Multi-source BFS computes this COMBINED result in ONE pass!
+  No need to run two separate BFS and take minimums.</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: Multi-Source BFS (Standard Solution)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">update_matrix</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    For each cell, find distance to nearest 0.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Strategy (from Problem 13 — Multi-Source BFS):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Start BFS from ALL 0-cells simultaneously
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Each 1-cell gets reached by its nearest 0 first
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → BFS level = distance to nearest 0
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Reverse thinking:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Don't search FROM each 1 to find nearest 0 (slow)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Search FROM all 0s outward (fast)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → "Start from the answer, work toward the question"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Identical pattern to Problem 13 (Rotten Oranges):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Problem 13: sources = rotten (2), targets = fresh (1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Problem 14: sources = zeros (0), targets = ones (1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        2D array where each cell = distance to nearest 0
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> mat </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mat
+</span>    
+<span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── STEP 1: Initialize distance matrix and queue ───</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>              </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># zeros have distance 0</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ALL zeros are sources!</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── STEP 2: Multi-source BFS ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Check bounds + can we improve the distance?</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span>                
+<span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># update distance</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TESTS ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 1</span><span>
+</span><span>mat1 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>result1 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> update_matrix</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Test 1:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> row </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> result1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">row</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Expected:</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   [0, 0, 0]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   [0, 1, 0]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   [1, 2, 1]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 2</span><span>
+</span><span>mat2 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>result2 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> update_matrix</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"\nTest 2:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> row </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> result2</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">row</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Expected:</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   [0, 1, 2]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   [1, 2, 1]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   [2, 1, 0]</span></code></pre></div>
+<hr>
+<h3>Version 2: Level-by-Level BFS (Explicit Level Tracking)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">update_matrix_level</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same algorithm, but using level-by-level BFS (Problem 3 template).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This version makes the "distance = BFS level" relationship
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    more explicit — useful for understanding and debugging.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> mat </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mat
+</span>    
+<span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Initialize: all zeros at distance 0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># BFS level by level</span><span>
+</span><span>    level </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        level_size </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>queue</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        level </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>level_size</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># unvisited!</span><span>
+</span>                    
+<span>                    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> level    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># distance = current BFS level</span><span>
+</span><span>                    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>mat </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> update_matrix_level</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> row </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> result</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>row</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [0, 1, 2]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [1, 2, 1]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [2, 1, 0]</span></code></pre></div>
+<hr>
+<h3>Version 3: In-Place Modification (Space Optimized)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">update_matrix_inplace</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Modify the input matrix in-place to store distances.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Trick: set all 1-cells to infinity first, then BFS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This uses the matrix itself as the distance array.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Saves O(R×C) extra space for separate dist array.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Similar to grid modification in Problems 6, 7, 13.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> mat </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mat
+</span>    
+<span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Step 1: Mark all 1-cells as "unvisited" (infinity)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#         Add all 0-cells to queue</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># mark as unvisited</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Step 2: Multi-source BFS</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span>                
+<span>                mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mat
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>mat </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> update_matrix_inplace</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> row </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> result</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>row</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [0, 0, 0]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [0, 1, 0]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [1, 2, 1]</span></code></pre></div>
+<hr>
+<h3>Version 4: DP Approach (Alternative — No BFS!)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">update_matrix_dp</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Dynamic Programming approach — alternative to BFS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Insight: distance to nearest 0 can come from 4 directions.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    We can't check all 4 at once, but we CAN do TWO passes:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Pass 1 (top-left to bottom-right):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Each cell considers distances from TOP and LEFT
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → dist[r][c] = min(dist[r][c], dist[r-1][c]+1, dist[r][c-1]+1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Pass 2 (bottom-right to top-left):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Each cell considers distances from BOTTOM and RIGHT
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → dist[r][c] = min(dist[r][c], dist[r+1][c]+1, dist[r][c+1]+1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    After both passes, every cell has the minimum from all 4 directions.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Time: O(R × C) — two passes through the grid
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Space: O(1) extra — modifies in place (or O(R×C) for dist array)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    When to use DP vs BFS:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → BFS: more intuitive, standard multi-source pattern
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → DP: slightly more efficient (no queue overhead), clever
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Both are O(R × C)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Interview: BFS is safer (harder to get DP wrong)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> mat </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mat
+</span>    
+<span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    INF </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Initialize distance array</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>INF</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> mat</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Pass 1: top-left → bottom-right (check UP and LEFT)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Pass 2: bottom-right → top-left (check DOWN and RIGHT)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>mat </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> update_matrix_dp</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>mat</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> row </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> result</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>row</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [0, 0, 0]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [0, 1, 0]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [1, 2, 1]</span></code></pre></div>
+<h3>Why Two DP Passes Work</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Pass 1 (↓→): each cell gets min distance from TOP and LEFT neighbors
+</span>  Pass 2 (↑←): each cell gets min distance from BOTTOM and RIGHT neighbors
+
+  After BOTH passes: min distance from ALL four directions is captured.
+
+  Example trace:
+  
+  Input:          After Pass 1:        After Pass 2:
+  [0, 1, 1]      [0, 1, 2]            [0, 1, 2]
+  [1, 1, 1]      [1, 2, 3]            [1, 2, 1]   ← improved!
+  [1, 1, 0]      [2, 3, 0]            [2, 1, 0]   ← improved!
+
+  Pass 1 only knows about top and left → some cells overestimate.
+  Pass 2 fixes them using bottom and right information.
+  
+  WHY this works:
+    → Nearest 0 is either above/left OR below/right
+    → Pass 1 handles the first case
+    → Pass 2 handles the second case
+    → Together they cover all directions</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(R × C)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  BFS Approach (Versions 1-3):
+</span>    → Initial scan: O(R × C)
+    → BFS: each cell enqueued/dequeued at most once → O(R × C)
+    → Each cell checks 4 neighbors → O(4) = O(1) per cell
+    → Total: O(R × C)
+
+  DP Approach (Version 4):
+    → Pass 1: O(R × C)
+    → Pass 2: O(R × C)
+    → Total: O(R × C)
+
+  Both approaches are optimal — must visit every cell at least once.</code></pre></div>
+<h3>Space Complexity</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Version 1 (separate dist array): O(R × C) for dist + O(R × C) for queue
+</span>  Version 3 (in-place):            O(R × C) for queue only
+  Version 4 (DP with separate dist): O(R × C) for dist
+  Version 4 (DP in-place):          O(1) extra if we modify input
+
+  All versions: O(R × C) worst case for the output itself.</code></pre></div>
+<hr>
+<h2>STEP 7: SIDE-BY-SIDE — Problem 13 vs Problem 14</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────┬──────────────────────────────────┐
+</span>  │  Problem 13: Rotten Oranges   │  Problem 14: 01 Matrix           │
+  ├──────────────────────────────┼──────────────────────────────────┤
+  │                                │                                  │
+  │  Sources: cells with value 2   │  Sources: cells with value 0    │
+  │  Targets: cells with value 1   │  Targets: cells with value 1    │
+  │                                │                                  │
+  │  Question:                     │  Question:                       │
+  │  "How long until ALL targets   │  "For EACH target, distance     │
+  │   are reached?"                │   to nearest source?"            │
+  │                                │                                  │
+  │  Answer: max BFS level         │  Answer: BFS level of each cell  │
+  │  (single number)               │  (entire grid)                   │
+  │                                │                                  │
+  │  Extra check: -1 if some       │  No -1 needed (problem           │
+  │  targets unreachable           │  guarantees at least one 0)      │
+  │                                │                                  │
+  │  Visited marker:               │  Visited marker:                 │
+  │  grid[r][c] = 2 (rot it)      │  dist[r][c] &lt; ∞ (distance set)  │
+  │                                │                                  │
+  │  BFS initialization:           │  BFS initialization:             │
+  │  IDENTICAL                     │  IDENTICAL                       │
+  │  queue = all sources           │  queue = all sources             │
+  │                                │                                  │
+  │  BFS loop:                     │  BFS loop:                       │
+  │  IDENTICAL                     │  IDENTICAL                       │
+  │                                │                                  │
+  └──────────────────────────────┴──────────────────────────────────┘
+
+  THE PATTERN IS THE SAME.
+  
+  If you can solve Problem 13, you can solve Problem 14.
+  The only difference is what you RETURN.</code></pre></div>
+<hr>
+<h2>STEP 8: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if No Zeros Exist?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Input: [[1, 1], [1, 1]]
+</span>  
+  → No sources for BFS → queue starts empty
+  → BFS does nothing → all distances remain infinity
+  
+  Problem typically guarantees at least one 0.
+  But if not: return grid of infinities (or -1s).</code></pre></div>
+<h3>What if All Zeros?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Input: [[0, 0], [0, 0]]
+</span>  
+  → All cells are sources → all distances = 0
+  → BFS enqueues everything, but no cell needs updating
+  → Output: [[0, 0], [0, 0]]</code></pre></div>
+<h3>What if Weighted (Different "Costs" Per Cell)?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  If moving through different cells has different costs:
+</span>    → BFS doesn't work (all edges must be equal)
+    → Need Dijkstra on grid (Problem 40)
+    → Or 0-1 BFS if costs are only 0 and 1 (Problem 39)
+    
+  For 01 Matrix: all moves cost 1 → BFS is correct.</code></pre></div>
+<h3>What if Diagonal Movement Allowed?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Change directions:
+</span>    4-dir: [(-1,0), (1,0), (0,-1), (0,1)]
+    8-dir: [(-1,-1),(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0),(1,1)]
+  
+  Same algorithm, more neighbors per cell.
+  Distances would generally be smaller (more paths available).</code></pre></div>
+<hr>
+<h2>STEP 9: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: BFS from each 1-cell separately (too slow!)     ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  "For each 1, search outward for nearest 0"                 ║
+  ║  → O((R×C)²) — separate BFS per cell                        ║
+  ║                                                              ║
+  ║  FIX: Reverse thinking! BFS from ALL 0s simultaneously.     ║
+  ║  → O(R×C) — single multi-source BFS                         ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Not initializing 1-cells as infinity             ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  If dist array starts as all 0s:                             ║
+  ║    → dist[r][c] &gt; dist[current] + 1 is never true           ║
+  ║    → No updates happen → wrong answer!                       ║
+  ║                                                              ║
+  ║  FIX: Initialize 1-cells as float('inf') or R×C+1           ║
+  ║  (any value larger than maximum possible distance)           ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Using the original grid values for BFS check     ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  WRONG:                                                      ║
+  ║    if mat[nr][nc] == 1:     ← checks original value          ║
+  ║        enqueue...                                            ║
+  ║                                                              ║
+  ║  This might revisit cells!                                   ║
+  ║                                                              ║
+  ║  RIGHT:                                                      ║
+  ║    if dist[nr][nc] &gt; dist[r][c] + 1:   ← checks distance    ║
+  ║        update and enqueue                                    ║
+  ║                                                              ║
+  ║  Or: if dist[nr][nc] == float('inf'):  ← checks if unvisited║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: DP approach — wrong pass direction               ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  WRONG: Two passes in SAME direction                         ║
+  ║    → Only captures info from one direction                   ║
+  ║                                                              ║
+  ║  RIGHT: Pass 1 top-left→bottom-right                        ║
+  ║         Pass 2 bottom-right→top-left                        ║
+  ║    → Together cover all 4 directions                         ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Single cell                                      ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  mat = [[0]] → output = [[0]]                                ║
+  ║  mat = [[1]] → output = [[inf]] (no 0 exists!)              ║
+  ║                (problem usually guarantees at least one 0)   ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Single row or single column                      ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  mat = [[0, 1, 1, 0, 1]]                                    ║
+  ║  → output = [[0, 1, 1, 0, 1]]                               ║
+  ║  Works correctly — BFS handles 1D grids fine.                ║
+  ╚══════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 10: THE "REVERSE THINKING" PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  "REVERSE THINKING" = Start from the ANSWER, not the QUESTION │
+  │                                                                │
+  │  This pattern appears in MANY problems:                        │
+  │                                                                │
+  │  Problem 14 (this): "Distance to nearest 0"                   │
+  │    Forward: from each 1, search for nearest 0 → slow          │
+  │    Reverse: from all 0s, spread outward → fast                 │
+  │                                                                │
+  │  Problem 16 (Surrounded Regions): "Capture O's not on border" │
+  │    Forward: for each O, check if it reaches border → complex   │
+  │    Reverse: from border O's, mark all connected → simple       │
+  │                                                                │
+  │  Problem 17 (Pacific Atlantic): "Cells reaching both oceans"  │
+  │    Forward: from each cell, check if reaches both → slow       │
+  │    Reverse: from each ocean, BFS inward → fast                 │
+  │                                                                │
+  │  "Walls and Gates": "Distance to nearest gate"                │
+  │    Forward: from each room, find nearest gate → slow           │
+  │    Reverse: from all gates, BFS outward → fast                 │
+  │                                                                │
+  │  PATTERN RECOGNITION:                                          │
+  │    "Find nearest/closest [X] for every cell"                   │
+  │    → Don't search FROM each cell TO find X                     │
+  │    → Search FROM all X cells OUTWARD                           │
+  │    → Multi-source BFS from the targets!                        │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 11: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  SIGNAL 1: "Distance to nearest [X] for EVERY cell"           │
+  │    → Multi-source BFS from all [X] cells                      │
+  │    → Reverse thinking: start from targets, not from queries   │
+  │                                                                │
+  │  SIGNAL 2: "Replace each cell with distance to nearest..."    │
+  │    → Same as signal 1                                          │
+  │    → BFS from all "target" cells                               │
+  │                                                                │
+  │  SIGNAL 3: Problem looks like "nearest neighbor search on grid"│
+  │    → If grid + unweighted → multi-source BFS                  │
+  │    → If weighted → Dijkstra from all sources                  │
+  │                                                                │
+  │  THINKING PROCESS:                                             │
+  │    "I see 'nearest [X] for every cell' on a grid"             │
+  │    → "Naive: BFS from each cell → O((R×C)²) too slow"        │
+  │    → "Reverse: BFS from all [X] cells → O(R×C)"              │
+  │    → "This is multi-source BFS (Problem 13 pattern)"          │
+  │    → "Initialize queue with ALL [X] cells at distance 0"     │
+  │    → "BFS outward — each cell gets distance to nearest [X]"  │
+  │                                                                │
+  │  INTERVIEW TIP:                                                │
+  │    First mention the naive approach and its complexity.        │
+  │    Then say: "But we can reverse the thinking..."              │
+  │    This shows you can OPTIMIZE, not just code.                 │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: REVERSE THINKING + MULTI-SOURCE BFS       ║
+  ║                                                                    ║
+  ║   1. "Nearest X for every cell" → BFS FROM all X cells           ║
+  ║      → Don't search from each query cell (too slow)               ║
+  ║      → Search from all answer cells outward (fast)                ║
+  ║      → Each query cell gets reached by nearest answer first       ║
+  ║                                                                    ║
+  ║   2. SAME multi-source BFS as Problem 13                         ║
+  ║      → Initialize queue with all "target" cells at distance 0    ║
+  ║      → BFS spreads outward, assigning distances                  ║
+  ║      → First arrival at each cell = shortest distance             ║
+  ║                                                                    ║
+  ║   3. ALTERNATIVE: 2-pass DP                                      ║
+  ║      → Pass 1 (↓→): propagate distances from top-left            ║
+  ║      → Pass 2 (↑←): propagate distances from bottom-right        ║
+  ║      → Together cover all 4 directions                            ║
+  ║      → Same O(R×C) complexity, no queue needed                    ║
+  ║                                                                    ║
+  ║   4. "REVERSE THINKING" is a POWERFUL general technique           ║
+  ║      → Problem 14: start from zeros, not from ones               ║
+  ║      → Problem 16: start from border, not from interior           ║
+  ║      → Problem 17: start from ocean, not from cells               ║
+  ║      → "When searching from the question is expensive,            ║
+  ║         try searching from the answer instead"                    ║
+  ║                                                                    ║
+  ║   BUILDS ON:                                                      ║
+  ║     Problem 9:  BFS = shortest path (now to NEAREST source)       ║
+  ║     Problem 13: Multi-source BFS pattern                          ║
+  ║                                                                    ║
+  ║   MENTAL MODEL:                                                    ║
+  ║   "Imagine all zeros as lighthouses.                               ║
+  ║    They all turn on simultaneously.                                ║
+  ║    Light spreads outward at 1 cell per second.                     ║
+  ║    The time each cell first gets lit = distance to nearest zero."  ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CONNECTION MAP</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 9 (BFS Shortest Path) ─────→ Problem 14 (01 Matrix) ◄── HERE
+</span>  Problem 13 (Multi-Source BFS) ─────→       │
+                                             │
+  Same multi-source BFS pattern,             │
+  new concept: reverse thinking              │
+                                             │
+                                             ├──→ Problem 15 (Word Ladder)
+                                             │     → BFS on IMPLICIT graph
+                                             │     → "Nodes = words, edges = one letter diff"
+                                             │     → Shortest transformation sequence
+                                             │
+                                             ├──→ Problem 16 (Surrounded Regions)
+                                             │     → REVERSE THINKING on border
+                                             │     → "Start from boundary, not center"
+                                             │
+                                             └──→ Problem 17 (Pacific Atlantic)
+                                                   → Multi-source BFS from BOTH oceans
+                                                   → Intersection of two reverse BFS</code></pre></div>
+<hr>
+<p><strong>Problem 14 Complete.</strong><br>
+<strong>Ready for Problem 15: Word Ladder (BFS on Implicit Graph)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+
+<!-- ========== data-index="5" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-13.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 14 of 50</span>
+            </div>
+            <a href="problem-15.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 18: Problem 18: Clone Graph (Graph Transformation — BFS/DFS + Hashmap) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="11">
+<div class="px-2"><h1>Problem 18: Clone Graph (Graph Transformation — BFS/DFS + Hashmap)</h1>
+<h2>[Algorithm Family: BFS/DFS + Hashmap — Graph Construction During Traversal]</h2>
+<h2>[Phase 2: Core Patterns — "I know WHICH traversal and WHY"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Given a reference to a node in a CONNECTED UNDIRECTED graph,
+</span>return a DEEP COPY (clone) of the graph.
+
+Each node contains:
+  → A value (integer)
+  → A list of its neighbors (references to other nodes)
+
+The clone must be a completely NEW graph with NEW node objects,
+but with the SAME structure (same connections, same values).
+
+NO original node should appear in the cloned graph.
+NO cloned node should appear in the original graph.
+
+Example:
+  Original graph:
+    1 --- 2
+    |     |
+    4 --- 3
+
+  Input: reference to node 1
+  Output: reference to NEW node 1 (clone), which connects to
+          NEW node 2 and NEW node 4, etc.
+          
+  The entire cloned graph has the same structure but
+  all nodes are DIFFERENT objects in memory.</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Understand What "Clone" Means</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ORIGINAL GRAPH (in memory):
+</span>  
+    Node1 ─────── Node2
+      │             │
+      │             │
+    Node4 ─────── Node3
+  
+  Each node is an OBJECT in memory:
+    Node1 = {val: 1, neighbors: [Node2, Node4]}    ← actual references
+    Node2 = {val: 2, neighbors: [Node1, Node3]}
+    Node3 = {val: 3, neighbors: [Node2, Node4]}
+    Node4 = {val: 4, neighbors: [Node1, Node3]}
+
+  CLONED GRAPH (completely separate in memory):
+  
+    Clone1 ─────── Clone2
+      │              │
+      │              │
+    Clone4 ─────── Clone3
+  
+    Clone1 = {val: 1, neighbors: [Clone2, Clone4]}  ← NEW objects
+    Clone2 = {val: 2, neighbors: [Clone1, Clone3]}
+    Clone3 = {val: 3, neighbors: [Clone2, Clone4]}
+    Clone4 = {val: 4, neighbors: [Clone1, Clone3]}
+
+  CRITICAL: Clone1.neighbors must contain Clone2, NOT Node2!
+            Every reference must point to CLONED nodes, not originals.</code></pre></div>
+<h3>Why Is This Harder Than It Looks?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  NAIVE THOUGHT: "Just create new nodes and copy neighbors"
+</span>  
+  Problem: When creating Clone1, its neighbor list needs Clone2.
+           But Clone2 might not exist yet!
+           
+  And when creating Clone2, its neighbor list needs Clone1.
+  → CIRCULAR DEPENDENCY
+  
+  Even worse: Node1.neighbors = [Node2, Node4]
+              When building Clone1.neighbors, we need to know
+              "What is the CLONE of Node2? What is the CLONE of Node4?"
+              
+  We need a MAPPING: original node → cloned node
+  → This is where the HASHMAP comes in!
+  
+  ┌────────────────────────────────────────────────────────┐
+  │  Without hashmap:                                      │
+  │    See Node2 in neighbor list → create new Clone2      │
+  │    Later, see Node2 again → create ANOTHER Clone2!     │
+  │    → DUPLICATE nodes! Graph structure broken!          │
+  │                                                        │
+  │  With hashmap:                                         │
+  │    See Node2 first time → create Clone2, store mapping │
+  │    See Node2 again → look up existing Clone2           │
+  │    → Each original node maps to EXACTLY ONE clone      │
+  └────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer          │  Why?                       ║
+╠══════════════════╪══════════════════╪═════════════════════════════╣
+║  NODES           │  Node objects    │  Each has val + neighbors   ║
+║  EDGES           │  Neighbor refs   │  Bidirectional references   ║
+║  Directed?       │  NO              │  If A neighbors B, B        ║
+║                  │                  │  neighbors A                ║
+║  Weighted?       │  NO              │  Just connections           ║
+║  Cyclic?         │  YES             │  1→2→3→4→1 is a cycle      ║
+║  Connected?      │  YES             │  Problem states "connected" ║
+║  What we need    │  Deep copy       │  New objects, same structure║
+╚══════════════════╧══════════════════╧═════════════════════════════╝
+
+  ★ KEY CHALLENGE: CYCLES
+  
+  If the graph has cycles (and it does!), naive recursive copying
+  would loop FOREVER:
+    Copy Node1 → need to copy neighbor Node2
+    Copy Node2 → need to copy neighbor Node1
+    Copy Node1 → need to copy neighbor Node2
+    → INFINITE LOOP!
+    
+  The HASHMAP solves this: "Have I already cloned this node? If yes, reuse."
+  → This is exactly what "visited set" does in BFS/DFS (Problem 3-4)
+  → The hashmap serves DOUBLE DUTY: visited tracking + clone mapping</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<h3>Approach: Recursive Copy Without Tracking</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># WRONG — DO NOT USE</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">clone_wrong</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    new_node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> Node</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>val</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> node</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        new_node</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>clone_wrong</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># recurse</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> new_node</span></code></pre></div>
+<h3>Why This Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  clone_wrong(Node1):
+</span>    Create Clone1
+    For neighbor Node2:
+      clone_wrong(Node2):
+        Create Clone2
+        For neighbor Node1:
+          clone_wrong(Node1):        ← ALREADY CLONING Node1!
+            Create ANOTHER Clone1!    ← DUPLICATE!
+            For neighbor Node2:
+              clone_wrong(Node2):     ← INFINITE RECURSION!
+              
+  TWO PROBLEMS:
+    1. INFINITE LOOP (cycle causes never-ending recursion)
+    2. DUPLICATE NODES (same original node cloned multiple times)
+  
+  FIX: Track which nodes we've already cloned using a HASHMAP
+       hashmap[original_node] = cloned_node
+       
+       Before cloning a node, check: "Already in hashmap?"
+       If yes → return the existing clone
+       If no  → create new clone, store in hashmap, then process neighbors</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────┐
+</span>  │  I see: "Traverse entire graph and BUILD something"          │
+  │       → Need BFS or DFS to visit every node                 │
+  │                                                              │
+  │  I see: "Cycles exist → need visited tracking"               │
+  │       → Hashmap serves as visited set (Problem 3-4)          │
+  │                                                              │
+  │  I see: "Map original nodes to cloned nodes"                 │
+  │       → Hashmap: old_node → new_node                         │
+  │                                                              │
+  │  I see: "When processing a node, need clones of its neighbors│
+  │       → Neighbors might be cloned already (hashmap lookup)   │
+  │       → Or need to be cloned now (create + store in hashmap) │
+  │                                                              │
+  │  PATTERN: Traversal + Construction                           │
+  │    Step 1: Visit a node (BFS/DFS)                            │
+  │    Step 2: Create its clone (if not already created)         │
+  │    Step 3: For each neighbor, get/create their clone         │
+  │    Step 4: Connect the clones                                │
+  │                                                              │
+  │  Both BFS and DFS work — I'll show BOTH                      │
+  └──────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>The Hashmap's Dual Role</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────┐
+</span>  │                                                            │
+  │  In Problems 3-8: visited = set()                          │
+  │    → Tracks "have I seen this node?" (True/False)          │
+  │                                                            │
+  │  In Problem 18: cloned = dict()  (hashmap)                 │
+  │    → Tracks "have I cloned this node?" (existence check)   │
+  │    → ALSO stores "what is the clone?" (value lookup)       │
+  │    → One data structure, two purposes!                     │
+  │                                                            │
+  │  cloned = {                                                │
+  │    Node1: Clone1,    ← "Node1 has been cloned, here it is" │
+  │    Node2: Clone2,                                          │
+  │    Node3: Clone3,                                          │
+  │    Node4: Clone4,                                          │
+  │  }                                                         │
+  │                                                            │
+  │  "Is Node2 cloned?" → Node2 in cloned → YES               │
+  │  "What is Node2's clone?" → cloned[Node2] → Clone2        │
+  │                                                            │
+  └────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH</h2>
+<h3>The Node Class</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  class Node:
+</span>      def __init__(self, val=0, neighbors=None):
+          self.val = val
+          self.neighbors = neighbors if neighbors else []</code></pre></div>
+<h3>Setup</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Original graph:
+</span>    1 --- 2
+    |     |
+    4 --- 3
+
+  Node1.neighbors = [Node2, Node4]
+  Node2.neighbors = [Node1, Node3]
+  Node3.neighbors = [Node2, Node4]
+  Node4.neighbors = [Node1, Node3]
+  
+  Start: given reference to Node1
+  Goal:  return reference to Clone1 (with entire graph cloned)</code></pre></div>
+<h3>BFS Walkthrough</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ══════════════════════════════════════════════════════════
+</span>  INITIALIZATION
+  ══════════════════════════════════════════════════════════
+  
+  Create Clone1 (copy of Node1)
+  Clone1 = Node(val=1, neighbors=[])    ← empty neighbors for now
+  
+  cloned = {Node1: Clone1}              ← hashmap tracks the mapping
+  queue  = [Node1]                       ← BFS queue
+  
+  ══════════════════════════════════════════════════════════
+  STEP 1: Dequeue Node1, process its neighbors
+  ══════════════════════════════════════════════════════════
+  
+  current = Node1
+  my_clone = cloned[Node1] = Clone1
+  
+  Neighbor 1: Node2
+    → Is Node2 in cloned? NO
+    → Create Clone2 = Node(val=2, neighbors=[])
+    → cloned[Node2] = Clone2
+    → queue.append(Node2)
+    → Connect: Clone1.neighbors.append(Clone2)
+  
+  Neighbor 2: Node4
+    → Is Node4 in cloned? NO
+    → Create Clone4 = Node(val=4, neighbors=[])
+    → cloned[Node4] = Clone4
+    → queue.append(Node4)
+    → Connect: Clone1.neighbors.append(Clone4)
+  
+  STATE AFTER STEP 1:
+  
+    cloned = {Node1: Clone1, Node2: Clone2, Node4: Clone4}
+    queue  = [Node2, Node4]
+    
+    Clone1.neighbors = [Clone2, Clone4]  ← CONNECTED!
+    Clone2.neighbors = []                 ← not yet processed
+    Clone4.neighbors = []                 ← not yet processed
+    
+    Partial clone so far:
+      Clone1 ─── Clone2
+        │
+      Clone4
+      
+      (Clone2 and Clone4 not yet connected to their other neighbors)
+
+  ══════════════════════════════════════════════════════════
+  STEP 2: Dequeue Node2, process its neighbors
+  ══════════════════════════════════════════════════════════
+  
+  current = Node2
+  my_clone = cloned[Node2] = Clone2
+  
+  Neighbor 1: Node1
+    → Is Node1 in cloned? YES! → Clone1 already exists
+    → DON'T create new clone, DON'T add to queue
+    → Just connect: Clone2.neighbors.append(cloned[Node1]) = Clone1
+  
+  Neighbor 2: Node3
+    → Is Node3 in cloned? NO
+    → Create Clone3 = Node(val=3, neighbors=[])
+    → cloned[Node3] = Clone3
+    → queue.append(Node3)
+    → Connect: Clone2.neighbors.append(Clone3)
+  
+  STATE AFTER STEP 2:
+  
+    cloned = {Node1: Clone1, Node2: Clone2, Node4: Clone4, Node3: Clone3}
+    queue  = [Node4, Node3]
+    
+    Clone1.neighbors = [Clone2, Clone4]  ✓
+    Clone2.neighbors = [Clone1, Clone3]  ✓ COMPLETE!
+    Clone3.neighbors = []                ← not yet processed
+    Clone4.neighbors = []                ← not yet processed
+    
+    Partial clone:
+      Clone1 ─── Clone2
+        │          │
+      Clone4     Clone3
+
+  ══════════════════════════════════════════════════════════
+  STEP 3: Dequeue Node4, process its neighbors
+  ══════════════════════════════════════════════════════════
+  
+  current = Node4
+  my_clone = cloned[Node4] = Clone4
+  
+  Neighbor 1: Node1
+    → Is Node1 in cloned? YES! → Clone1 exists
+    → Connect: Clone4.neighbors.append(Clone1)
+  
+  Neighbor 2: Node3
+    → Is Node3 in cloned? YES! → Clone3 exists
+    → Connect: Clone4.neighbors.append(Clone3)
+  
+  STATE AFTER STEP 3:
+  
+    queue = [Node3]
+    
+    Clone4.neighbors = [Clone1, Clone3]  ✓ COMPLETE!
+    
+    Partial clone:
+      Clone1 ─── Clone2
+        │          │
+      Clone4 ─── Clone3   (Clone3 still has empty neighbors)
+
+  ══════════════════════════════════════════════════════════
+  STEP 4: Dequeue Node3, process its neighbors
+  ══════════════════════════════════════════════════════════
+  
+  current = Node3
+  my_clone = cloned[Node3] = Clone3
+  
+  Neighbor 1: Node2
+    → Is Node2 in cloned? YES! → Clone2 exists
+    → Connect: Clone3.neighbors.append(Clone2)
+  
+  Neighbor 2: Node4
+    → Is Node4 in cloned? YES! → Clone4 exists
+    → Connect: Clone3.neighbors.append(Clone4)
+  
+  STATE AFTER STEP 4:
+  
+    queue = []  ← EMPTY, BFS complete!
+    
+    Clone3.neighbors = [Clone2, Clone4]  ✓ COMPLETE!
+
+  ══════════════════════════════════════════════════════════
+  FINAL CLONED GRAPH:
+  ══════════════════════════════════════════════════════════
+  
+    Clone1 ─── Clone2
+      │          │
+    Clone4 ─── Clone3
+  
+    Clone1 = {val:1, neighbors:[Clone2, Clone4]}  ✓ matches original
+    Clone2 = {val:2, neighbors:[Clone1, Clone3]}  ✓
+    Clone3 = {val:3, neighbors:[Clone2, Clone4]}  ✓
+    Clone4 = {val:4, neighbors:[Clone1, Clone3]}  ✓
+    
+    ALL different objects from original!  ✓
+    Same structure!  ✓
+    
+  Return Clone1 (= cloned[Node1])</code></pre></div>
+<h3>The Hashmap At Each Step</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────┬─────────────────────────────────────────────────────┐
+</span>  │ Step   │ cloned hashmap                                      │
+  ├────────┼─────────────────────────────────────────────────────┤
+  │ Init   │ {Node1 → Clone1}                                    │
+  │ Step 1 │ {Node1→Clone1, Node2→Clone2, Node4→Clone4}         │
+  │ Step 2 │ {Node1→Clone1, Node2→Clone2, Node4→Clone4,         │
+  │        │  Node3→Clone3}                                      │
+  │ Step 3 │ (same — no new clones, all neighbors already exist) │
+  │ Step 4 │ (same — no new clones)                              │
+  └────────┴─────────────────────────────────────────────────────┘
+  
+  OBSERVATION: 
+    → New clones are created ONLY on first encounter
+    → Subsequent encounters REUSE the existing clone via hashmap
+    → This prevents duplicates AND handles cycles</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: BFS Approach</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">class</span><span> </span><span class="token" style="color: rgb(43, 145, 175);">Node</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">__init__</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> val</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbors</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">None</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>val </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> val
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> neighbors </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbors </span><span class="token" style="color: rgb(0, 0, 255);">is</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">clone_graph_bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Clone an undirected graph using BFS + hashmap.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    STRATEGY:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → BFS traverses the original graph (Problem 3)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Hashmap maps each original node to its clone
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → For each node processed, connect its clone to clones of neighbors
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Hashmap prevents duplicate clones AND acts as visited set
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        node: reference to any node in the original graph
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        reference to the corresponding node in the cloned graph
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── EDGE CASE: Empty graph ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> node</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── INITIALIZE ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Create clone of the starting node</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Hashmap: original_node → cloned_node</span><span>
+</span><span>    cloned </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> Node</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>val</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BFS ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Process each neighbor of the current original node</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> current</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> cloned</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── FIRST TIME seeing this neighbor ───</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Create its clone</span><span>
+</span><span>                cloned</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> Node</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>val</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Add to BFS queue for future processing</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── CONNECT: current's clone → neighbor's clone ───</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Whether neighbor was just created or already existed,</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># we need to add the connection</span><span>
+</span><span>            cloned</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cloned</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Return clone of the starting node</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> cloned</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span></code></pre></div>
+<hr>
+<h3>Version 2: DFS Recursive Approach</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">clone_graph_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Clone graph using DFS + hashmap.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    DFS naturally handles the recursive structure:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → To clone a node, first clone its neighbors (recursion)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Hashmap prevents infinite recursion on cycles
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is often considered the most ELEGANT solution.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Hashmap: original → clone (shared across all recursive calls)</span><span>
+</span><span>    cloned </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Clone this node and all its neighbors recursively."""</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BASE CASE: Already cloned ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># This handles cycles AND prevents duplicate clones</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> original </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> cloned</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> cloned</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── CREATE CLONE ───</span><span>
+</span><span>        clone </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> Node</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>val</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        cloned</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> clone  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># MUST store BEFORE recursing!</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Why store before recursing?</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If we recurse first, a cycle back to this node</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># would not find it in cloned → infinite loop!</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># By storing first, the cycle finds the clone and returns it.</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── CLONE NEIGHBORS ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> original</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            clone</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> clone
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── HANDLE EMPTY GRAPH ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> node</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<h3>The Critical Ordering in DFS</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  WHY must we store in hashmap BEFORE recursing into neighbors?
+</span>  
+  ┌────────────────────────────────────────────────────────────┐
+  │  WRONG ORDER (infinite loop):                              │
+  │                                                            │
+  │  def dfs(node):                                            │
+  │      clone = Node(node.val)                                │
+  │      for neighbor in node.neighbors:                       │
+  │          clone.neighbors.append(dfs(neighbor))  ← RECURSE │
+  │      cloned[node] = clone  ← TOO LATE!                    │
+  │                                                            │
+  │  dfs(Node1):                                               │
+  │    create Clone1                                           │
+  │    recurse into Node2:                                     │
+  │      dfs(Node2):                                           │
+  │        create Clone2                                       │
+  │        recurse into Node1:                                 │
+  │          dfs(Node1):                                       │
+  │            Node1 NOT in cloned (stored too late!)          │
+  │            create ANOTHER Clone1 ← INFINITE LOOP!          │
+  │                                                            │
+  │  RIGHT ORDER:                                              │
+  │                                                            │
+  │  def dfs(node):                                            │
+  │      clone = Node(node.val)                                │
+  │      cloned[node] = clone  ← STORE FIRST!                 │
+  │      for neighbor in node.neighbors:                       │
+  │          clone.neighbors.append(dfs(neighbor))             │
+  │                                                            │
+  │  dfs(Node1):                                               │
+  │    create Clone1, store cloned[Node1] = Clone1             │
+  │    recurse into Node2:                                     │
+  │      dfs(Node2):                                           │
+  │        create Clone2, store cloned[Node2] = Clone2         │
+  │        recurse into Node1:                                 │
+  │          dfs(Node1):                                       │
+  │            Node1 IS in cloned → return Clone1  ✓           │
+  │            NO infinite loop!                               │
+  └────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h3>Version 3: DFS Iterative (Stack)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">clone_graph_dfs_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    DFS using explicit stack — avoids recursion limit.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same logic as BFS version but uses stack (LIFO) instead of queue (FIFO).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Processing order differs but final result is identical.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> node</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span>
+</span>    
+<span>    cloned </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> Node</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>val</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span><span>    stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ← only difference from BFS: pop() vs popleft()</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> current</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> cloned</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                cloned</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> Node</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>val</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            cloned</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cloned</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> cloned</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span></code></pre></div>
+<hr>
+<h3>Complete Test Harness</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">class</span><span> </span><span class="token" style="color: rgb(43, 145, 175);">Node</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">__init__</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> val</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbors</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">None</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>val </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> val
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> neighbors </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbors </span><span class="token" style="color: rgb(0, 0, 255);">is</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">build_test_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Build the example graph:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      1 --- 2
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      |     |
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      4 --- 3
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    n1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n4 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> Node</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> Node</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> Node</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> Node</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    n1</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>n2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    n2</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>n1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    n3</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>n2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    n4</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>n1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> n1
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">print_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""BFS print of graph — shows each node and its neighbors."""</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> node</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"  Empty graph"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span>    
+<span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        neighbor_vals </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>val </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> n </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> current</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">current</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">val</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> (id=</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">id</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">current</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">) → neighbors: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">neighbor_vals</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> current</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">verify_clone</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> clone</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Verify that clone is a valid deep copy."""</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> original </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> clone</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"  Both empty — valid ✓"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># BFS both graphs simultaneously</span><span>
+</span><span>    orig_visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span><span>    clone_visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span>    
+<span>    orig_queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    clone_queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>clone</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    orig_visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>    clone_visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>clone</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>    
+<span>    all_valid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> orig_queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        o </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> orig_queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> clone_queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Check values match</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> o</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>val </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>val</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  FAIL: values differ at node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">o</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">val</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> vs </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">c</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">val</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            all_valid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Check they're DIFFERENT objects</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> o </span><span class="token" style="color: rgb(0, 0, 255);">is</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  FAIL: node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">o</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">val</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> is SAME object (not a deep copy!)"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            all_valid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Check same number of neighbors</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>o</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  FAIL: neighbor count differs at node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">o</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">val</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            all_valid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> on</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cn </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">zip</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>o</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> on </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> orig_visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                orig_visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>on</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                clone_visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>cn</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                orig_queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>on</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                clone_queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cn</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> all_valid</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"  Clone is VALID deep copy ✓"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── RUN TESTS ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Original graph:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>original </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> build_test_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>print_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"\nCloning with BFS..."</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>clone_bfs </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> clone_graph_bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Cloned graph (BFS):"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>print_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>clone_bfs</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>verify_clone</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> clone_bfs</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"\nCloning with DFS..."</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>clone_dfs </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> clone_graph_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Cloned graph (DFS):"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>print_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>clone_dfs</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>verify_clone</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> clone_dfs</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"\nCloning with DFS iterative..."</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>clone_dfs_iter </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> clone_graph_dfs_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Cloned graph (DFS iterative):"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>print_graph</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>clone_dfs_iter</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>verify_clone</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>original</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> clone_dfs_iter</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Original graph:
+</span>  Node 1 (id=140234567890) → neighbors: [2, 4]
+  Node 2 (id=140234567891) → neighbors: [1, 3]
+  Node 4 (id=140234567893) → neighbors: [1, 3]
+  Node 3 (id=140234567892) → neighbors: [2, 4]
+
+Cloning with BFS...
+Cloned graph (BFS):
+  Node 1 (id=140234567900) → neighbors: [2, 4]     ← DIFFERENT id!
+  Node 2 (id=140234567901) → neighbors: [1, 3]     ← DIFFERENT id!
+  Node 4 (id=140234567903) → neighbors: [1, 3]
+  Node 3 (id=140234567902) → neighbors: [2, 4]
+  Clone is VALID deep copy ✓</code></pre></div>
+<hr>
+<h2>STEP 6: DFS TRACE — Recursive Version</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  To complement the BFS trace from Step 4, here's the DFS trace:
+</span>  
+  ══════════════════════════════════════════════════════════
+  dfs(Node1)
+  ══════════════════════════════════════════════════════════
+  
+  Node1 in cloned? NO
+  → Create Clone1, store cloned = {Node1: Clone1}
+  
+  Process neighbors of Node1: [Node2, Node4]
+  
+    ┌── dfs(Node2)
+    │   Node2 in cloned? NO
+    │   → Create Clone2, store cloned = {Node1:Clone1, Node2:Clone2}
+    │   
+    │   Process neighbors of Node2: [Node1, Node3]
+    │   
+    │     ┌── dfs(Node1)
+    │     │   Node1 in cloned? YES! → return Clone1  ★ CYCLE HANDLED
+    │     └── Clone2.neighbors.append(Clone1)
+    │   
+    │     ┌── dfs(Node3)
+    │     │   Node3 in cloned? NO
+    │     │   → Create Clone3, store cloned = {..., Node3:Clone3}
+    │     │   
+    │     │   Process neighbors of Node3: [Node2, Node4]
+    │     │   
+    │     │     ┌── dfs(Node2)
+    │     │     │   Node2 in cloned? YES! → return Clone2  ★ CYCLE
+    │     │     └── Clone3.neighbors.append(Clone2)
+    │     │   
+    │     │     ┌── dfs(Node4)
+    │     │     │   Node4 in cloned? NO
+    │     │     │   → Create Clone4, store cloned = {..., Node4:Clone4}
+    │     │     │   
+    │     │     │   Process neighbors of Node4: [Node1, Node3]
+    │     │     │   
+    │     │     │     ┌── dfs(Node1) → YES in cloned → return Clone1
+    │     │     │     └── Clone4.neighbors.append(Clone1)
+    │     │     │   
+    │     │     │     ┌── dfs(Node3) → YES in cloned → return Clone3
+    │     │     │     └── Clone4.neighbors.append(Clone3)
+    │     │     │   
+    │     │     │   Clone4.neighbors = [Clone1, Clone3] ✓
+    │     │     │   return Clone4
+    │     │     └── Clone3.neighbors.append(Clone4)
+    │     │   
+    │     │   Clone3.neighbors = [Clone2, Clone4] ✓
+    │     │   return Clone3
+    │     └── Clone2.neighbors.append(Clone3)
+    │   
+    │   Clone2.neighbors = [Clone1, Clone3] ✓
+    │   return Clone2
+    └── Clone1.neighbors.append(Clone2)
+  
+    ┌── dfs(Node4)
+    │   Node4 in cloned? YES! → return Clone4  ★ ALREADY CLONED
+    └── Clone1.neighbors.append(Clone4)
+  
+  Clone1.neighbors = [Clone2, Clone4] ✓
+  return Clone1
+  
+  ══════════════════════════════════════════════════════════
+  DONE! Return Clone1
+  ══════════════════════════════════════════════════════════
+  
+  DFS call tree depth: 4 (Node1 → Node2 → Node3 → Node4)
+  Total dfs() calls: 8 (4 new + 4 cached returns)
+  
+  Notice: DFS goes DEEP first (1→2→3→4)
+          BFS went WIDE first (1→2,4→3)
+          Both produce the SAME cloned graph!</code></pre></div>
+<hr>
+<h2>STEP 7: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(V + E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  WHERE V = number of nodes, E = number of edges
+</span>
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  BFS/DFS visits each node EXACTLY ONCE                         │
+  │    → V nodes processed                                         │
+  │    → Each node's processing = iterate its neighbor list         │
+  │                                                                 │
+  │  For each node, we iterate through its neighbors:              │
+  │    → Total neighbor iterations across all nodes = 2E            │
+  │      (undirected graph: each edge counted twice)               │
+  │                                                                 │
+  │  Per neighbor:                                                  │
+  │    → Hashmap lookup: O(1) average                              │
+  │    → Hashmap insert: O(1) average (if new)                     │
+  │    → Append to neighbor list: O(1)                             │
+  │                                                                 │
+  │  TOTAL: O(V) for visiting + O(E) for edge processing           │
+  │       = O(V + E)                                               │
+  └─────────────────────────────────────────────────────────────────┘
+  
+  SAME complexity as basic BFS/DFS traversal (Problem 3-4)
+  → Cloning adds O(1) work per node (create clone, store in hashmap)
+  → Doesn't change the asymptotic complexity</code></pre></div>
+<h3>Space Complexity: O(V)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  Hashmap (cloned):       O(V) — one entry per node             │
+  │  BFS queue / DFS stack:  O(V) — at most all nodes              │
+  │  Cloned graph itself:    O(V + E) — V nodes + E×2 edges        │
+  │                                                                 │
+  │  The cloned graph is the OUTPUT, so typically not counted       │
+  │  as extra space.                                                │
+  │                                                                 │
+  │  Auxiliary space: O(V) for hashmap + queue/stack                │
+  │                                                                 │
+  │  DFS recursive: O(V) additional for recursion stack             │
+  │    → Same as explicit stack, but uses system call stack          │
+  │    → Risk: stack overflow for very deep graphs (Problem 16 note)│
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Directed?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Original:  1 → 2 → 3 → 1  (directed cycle)
+</span>  
+  CHANGE: When processing neighbors, we only follow OUTGOING edges.
+  
+  Same algorithm works! The hashmap still prevents cycles.
+  
+  Difference: In undirected graph, if 1-2 is an edge:
+    → Node1.neighbors has Node2 AND Node2.neighbors has Node1
+    → Both directions automatically handled
+    
+  In directed graph:
+    → Node1.neighbors has Node2 (1→2)
+    → Node2.neighbors does NOT have Node1 (no 2→1 edge)
+    → We only clone edges that exist → correct directed clone
+    
+  CODE: No changes needed! The algorithm clones whatever structure exists.</code></pre></div>
+<h3>What if Weighted?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  If edges have weights, the Node class changes:
+</span>  
+  class WeightedNode:
+      def __init__(self, val):
+          self.val = val
+          self.neighbors = []   # list of (node, weight) tuples
+  
+  Clone adjustment:
+    for neighbor, weight in current.neighbors:
+        if neighbor not in cloned:
+            cloned[neighbor] = WeightedNode(neighbor.val)
+            queue.append(neighbor)
+        cloned[current].neighbors.append((cloned[neighbor], weight))
+                                          ↑                    ↑
+                                     clone ref           copy weight</code></pre></div>
+<h3>What if Disconnected?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem states "connected" graph, so one BFS/DFS from any node
+</span>  reaches everything.
+  
+  If DISCONNECTED:
+    → Single BFS/DFS from start node only clones ONE component
+    → Need references to nodes in OTHER components
+    → Would need a list of all nodes, then clone each unvisited one
+    
+    def clone_disconnected(all_nodes):
+        cloned = {}
+        for node in all_nodes:
+            if node not in cloned:
+                bfs_clone(node, cloned)  # clone this component
+        return [cloned[n] for n in all_nodes]</code></pre></div>
+<h3>What if the Graph Were a Tree?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Trees are acyclic → no cycles to worry about!
+</span>  
+  → Could clone without a hashmap (no cycle = no revisiting)
+  → But hashmap approach still works and is simpler
+  → For trees, DFS is particularly natural (recursive tree copy)
+  
+  def clone_tree(root):
+      if not root:
+          return None
+      clone = TreeNode(root.val)
+      clone.left = clone_tree(root.left)
+      clone.right = clone_tree(root.right)
+      return clone
+  
+  → No hashmap needed because no cycles!
+  → The hashmap in our graph solution is specifically for CYCLES</code></pre></div>
+<hr>
+<h2>STEP 9: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Connecting to ORIGINAL nodes instead of CLONES      ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG:                                                          ║
+  ║    cloned[current].neighbors.append(neighbor)                    ║
+  ║                                     ↑ ORIGINAL node!             ║
+  ║                                                                  ║
+  ║  RIGHT:                                                          ║
+  ║    cloned[current].neighbors.append(cloned[neighbor])            ║
+  ║                                     ↑ CLONED node!               ║
+  ║                                                                  ║
+  ║  This is THE most common bug. The clone's neighbors must         ║
+  ║  point to OTHER clones, never to original nodes.                 ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Not storing in hashmap BEFORE recursing (DFS)        ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  (Explained in detail in Version 2 code section)                 ║
+  ║                                                                  ║
+  ║  WRONG:                                                          ║
+  ║    clone = Node(val)                                             ║
+  ║    for neighbor in node.neighbors:                               ║
+  ║        clone.neighbors.append(dfs(neighbor))                     ║
+  ║    cloned[node] = clone  ← stored AFTER recursion               ║
+  ║                                                                  ║
+  ║  RIGHT:                                                          ║
+  ║    clone = Node(val)                                             ║
+  ║    cloned[node] = clone  ← stored BEFORE recursion               ║
+  ║    for neighbor in node.neighbors:                               ║
+  ║        clone.neighbors.append(dfs(neighbor))                     ║
+  ║                                                                  ║
+  ║  The difference: one line moved up → prevents infinite recursion ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Null/empty input                                     ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If node is None → return None                                   ║
+  ║  Must check at the very beginning                                ║
+  ║  Without this: hashmap operations on None → error                ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Single node (no neighbors)                           ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Node1 with no neighbors → graph has 1 node, 0 edges            ║
+  ║  → Create Clone1 with empty neighbors                            ║
+  ║  → BFS queue empties immediately (no neighbors to process)       ║
+  ║  → Return Clone1  ✓                                              ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 5: Self-loops                                           ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Node1.neighbors = [Node1]  ← self-loop!                        ║
+  ║                                                                  ║
+  ║  BFS approach:                                                   ║
+  ║    Process Node1's neighbor Node1                                ║
+  ║    → Node1 already in cloned → use existing Clone1               ║
+  ║    → Clone1.neighbors.append(Clone1)  ← self-loop preserved! ✓  ║
+  ║                                                                  ║
+  ║  Our algorithm handles this correctly without special cases.     ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 10: HOW THIS CONNECTS TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Problem 3 (BFS Traversal):                                      │
+  │    → BFS with queue + visited set                                │
+  │    → HERE: same BFS, but hashmap replaces visited set            │
+  │    → Hashmap does visited tracking PLUS stores clone references  │
+  │                                                                  │
+  │  Problem 4 (DFS Traversal):                                      │
+  │    → DFS with recursion + visited set                            │
+  │    → HERE: same DFS, but hashmap replaces visited set            │
+  │    → CRITICAL: store in hashmap BEFORE recursing (cycle safety)  │
+  │                                                                  │
+  │  Problem 5 (Connected Components):                               │
+  │    → BFS/DFS visits all nodes in a component                     │
+  │    → HERE: same traversal visits all nodes to clone them         │
+  │    → If graph disconnected, would need component-by-component    │
+  │                                                                  │
+  │  Problem 10 (Cycle Detection — Undirected):                      │
+  │    → Cycles cause revisiting → must track visited                │
+  │    → HERE: cycles cause infinite cloning → hashmap prevents it   │
+  │    → Same underlying principle: detect "already processed"       │
+  │                                                                  │
+  │  EVOLUTION OF "VISITED" CONCEPT:                                 │
+  │    Problem 3:  visited = set()          → just True/False        │
+  │    Problem 9:  visited + distance[]     → True/False + distance  │
+  │    Problem 18: cloned = dict()          → True/False + reference │
+  │    The "visited" concept GROWS richer with each problem          │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 11: WHEN TO USE THIS VS ALTERNATIVES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────┬──────────────────────────────────┐
+</span>  │  Approach                    │  When to use                     │
+  ├──────────────────────────────┼──────────────────────────────────┤
+  │  BFS + hashmap               │  ★ General graph cloning         │
+  │  (this problem)              │  ★ Handles cycles, directed,     │
+  │                              │    undirected, weighted           │
+  │                              │  ★ Iterative → no stack overflow │
+  │                              │                                  │
+  │  DFS recursive + hashmap     │  ★ Same capability, cleaner code │
+  │                              │  ★ Risk: recursion limit for     │
+  │                              │    very large graphs              │
+  │                              │                                  │
+  │  DFS iterative + hashmap     │  ★ Best of both: clean + safe    │
+  │                              │                                  │
+  │  Simple recursive (no map)   │  ONLY for trees (no cycles)     │
+  │                              │  → No hashmap needed             │
+  │                              │                                  │
+  │  Serialization + deserialize │  Alternative: convert to string, │
+  │                              │  then parse back to new graph    │
+  │                              │  → More complex, rarely better   │
+  └──────────────────────────────┴──────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: THE GENERAL PATTERN — "Traverse and Build"</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Previous problems: "Traverse and FIND"                          │
+  │    → BFS/DFS to find shortest path, components, cycles          │
+  │    → OUTPUT: a number, a boolean, a set                         │
+  │                                                                  │
+  │  THIS problem: "Traverse and BUILD"  ★ NEW PATTERN              │
+  │    → BFS/DFS to construct a new graph while traversing           │
+  │    → OUTPUT: a new data structure mirroring the original         │
+  │                                                                  │
+  │  The "traverse and build" pattern appears in:                    │
+  │    → Clone Graph (this problem)                                  │
+  │    → Serialize/Deserialize Graph                                 │
+  │    → Build Reverse Graph (flip all edge directions)              │
+  │    → Build Condensation Graph (SCC → Problem 36)                 │
+  │    → Transform graph (add/remove edges based on rules)           │
+  │                                                                  │
+  │  TEMPLATE:                                                       │
+  │    mapping = {}                                                  │
+  │    queue = deque([start])                                        │
+  │    mapping[start] = transform(start)                             │
+  │                                                                  │
+  │    while queue:                                                  │
+  │        node = queue.popleft()                                    │
+  │        for neighbor in node.neighbors:                           │
+  │            if neighbor not in mapping:                            │
+  │                mapping[neighbor] = transform(neighbor)            │
+  │                queue.append(neighbor)                             │
+  │            connect(mapping[node], mapping[neighbor])              │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 13: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Deep copy" / "clone" / "duplicate" a graph            │
+  │         → Need to create new objects with same structure           │
+  │         → BFS/DFS + hashmap for old→new mapping                   │
+  │                                                                    │
+  │  SIGNAL 2: "Graph has cycles"                                      │
+  │         → Can't do naive recursive copy (infinite loop)            │
+  │         → MUST track what's already been copied                    │
+  │         → Hashmap is essential                                     │
+  │                                                                    │
+  │  SIGNAL 3: "Build a new graph based on an existing one"            │
+  │         → "Traverse and Build" pattern                             │
+  │         → BFS/DFS for traversal + construction at each step        │
+  │                                                                    │
+  │  SIGNAL 4: "Map between old and new versions"                      │
+  │         → Hashmap: old_entity → new_entity                         │
+  │         → Create on first encounter, reuse on subsequent           │
+  │                                                                    │
+  │  THINKING CHAIN:                                                   │
+  │  "Clone a graph with cycles"                                       │
+  │     → need to visit every node once                                │
+  │        → BFS or DFS                                                │
+  │           → need to map original to clone                          │
+  │              → hashmap (also serves as visited set)                 │
+  │                 → create clone on first visit                      │
+  │                    → connect clones using hashmap lookups           │
+  │                                                                    │
+  │  SIMILAR PROBLEMS:                                                 │
+  │    → Copy List with Random Pointer (linked list version)           │
+  │    → Clone Binary Tree with Random Pointer                         │
+  │    → Deep Copy of any graph-like structure                         │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: TRAVERSE AND BUILD WITH HASHMAP            ║
+  ║                                                                    ║
+  ║   → To CLONE a graph: BFS/DFS + hashmap (old → new mapping)      ║
+  ║                                                                    ║
+  ║   → The hashmap serves DUAL PURPOSE:                              ║
+  ║     1. Visited tracking (prevents infinite loops on cycles)       ║
+  ║     2. Clone lookup (maps original node to its clone)             ║
+  ║                                                                    ║
+  ║   → CRITICAL ORDER for DFS: store in hashmap BEFORE recursing    ║
+  ║     (otherwise cycles cause infinite recursion)                   ║
+  ║                                                                    ║
+  ║   → The "traverse and build" pattern generalizes beyond cloning:  ║
+  ║     → Build reverse graph, transform graph, serialize graph       ║
+  ║     → Any time you need to create a new structure while           ║
+  ║       exploring an existing one                                   ║
+  ║                                                                    ║
+  ║   → This COMPLETES Phase 2!                                       ║
+  ║     We now know: BFS, DFS, cycle detection, bipartite check,     ║
+  ║     multi-source BFS, reverse thinking, boundary BFS,            ║
+  ║     implicit graphs, and graph transformation.                   ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>PHASE 2 COMPLETE — RECAP</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   PHASE 2 SKILLS UNLOCKED (Problems 9-18):                       ║
+  ║                                                                    ║
+  ║   Problem  9: BFS = shortest path in unweighted graph             ║
+  ║   Problem 10: DFS detects cycles in undirected graphs (parent)    ║
+  ║   Problem 11: 3-state DFS detects cycles in directed graphs       ║
+  ║   Problem 12: BFS/DFS 2-coloring checks bipartiteness            ║
+  ║   Problem 13: Multi-source BFS for simultaneous spread            ║
+  ║   Problem 14: Reverse thinking — start from targets               ║
+  ║   Problem 15: Implicit graphs — words/states as nodes             ║
+  ║   Problem 16: Boundary-first DFS/BFS for surrounded regions       ║
+  ║   Problem 17: Dual boundary BFS with intersection                 ║
+  ║   Problem 18: Traverse-and-build with hashmap for cloning         ║
+  ║                                                                    ║
+  ║   MASTER SKILL: "I can identify WHICH traversal to use and WHY"  ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h3>CONNECTION TO PHASE 3</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Phase 2 → Core traversal patterns (BFS, DFS, and their variations)
+</span>  Phase 3 → Standard interview algorithms:
+  
+  Problem 19: Topological Sort (Kahn's BFS) — ordering with dependencies
+  
+  Phase 3 introduces ENTIRELY NEW ALGORITHM FAMILIES:
+    → Topological Sort (Problems 19-22): ordering tasks
+    → Dijkstra (Problems 23-25): weighted shortest paths
+    → Bellman-Ford (Problem 26): negative weights
+    → Union-Find (Problems 27-29): dynamic connectivity
+    → MST — Kruskal &amp; Prim (Problems 30-32): minimum spanning trees
+  
+  Problem 19 builds directly on:
+    → BFS (Problem 3): Kahn's algorithm IS BFS with in-degree tracking
+    → Cycle detection (Problem 11): topological sort only works on DAGs
+    → Directed graphs: topological sort is for DIRECTED ACYCLIC graphs
+  
+  The leap from Phase 2 → Phase 3:
+    Phase 2: "How do I TRAVERSE a graph?"
+    Phase 3: "How do I SOLVE OPTIMIZATION PROBLEMS on graphs?"</code></pre></div>
+<hr>
+<p><strong>Problem 18 Complete. Phase 2 Complete.</strong><br>
+<strong>Ready for Phase 3, Problem 19: Topological Sort (Kahn's Algorithm — BFS)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="13" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-17.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 18 of 50</span>
+            </div>
+            <a href="problem-19.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

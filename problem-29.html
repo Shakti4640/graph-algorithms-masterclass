@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 29: Problem 29: Redundant Connection (Cycle Detection via Union-Find) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="7">
+<div class="px-2"><h1>Problem 29: Redundant Connection (Cycle Detection via Union-Find)</h1>
+<h2>[Algorithm Family: Union-Find / Disjoint Set Union]</h2>
+<h2>[Phase 3: Standard Interview — "I can solve real interview graph problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>A tree is a connected graph with N nodes and exactly N-1 edges
+</span>(no cycles). You are given a graph that started as a tree with
+nodes 1 to N, but ONE extra edge was added, creating exactly
+ONE cycle.
+
+Find that extra edge and return it. If there are multiple answers,
+return the edge that occurs LAST in the input.
+
+Input:
+  edges = [[1,2], [1,3], [2,3]]
+
+Output: [2,3]
+
+Explanation:
+  The tree was:     1 — 2
+                    |
+                    3
+  
+  Then edge [2,3] was added, creating cycle 1-2-3-1.
+  Remove [2,3] to restore the tree.
+
+
+Input:
+  edges = [[1,2], [2,3], [3,4], [1,4], [1,5]]
+
+Output: [1,4]
+
+Explanation:
+  The tree was:     1 — 2 — 3 — 4
+                    |
+                    5
+  
+  Then edge [1,4] was added, creating cycle 1-2-3-4-1.
+  Remove [1,4] to restore the tree.</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<h3>Example 1</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  edges = [[1,2], [1,3], [2,3]]
+</span>
+  Building step by step:
+
+  After [1,2]:     1 ── 2          (tree so far)
+
+  After [1,3]:     1 ── 2          (tree so far)
+                   |
+                   3
+
+  After [2,3]:     1 ── 2          (CYCLE created!)
+                   |  /
+                   3
+
+  Cycle: 1 → 2 → 3 → 1
+
+  The redundant edge: [2,3] ← this CLOSED the cycle</code></pre></div>
+<h3>Example 2</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  edges = [[1,2], [2,3], [3,4], [1,4], [1,5]]
+</span>
+  After [1,2]:     1 ── 2
+
+  After [2,3]:     1 ── 2 ── 3
+
+  After [3,4]:     1 ── 2 ── 3 ── 4
+
+  After [1,4]:     1 ── 2 ── 3 ── 4       CYCLE: 1-2-3-4-1
+                   └──────────────┘
+
+  After [1,5]:     1 ── 2 ── 3 ── 4
+                   |╲
+                   5  └──────────── 4
+
+  The redundant edge: [1,4] ← this CLOSED the cycle
+  Note: [1,5] came AFTER but it's NOT the problem — it doesn't create a cycle</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer              │  Why?                   ║
+╠══════════════════╪══════════════════════╪═════════════════════════╣
+║  NODES           │  1 to N              │  N nodes given          ║
+║  EDGES           │  N edges             │  Tree has N-1, +1 extra ║
+║  Directed?       │  NO (undirected)     │  Edges are pairs        ║
+║  Weighted?       │  NO                  │  No weights             ║
+║  Cyclic?         │  YES — exactly ONE   │  One extra edge = 1     ║
+║                  │  cycle               │  cycle                  ║
+║  Connected?      │  YES                 │  Started as tree + edge ║
+║  What we seek    │  The edge that       │  "Which edge, when      ║
+║                  │  CREATES the cycle   │   added, closed a loop?"║
+╚══════════════════╧══════════════════════╧═════════════════════════╝
+
+  KEY MATHEMATICAL FACT:
+    → Tree with N nodes has exactly N-1 edges
+    → We're given N edges → exactly 1 extra
+    → That extra edge creates exactly 1 cycle
+    → Removing it restores the tree</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<h3>Naive Approach: Try Removing Each Edge</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For each edge e in the input (from LAST to FIRST):
+</span>    → Build graph WITHOUT edge e
+    → Check if remaining graph is still connected (BFS/DFS)
+    → Check if remaining graph has no cycles
+    → If both true → e is the answer
+
+  Example: edges = [[1,2], [1,3], [2,3]]
+  
+  Try removing [2,3]: graph = [[1,2], [1,3]]
+    1 ── 2
+    |
+    3
+    → Connected? YES  → Cycle-free? YES  → ANSWER: [2,3] ✓
+
+  Try removing [1,3]: graph = [[1,2], [2,3]]
+    1 ── 2 ── 3
+    → Connected? YES  → Cycle-free? YES  → Also valid!
+    → But we want the LAST one in input → [2,3] comes after [1,3]
+    → So [2,3] is preferred ✓</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For each of N edges:
+</span>    → Build graph: O(N)
+    → Check connectivity: O(N) using BFS/DFS
+    → Check cycle: O(N) using DFS
+  
+  Total: O(N) edges × O(N) per check = O(N²)
+  
+  For N = 100,000: O(10^10) → TOO SLOW
+  
+  We need O(N) or O(N × α(N)) solution</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<h3>The Thinking Process</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "I need to find which edge CREATES a cycle"
+</span>  
+  Insight from Problem 28:
+    → Union-Find processes edges one by one
+    → union(u, v) merges the groups containing u and v
+    → If u and v are ALREADY in the same group → this edge is REDUNDANT
+    → "Already in same group" = "there's already a path from u to v"
+    → Adding another edge between them = CREATING A CYCLE
+
+  The connection is DIRECT:
+    → Process edges in order
+    → For each edge [u, v]: call find(u) and find(v)
+    → If find(u) == find(v) → they're already connected
+    → This edge CLOSES a cycle → THIS IS THE ANSWER
+    → If find(u) != find(v) → safe to merge → call union(u, v)</code></pre></div>
+<h3>Why Union-Find is Perfect Here</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  TREE BUILDING analogy:                                        │
+  │                                                                │
+  │  Imagine building a tree by adding edges one at a time.        │
+  │  Each new edge should connect TWO SEPARATE components.         │
+  │  If a new edge connects two nodes IN THE SAME component,       │
+  │  it creates a cycle — that's the redundant edge!               │
+  │                                                                │
+  │  Union-Find tracks exactly this:                               │
+  │    → "Are u and v in the same component?"                      │
+  │    → YES → redundant edge (cycle!)                             │
+  │    → NO  → merge them (grow the tree)                          │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘
+
+  Alternative: DFS cycle detection (Problem 10)
+    → Also works, but more complex
+    → DFS finds A cycle, but not necessarily the LAST edge causing it
+    → Union-Find naturally processes edges in INPUT ORDER
+    → So the LAST edge that triggers "same component" = answer</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH</h2>
+<h3>Example 1: edges = [[1,2], [1,3], [2,3]]</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  N = 3 (3 edges → 3 nodes)
+</span>
+  ═══════════════════════════════════════════════════════
+  INITIALIZATION
+  ═══════════════════════════════════════════════════════
+
+  parent = [0, 1, 2, 3]    ← index 0 unused (nodes are 1-indexed)
+  rank   = [0, 0, 0, 0]
+  
+  Components: {1} {2} {3}
+
+  Visually:
+    1     2     3     (three isolated nodes)
+
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Edge [1, 2]: Are 1 and 2 in the same group?                 │
+  │                                                              │
+  │   find(1) = 1                                                │
+  │   find(2) = 2                                                │
+  │                                                              │
+  │   1 ≠ 2 → DIFFERENT groups → SAFE to merge                  │
+  │   union(1, 2):                                               │
+  │     rank[1] == rank[2] == 0                                  │
+  │     → attach 2 under 1, rank[1]++                            │
+  │                                                              │
+  │   parent = [0, 1, 1, 3]                                      │
+  │   rank   = [0, 1, 0, 0]                                      │
+  │                                                              │
+  │   Visually:   1        3                                     │
+  │               |                                              │
+  │               2                                              │
+  │                                                              │
+  │   Components: {1, 2}  {3}                                    │
+  │   Result: NOT redundant ✓                                    │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Edge [1, 3]: Are 1 and 3 in the same group?                 │
+  │                                                              │
+  │   find(1) = 1                                                │
+  │   find(3) = 3                                                │
+  │                                                              │
+  │   1 ≠ 3 → DIFFERENT groups → SAFE to merge                  │
+  │   union(1, 3):                                               │
+  │     rank[1] = 1 &gt; rank[3] = 0                               │
+  │     → attach 3 under 1                                       │
+  │                                                              │
+  │   parent = [0, 1, 1, 1]                                      │
+  │   rank   = [0, 1, 0, 0]                                      │
+  │                                                              │
+  │   Visually:    1                                             │
+  │              / \                                             │
+  │             2   3                                            │
+  │                                                              │
+  │   Components: {1, 2, 3}                                      │
+  │   Result: NOT redundant ✓                                    │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Edge [2, 3]: Are 2 and 3 in the same group?                 │
+  │                                                              │
+  │   find(2): parent[2] = 1, parent[1] = 1 → root = 1         │
+  │   find(3): parent[3] = 1, parent[1] = 1 → root = 1         │
+  │                                                              │
+  │   ┌─────────────────────────────────────────────────────┐   │
+  │   │  1 == 1 → SAME GROUP → CYCLE DETECTED!             │   │
+  │   │                                                     │   │
+  │   │  2 and 3 are ALREADY connected (through 1)          │   │
+  │   │  Adding edge [2,3] creates cycle: 1-2-3-1          │   │
+  │   │                                                     │   │
+  │   │  ★ ANSWER: [2, 3] ★                                │   │
+  │   └─────────────────────────────────────────────────────┘   │
+  │                                                              │
+  │   Visually:    1                                             │
+  │              / \                                             │
+  │             2 ─ 3     ← this edge creates cycle!             │
+  └──────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Example 2: edges = [[1,2], [2,3], [3,4], [1,4], [1,5]]</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ═══════════════════════════════════════════════════════
+</span>  INITIALIZATION
+  ═══════════════════════════════════════════════════════
+
+  parent = [0, 1, 2, 3, 4, 5]
+  rank   = [0, 0, 0, 0, 0, 0]
+
+  Components: {1} {2} {3} {4} {5}
+
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Edge [1, 2]:                                                 │
+  │   find(1)=1, find(2)=2 → DIFFERENT → union(1,2)             │
+  │   parent = [0, 1, 1, 3, 4, 5]                               │
+  │   rank   = [0, 1, 0, 0, 0, 0]                               │
+  │                                                              │
+  │     1                                                        │
+  │     |          3     4     5                                  │
+  │     2                                                        │
+  │                                                              │
+  │   Components: {1,2} {3} {4} {5}                              │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Edge [2, 3]:                                                 │
+  │   find(2): parent[2]=1, parent[1]=1 → root=1                │
+  │   find(3)=3                                                  │
+  │   1 ≠ 3 → DIFFERENT → union(1,3)                             │
+  │   rank[1]=1 &gt; rank[3]=0 → attach 3 under 1                  │
+  │   parent = [0, 1, 1, 1, 4, 5]                               │
+  │                                                              │
+  │       1                                                      │
+  │      / \       4     5                                       │
+  │     2   3                                                    │
+  │                                                              │
+  │   Components: {1,2,3} {4} {5}                                │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Edge [3, 4]:                                                 │
+  │   find(3): parent[3]=1, parent[1]=1 → root=1                │
+  │   find(4)=4                                                  │
+  │   1 ≠ 4 → DIFFERENT → union(1,4)                             │
+  │   rank[1]=1 &gt; rank[4]=0 → attach 4 under 1                  │
+  │   parent = [0, 1, 1, 1, 1, 5]                               │
+  │                                                              │
+  │        1                                                     │
+  │      / | \       5                                           │
+  │     2  3  4                                                  │
+  │                                                              │
+  │   Components: {1,2,3,4} {5}                                  │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Edge [1, 4]:                                                 │
+  │   find(1) = 1                                                │
+  │   find(4): parent[4]=1, parent[1]=1 → root=1                │
+  │                                                              │
+  │   ┌─────────────────────────────────────────────────────┐   │
+  │   │  1 == 1 → SAME GROUP → CYCLE DETECTED!             │   │
+  │   │                                                     │   │
+  │   │  1 and 4 are ALREADY connected (1→4 directly,      │   │
+  │   │  or 1→2→3→4 through chain)                          │   │
+  │   │                                                     │   │
+  │   │  ★ ANSWER: [1, 4] ★                                │   │
+  │   └─────────────────────────────────────────────────────┘   │
+  │                                                              │
+  │  Note: We could STOP here, but let's see what happens       │
+  │  if we continued...                                          │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Edge [1, 5] (if we continued):                               │
+  │   find(1)=1, find(5)=5 → DIFFERENT → would merge normally   │
+  │   This is NOT a redundant edge — it connects a new node      │
+  └──────────────────────────────────────────────────────────────┘
+
+  ═══════════════════════════════════════════════════════
+  ANSWER: [1, 4]
+  ═══════════════════════════════════════════════════════
+
+  WHY [1,4] and not some other edge in the cycle?
+  → The cycle is 1-2-3-4-1
+  → Edges forming it: [1,2], [2,3], [3,4], [1,4]
+  → [1,4] is the LAST one processed that closes the cycle
+  → Union-Find naturally catches the CLOSING edge
+  → Problem asks for last such edge in input → perfect match!</code></pre></div>
+<hr>
+<h2>STEP 5: WHY THIS WORKS — Deep Intuition</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TREE PROPERTY:                                                    │
+  │    In a tree, there is EXACTLY ONE path between any two nodes.     │
+  │    Adding an edge between two already-connected nodes creates      │
+  │    a SECOND path → which forms a CYCLE.                            │
+  │                                                                    │
+  │  UNION-FIND TRANSLATION:                                           │
+  │    → Two nodes in the SAME component = there EXISTS a path         │
+  │    → Adding an edge between them = adding a SECOND path = CYCLE    │
+  │    → find(u) == find(v) before union = "path already exists"       │
+  │    → That edge is the REDUNDANT one                                │
+  │                                                                    │
+  │  WHY "LAST" EDGE?                                                  │
+  │    → We process edges in input order                               │
+  │    → The first N-1 edges that connect different components          │
+  │      form the tree                                                 │
+  │    → The edge that tries to connect SAME component = extra edge    │
+  │    → Since there's exactly ONE extra edge, exactly ONE union fails │
+  │    → That failed union = the answer                                │
+  │                                                                    │
+  │  GUARANTEED TO FIND EXACTLY ONE:                                   │
+  │    → N nodes + N edges → exactly 1 cycle                           │
+  │    → First N-1 successful unions build the tree                    │
+  │    → The Nth edge (wherever it falls in input) fails union         │
+  │    → Can't have 0 failures (N edges, N-1 needed for tree)         │
+  │    → Can't have 2+ failures (only 1 extra edge given)             │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLETE CODE</h2>
+<h3>Primary Solution: Union-Find</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">class</span><span> </span><span class="token" style="color: rgb(43, 145, 175);">UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same Union-Find from Problem 27.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Path compression + union by rank.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">__init__</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 1-indexed: nodes 1 to n</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Returns True if merge happened (different groups).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Returns False if already in same group (CYCLE!).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        root_x </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        root_y </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ KEY: same root = already connected = REDUNDANT EDGE</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> root_x </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> root_y</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Union by rank</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_y
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_x
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_x
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">findRedundantConnection</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find the edge that creates a cycle in a graph that should be a tree.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Strategy:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      1. Process edges one by one in input order
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      2. For each edge, try to union the two endpoints
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      3. If union fails (same group) → THIS edge creates the cycle
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      4. Return it
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Why this gives the LAST such edge:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Problem guarantees exactly ONE cycle
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Exactly ONE union will fail
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → We return it immediately when found
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Since we process in order, it's the last cycle-forming edge
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Builds on:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Problem 27: Union-Find data structure
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Problem 28: Using Union-Find for connectivity
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → NEW: Using union() return value for cycle detection
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># N edges → N nodes (tree has N-1 edges + 1 extra)</span><span>
+</span><span>    uf </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Try to merge u and v</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># union returned False → u and v already in same group</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># → This edge creates a cycle</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># → This is the redundant edge!</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Should never reach here (problem guarantees one redundant edge)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findRedundantConnection</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [2, 3]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findRedundantConnection</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [1, 4]</span></code></pre></div>
+<hr>
+<h3>DFS Alternative (For Comparison — NOT Recommended Here)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">findRedundantConnection_DFS</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    DFS approach: for each edge [u,v], check if u can already reach v
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    BEFORE adding the edge. If yes → redundant.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is SLOWER than Union-Find but shows the concept.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Time: O(N²) — for each edge, DFS takes O(N)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    vs Union-Find: O(N × α(N)) ≈ O(N)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">has_path</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> target</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""DFS to check if source can reach target."""</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> source </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> target</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> has_path</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> target</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Before adding this edge, can u already reach v?</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># both must exist in graph</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> has_path</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># already reachable → redundant</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Add edge to graph</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Works but O(N²) vs Union-Find's O(N·α(N))</span></code></pre></div>
+<h3>Side-by-Side Comparison</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────┬────────────────────┬────────────────────────┐
+</span>  │  Approach        │  Time              │  Why                    │
+  ├─────────────────┼────────────────────┼────────────────────────┤
+  │  Brute Force     │  O(N² × N) = O(N³)│  Remove each edge,     │
+  │  (try removing)  │                    │  check tree property   │
+  ├─────────────────┼────────────────────┼────────────────────────┤
+  │  DFS per edge    │  O(N²)            │  N edges × O(N) DFS    │
+  │                  │                    │  per edge              │
+  ├─────────────────┼────────────────────┼────────────────────────┤
+  │  Union-Find ★    │  O(N × α(N)) ≈O(N)│  N edges × O(α(N))    │
+  │                  │                    │  per union/find        │
+  └─────────────────┴────────────────────┴────────────────────────┘
+
+  Union-Find is the CLEAR winner.</code></pre></div>
+<hr>
+<h2>STEP 7: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(N × α(N)) ≈ O(N)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  WHY:
+</span>    → We process N edges
+    → For each edge: one find() + one union() call
+    → Each find()/union() with path compression + rank: O(α(N))
+    → α(N) is the inverse Ackermann function (explained in Problem 27)
+    → α(N) ≤ 4 for any practical N (up to 2^65536)
+    → So effectively: N × O(1) = O(N)
+
+  Concrete:
+    N = 100,000 edges
+    → ~100,000 operations × ~4 = ~400,000 steps
+    → Lightning fast</code></pre></div>
+<h3>Space Complexity: O(N)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  WHY:
+</span>    → parent array: O(N)
+    → rank array: O(N)
+    → No other data structures
+    → Total: O(N)</code></pre></div>
+<hr>
+<h2>STEP 8: ADDITIONAL TEST CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 3: Minimal case (3 nodes forming triangle) ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findRedundantConnection</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [1, 3]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   1 ── 2</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    \  /</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#     3</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [1,3] is the last edge that closes the triangle</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 4: Large cycle ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findRedundantConnection</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [5, 1]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   1 ── 2</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   |    |</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   5    3</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    \  /</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#     4</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [5,1] closes the 5-node cycle</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 5: Redundant edge early in input ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findRedundantConnection</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [2, 3]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># After [1,3]: {1,3}</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># After [1,2]: {1,2,3}</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># [2,3]: find(2)=1, find(3)=1 → SAME → redundant!</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 6: Star graph with extra edge ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findRedundantConnection</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [2, 3]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#     2</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    /|</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   1 |    ← [2,3] creates shortcut</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   |\ </span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   3  4</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   </span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   5</span></code></pre></div>
+<hr>
+<h2>STEP 9: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Directed? (Redundant Connection II — LeetCode 685)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  THIS CHANGES EVERYTHING.
+</span>
+  In directed graphs with one extra edge:
+    → Two possible issues:
+      a) A node has TWO parents (in-degree 2)
+      b) A cycle exists in the directed graph
+      c) BOTH can happen simultaneously
+    
+    → Much more complex logic needed
+    → Can't use simple Union-Find alone
+    → Need to handle multiple cases
+    
+  This is a HARD problem (LeetCode 685) — different from our current one.
+  Our problem: UNDIRECTED only → simple Union-Find works perfectly.</code></pre></div>
+<h3>What if Multiple Extra Edges?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Graph has K extra edges. Find all of them."
+</span>  
+  With Union-Find:
+    → Process all edges
+    → Every edge where union() returns False is redundant
+    → Collect ALL such edges
+    → Time still O(N × α(N))
+
+  def findAllRedundant(edges, n):
+      uf = UnionFind(n)
+      redundant = []
+      for u, v in edges:
+          if not uf.union(u, v):
+              redundant.append([u, v])
+      return redundant</code></pre></div>
+<h3>What if Weighted?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Multiple edges create cycles. Remove the one with MAXIMUM weight."
+</span>  
+  → Still use Union-Find to identify ALL cycle-creating edges
+  → Among those, return the one with max weight
+  → This connects to MST thinking (Problem 30):
+    Kruskal's algorithm processes edges by weight and skips cycle-creators</code></pre></div>
+<hr>
+<h2>STEP 10: THE UNION-FIND CYCLE DETECTION PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  THE PATTERN (memorize this):                                      ║
+  ║                                                                    ║
+  ║  for each edge (u, v):                                             ║
+  ║      if find(u) == find(v):                                        ║
+  ║          → u and v are ALREADY connected                           ║
+  ║          → This edge creates a CYCLE                               ║
+  ║          → This is a REDUNDANT edge                                ║
+  ║      else:                                                         ║
+  ║          → union(u, v)                                             ║
+  ║          → This edge is part of the spanning tree                  ║
+  ║                                                                    ║
+  ║  This exact pattern appears in:                                    ║
+  ║    → Problem 29 (this problem): find the redundant edge            ║
+  ║    → Problem 30 (Kruskal's MST): skip cycle-creating edges        ║
+  ║    → Any problem asking "does adding this edge create a cycle?"    ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 11: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: 1-indexed vs 0-indexed nodes                       ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  This problem uses nodes 1 to N (1-indexed)                     ║
+  ║  Union-Find parent array must accommodate this:                  ║
+  ║                                                                  ║
+  ║  WRONG:  parent = list(range(n))     ← indices 0 to n-1         ║
+  ║  RIGHT:  parent = list(range(n + 1)) ← indices 0 to n           ║
+  ║                                                                  ║
+  ║  Index 0 is unused (wasted), but avoids off-by-one errors       ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Returning wrong format                              ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Problem asks for [u, v] in same order as input                  ║
+  ║  → return [u, v] directly from the edge list                     ║
+  ║  → DON'T return [find(u), find(v)] — those are roots, not nodes ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: "What if multiple edges cause cycles?"              ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Problem GUARANTEES exactly one extra edge → exactly one cycle   ║
+  ║  → Exactly ONE union() will return False                         ║
+  ║  → We return the first (and only) failed union                   ║
+  ║                                                                  ║
+  ║  If problem didn't guarantee this, we'd need to collect ALL     ║
+  ║  failed unions and apply additional logic                        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Confusing "last in input" with "last in cycle"      ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  "If there are multiple answers, return the one that occurs      ║
+  ║   LAST in the input"                                             ║
+  ║                                                                  ║
+  ║  Union-Find handles this AUTOMATICALLY:                          ║
+  ║  → We process edges in input order                               ║
+  ║  → The cycle-closing edge is naturally the LAST one in the       ║
+  ║    cycle that we encounter                                       ║
+  ║  → Since there's exactly one cycle, there's exactly one answer   ║
+  ║                                                                  ║
+  ║  Wait — could DIFFERENT edges close the cycle depending on       ║
+  ║  processing order? NO!                                           ║
+  ║  → The cycle exists as a fixed set of edges                      ║
+  ║  → When processed in input order, the LAST cycle edge            ║
+  ║    encountered is the one that "closes" it                       ║
+  ║  → This is guaranteed to be the last one in input ✓              ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TRIGGER SIGNALS:                                                  │
+  │                                                                    │
+  │  1. "Tree + one extra edge"                                       │
+  │     → Exactly one cycle                                            │
+  │     → Find the extra edge                                         │
+  │                                                                    │
+  │  2. "Which edge creates a cycle?"                                  │
+  │     → Process edges one by one                                     │
+  │     → Union-Find detects when both endpoints are already connected │
+  │                                                                    │
+  │  3. "Remove an edge to make it a tree"                            │
+  │     → Same as "find the cycle-creating edge"                       │
+  │                                                                    │
+  │  MY THINKING:                                                      │
+  │                                                                    │
+  │  "I see edges being added, and I need to detect a cycle"          │
+  │    → INCREMENTAL edge processing                                   │
+  │    → Union-Find is PERFECT for incremental connectivity            │
+  │                                                                    │
+  │  "find(u) == find(v) before union → they're already connected"    │
+  │    → This edge is the redundant one                                │
+  │    → Return it immediately                                         │
+  │                                                                    │
+  │  TIME TO CODE: ~3 minutes                                          │
+  │    → Write UnionFind class (memorized from Problem 27)             │
+  │    → Simple loop through edges                                     │
+  │    → Return first failed union                                     │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 13: CONNECTION TO PREVIOUS AND FUTURE PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────────┐
+</span>  │  BUILDS ON:                                                         │
+  │                                                                     │
+  │  Problem 10 → Cycle detection via DFS (undirected)                 │
+  │               → Same GOAL (find a cycle), different TOOL            │
+  │               → DFS: explores graph, finds cycle during traversal  │
+  │               → UF: processes edges, finds cycle during building   │
+  │                                                                     │
+  │  Problem 27 → Union-Find data structure                            │
+  │               → We REUSE the exact same structure                   │
+  │               → NEW usage: return value of union() = cycle signal  │
+  │                                                                     │
+  │  Problem 28 → Union-Find for counting components                   │
+  │               → Problem 28: count GROUPS (components--)             │
+  │               → Problem 29: detect CYCLE (union returns False)     │
+  │               → Same tool, different question                       │
+  │                                                                     │
+  │  LEADS TO:                                                          │
+  │                                                                     │
+  │  Problem 30 → Kruskal's MST                                        │
+  │               → Process edges sorted by weight                     │
+  │               → SKIP edges where union() returns False (cycle!)    │
+  │               → Keep edges where union() succeeds (tree edges!)    │
+  │               → Exactly the same pattern as Problem 29             │
+  │               → Kruskal's = "build MST by skipping redundant edges"│
+  │                                                                     │
+  │  The progression:                                                   │
+  │    P27: "Here's Union-Find" (the tool)                             │
+  │    P28: "Use it to COUNT components" (first application)           │
+  │    P29: "Use it to DETECT cycles" (second application) ← YOU ARE  │
+  │    P30: "Use it to BUILD MST" (third application)       HERE       │
+  │                                                                     │
+  └─────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Preview: How Problem 29 Directly Becomes Problem 30</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 29 (this problem):
+</span>    for u, v in edges:
+        if not uf.union(u, v):
+            return [u, v]          ← return the CYCLE edge
+
+  Problem 30 (Kruskal's MST — next problem):
+    edges.sort(by weight)          ← sort by weight first
+    mst = []
+    for u, v, w in edges:
+        if uf.union(u, v):         ← opposite check!
+            mst.append([u, v, w])  ← keep the TREE edges
+                                   ← skip the cycle edges
+    return mst
+
+  SAME PATTERN, just:
+    → Problem 29: find the BAD edge
+    → Problem 30: keep the GOOD edges</code></pre></div>
+<hr>
+<h2>STEP 14: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  NEW CONCEPT: Union-Find for CYCLE DETECTION                       ║
+  ║                                                                    ║
+  ║  The insight:                                                      ║
+  ║    find(u) == find(v) BEFORE union                                 ║
+  ║    = "u and v are already in the same connected component"         ║
+  ║    = "there's already a path from u to v"                          ║
+  ║    = "adding edge (u,v) creates a SECOND path = CYCLE"            ║
+  ║                                                                    ║
+  ║  Three Union-Find applications learned so far:                     ║
+  ║                                                                    ║
+  ║    Problem 27: The DATA STRUCTURE itself                           ║
+  ║    Problem 28: COUNT components (track merges)                     ║
+  ║    Problem 29: DETECT cycles (check before merge)    ← NEW        ║
+  ║    Problem 30: BUILD MST (skip cycle edges)          ← NEXT       ║
+  ║                                                                    ║
+  ║  THE ELEGANCE:                                                     ║
+  ║    One data structure. One operation (union).                      ║
+  ║    The RETURN VALUE tells you everything:                          ║
+  ║      True  → new connection formed (tree edge)                    ║
+  ║      False → redundant connection (cycle edge)                    ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CLEAN INTERVIEW VERSION</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">class</span><span> </span><span class="token" style="color: rgb(43, 145, 175);">UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">__init__</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        rx</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ry </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> rx </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> ry</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ CYCLE DETECTED</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>ry</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            rx</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ry </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> ry</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> rx
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>ry</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> rx
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>ry</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>                         </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ SAFE MERGE</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">findRedundantConnection</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    uf </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># already connected → cycle!</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span></code></pre></div>
+<hr>
+<p><strong>Problem 29 Complete.</strong><br>
+<strong>Ready for Problem 30: Kruskal's Minimum Spanning Tree (MST)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="9" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-28.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 29 of 50</span>
+            </div>
+            <a href="problem-30.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

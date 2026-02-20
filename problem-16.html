@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 16: Problem 16: Surrounded Regions (Boundary DFS/BFS) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="7">
+<div class="px-2"><h1>Problem 16: Surrounded Regions (Boundary DFS/BFS)</h1>
+<h2>[Algorithm Family: DFS/BFS — Boundary-First Reverse Thinking]</h2>
+<h2>[Phase 2: Core Patterns — "I know WHICH traversal and WHY"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are given an M × N board containing 'X' and 'O'.
+</span>
+CAPTURE all regions of 'O' that are COMPLETELY SURROUNDED by 'X'.
+
+A region is "surrounded" if there is NO path from any 'O' in that 
+region to the BORDER of the board.
+
+Captured 'O's are flipped to 'X'. Border-connected 'O's stay as 'O'.
+
+Example:
+  Input:                    Output:
+  [REDACTED:AWS_SECRET_KEY]
+
+  The 'O' at (1,1), (1,2), (2,2) are SURROUNDED → captured → become 'X'
+  The 'O' at (3,1) touches the border (row 3 is last row) → stays 'O'
+
+  Wait — (3,1) is at row index 3, col index 1.
+  Row 3 IS the last row (border) → so (3,1) is ON the border → safe.</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Grid-Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  THE BOARD:
+</span>  
+     col: 0   1   2   3
+  row 0: [X] [X] [X] [X]
+  row 1: [X] [O] [O] [X]
+  row 2: [X] [X] [O] [X]
+  row 3: [X] [O] [X] [X]
+
+  BORDER CELLS (the perimeter):
+  
+     col: 0   1   2   3
+  row 0: [B] [B] [B] [B]     ← entire top row is border
+  row 1: [B] [ ] [ ] [B]     ← only leftmost and rightmost
+  row 2: [B] [ ] [ ] [B]     ← only leftmost and rightmost
+  row 3: [B] [B] [B] [B]     ← entire bottom row is border
+
+  WHICH 'O' CELLS EXIST?
+  
+  (1,1)=O  (1,2)=O  (2,2)=O  (3,1)=O
+  
+  ARE THEY CONNECTED (4-directional)?
+  
+  (1,1) ↔ (1,2) : adjacent horizontally     ✓ connected
+  (1,2) ↔ (2,2) : adjacent vertically       ✓ connected
+  (1,1) ↔ (2,1) : (2,1) = X                ✗ not connected
+  (3,1) ↔ (2,1) : (2,1) = X                ✗ not connected
+  
+  So we have TWO groups of 'O':
+  
+  Group A: {(1,1), (1,2), (2,2)}  ← connected cluster
+  Group B: {(3,1)}                 ← isolated 'O'
+
+  WHICH GROUPS TOUCH THE BORDER?
+  
+  Group A: (1,1) border? NO  (1,2) border? NO  (2,2) border? NO
+           → NO cell in Group A touches border
+           → SURROUNDED → CAPTURE (flip to X)
+  
+  Group B: (3,1) border? YES (row 3 = last row)
+           → Group B touches border
+           → NOT surrounded → KEEP as O</code></pre></div>
+<h3>The Grid AS a Graph (from Problem 6)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Nodes: each cell (r, c)
+</span>  Edges: 4-directional adjacency (up, down, left, right)
+         ONLY between cells with SAME value ('O' connects to 'O')
+  
+  The 'O' subgraph:
+  
+  (1,1) ─── (1,2)
+              │
+             (2,2)
+  
+  
+  (3,1)     [isolated — no adjacent 'O' cells]</code></pre></div>
+<h3>Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer          │  Why?                       ║
+╠══════════════════╪══════════════════╪═════════════════════════════╣
+║  NODES           │  Grid cells      │  Each cell = potential node ║
+║  EDGES           │  4-dir adjacency │  Up/Down/Left/Right         ║
+║  Directed?       │  NO              │  Can move both ways         ║
+║  Weighted?       │  NO              │  All moves equal            ║
+║  Implicit?       │  YES             │  Grid structure (Problem 6) ║
+║  What we need    │  Connectivity    │  Which 'O' groups touch     ║
+║                  │  to border       │  the border?                ║
+╚══════════════════╧══════════════════╧═════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<h3>Approach: For Each 'O' Region, Check if Surrounded</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  1. Find all connected components of 'O' (Problem 7 — island counting)
+</span>  2. For each component, check if ANY cell is on the border
+  3. If NO cell touches border → capture entire component
+
+  Step-by-step:
+    → Find components: BFS/DFS from each unvisited 'O'
+    → Component 1: {(1,1), (1,2), (2,2)}
+      → (1,1) on border? row=1 (not 0 or 3), col=1 (not 0 or 3) → NO
+      → (1,2) on border? row=1, col=2 → NO
+      → (2,2) on border? row=2, col=2 → NO
+      → NONE on border → CAPTURE ALL → flip to 'X'
+    
+    → Component 2: {(3,1)}
+      → (3,1) on border? row=3 (= M-1 = last row) → YES
+      → SAFE → keep as 'O'</code></pre></div>
+<h3>Why This Works But Is Suboptimal</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Time: O(M×N) to find all components + O(component_size) to check border
+</span>  Total: O(M×N) — actually fine asymptotically!
+  
+  BUT: requires storing all components separately
+       and making two passes (find components, then check each)
+       
+  Can we do it in ONE PASS with simpler logic?
+  YES — using REVERSE THINKING (from Problem 14)</code></pre></div>
+<hr>
+<h2>STEP 3: THE KEY INSIGHT — REVERSE THINKING</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────┐
+</span>  │                                                              │
+  │  FORWARD THINKING (brute force):                             │
+  │    "For each 'O' region, is it surrounded?"                  │
+  │    → Must check EVERY 'O' cluster and test border contact   │
+  │    → Complex: find component, then verify property           │
+  │                                                              │
+  │  REVERSE THINKING (★ elegant):                               │
+  │    "Which 'O' cells are SAFE (connected to border)?"         │
+  │    → Start from border 'O' cells                             │
+  │    → Flood fill inward — mark everything reachable as SAFE  │
+  │    → Everything NOT marked = SURROUNDED = CAPTURE            │
+  │                                                              │
+  │  This is EXACTLY the reverse thinking from Problem 14:       │
+  │    Problem 14: start from all 0s, BFS outward to find        │
+  │                distance to nearest 0                         │
+  │    Problem 16: start from all border 'O's, DFS/BFS inward   │
+  │                to find all safe 'O's                         │
+  │                                                              │
+  └──────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>The Three-Step Algorithm</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  STEP 1: Find all 'O' cells on the BORDER
+</span>  STEP 2: DFS/BFS from each border 'O' → mark connected 'O's as SAFE
+  STEP 3: Scan entire board:
+          → Unmarked 'O' → flip to 'X' (captured)
+          → Marked SAFE  → restore to 'O'
+          → 'X'          → stays 'X'</code></pre></div>
+<h3>Why This Is Better</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────┬────────────────────────────────┐
+</span>  │  Forward Approach           │  Reverse (Border) Approach     │
+  ├────────────────────────────┼────────────────────────────────┤
+  │  Find ALL components        │  Only explore BORDER-connected │
+  │  Check each for border      │  Everything else auto-captured │
+  │  Need component storage     │  Just mark in-place            │
+  │  Two logical phases         │  One DFS/BFS + one scan        │
+  │  Same time complexity       │  Simpler code, fewer bugs      │
+  └────────────────────────────┴────────────────────────────────┘
+  
+  Both are O(M×N) time, but reverse approach is:
+    → Simpler to code
+    → Less error-prone
+    → More elegant
+    → A common PATTERN you'll see repeatedly</code></pre></div>
+<hr>
+<h2>STEP 4: IDENTIFYING THE GRAPH PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────┐
+</span>  │  I see: "Grid of cells with two types"                       │
+  │       → Grid graph (Problem 6)                               │
+  │                                                              │
+  │  I see: "Connected regions"                                  │
+  │       → Connected components (Problem 5, 7)                  │
+  │                                                              │
+  │  I see: "Regions touching border are special"                │
+  │       → BOUNDARY-FIRST traversal                             │
+  │       → Start from border, work inward (reverse thinking)    │
+  │                                                              │
+  │  I need: "Mark border-connected cells, capture the rest"     │
+  │       → DFS or BFS from border cells                         │
+  │       → Same flood fill as Problem 6, just starting points   │
+  │         are BORDER cells instead of arbitrary cells           │
+  │                                                              │
+  │  Algorithm: Boundary DFS/BFS + in-place marking              │
+  └──────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Why DFS or BFS Both Work Here</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  We're NOT looking for shortest path
+</span>  We're looking for REACHABILITY (can this 'O' reach the border?)
+  → Both BFS and DFS find all reachable nodes (Problem 8)
+  → Either works — DFS is slightly simpler to code (recursion)
+  
+  I'll show BOTH versions</code></pre></div>
+<hr>
+<h2>STEP 5: ALGORITHM WALKTHROUGH</h2>
+<h3>Initial Board</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>     col: 0   1   2   3
+</span>  row 0: [X] [X] [X] [X]
+  row 1: [X] [O] [O] [X]
+  row 2: [X] [X] [O] [X]
+  row 3: [X] [O] [X] [X]</code></pre></div>
+<h3>PHASE 1: Identify Border 'O' Cells</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Border = first row, last row, first column, last column
+</span>  
+  Scan border cells:
+  
+  Top row    (row 0): (0,0)=X  (0,1)=X  (0,2)=X  (0,3)=X  → no 'O'
+  Bottom row (row 3): (3,0)=X  (3,1)=O★ (3,2)=X  (3,3)=X  → found (3,1)!
+  Left col   (col 0): (0,0)=X  (1,0)=X  (2,0)=X  (3,0)=X  → no 'O'
+  Right col  (col 3): (0,3)=X  (1,3)=X  (2,3)=X  (3,3)=X  → no 'O'
+  
+  Border 'O' cells: [(3,1)]</code></pre></div>
+<h3>PHASE 2: DFS from Each Border 'O' — Mark as Safe ('S')</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ══════════════════════════════════════════════════════════
+</span>  DFS from (3,1) — mark reachable 'O's as 'S' (safe)
+  ══════════════════════════════════════════════════════════
+  
+  Visit (3,1): value = 'O' → mark as 'S'
+  
+     col: 0   1   2   3
+  row 0: [X] [X] [X] [X]
+  row 1: [X] [O] [O] [X]
+  row 2: [X] [X] [O] [X]
+  row 3: [X] [S] [X] [X]     ← (3,1) marked safe
+  
+  DFS neighbors of (3,1):
+    Up:    (2,1) = 'X' → skip (not 'O')
+    Down:  (4,1) = out of bounds → skip
+    Left:  (3,0) = 'X' → skip
+    Right: (3,2) = 'X' → skip
+  
+  DFS from (3,1) COMPLETE — no more 'O' neighbors to explore
+  
+  ══════════════════════════════════════════════════════════
+  All border 'O' DFS complete
+  ══════════════════════════════════════════════════════════
+  
+  Board after Phase 2:
+  
+     col: 0   1   2   3
+  row 0: [X] [X] [X] [X]
+  row 1: [X] [O] [O] [X]     ← these O's were NOT reached from border
+  row 2: [X] [X] [O] [X]     ← this O was NOT reached from border
+  row 3: [X] [S] [X] [X]     ← this was reached → SAFE
+  
+  INTERPRETATION:
+    'S' = safe (border-connected) → will become 'O' in final answer
+    'O' = NOT border-connected   → SURROUNDED → will become 'X'
+    'X' = was always 'X'         → stays 'X'</code></pre></div>
+<h3>PHASE 3: Final Scan — Flip Remaining 'O' to 'X', Restore 'S' to 'O'</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ══════════════════════════════════════════════════════════
+</span>  Scan every cell and apply rules:
+    'O' → 'X'  (surrounded, captured!)
+    'S' → 'O'  (safe, restore)
+    'X' → 'X'  (unchanged)
+  ══════════════════════════════════════════════════════════
+  
+  (0,0)=X → X    (0,1)=X → X    (0,2)=X → X    (0,3)=X → X
+  (1,0)=X → X    (1,1)=O → X★   (1,2)=O → X★   (1,3)=X → X
+  (2,0)=X → X    (2,1)=X → X    (2,2)=O → X★   (2,3)=X → X
+  (3,0)=X → X    (3,1)=S → O★   (3,2)=X → X    (3,3)=X → X
+  
+  FINAL BOARD:
+  
+     col: 0   1   2   3
+  row 0: [X] [X] [X] [X]
+  row 1: [X] [X] [X] [X]     ← O's captured!
+  row 2: [X] [X] [X] [X]     ← O captured!
+  row 3: [X] [O] [X] [X]     ← O restored (was safe)
+  
+  ✓ Matches expected output!</code></pre></div>
+<h3>Trace on a MORE Complex Example</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Let me trace a case where border 'O' connects to interior 'O's:
+</span>  
+  Input:
+     col: 0   1   2   3   4
+  row 0: [X] [X] [O] [X] [X]
+  row 1: [X] [O] [O] [X] [X]
+  row 2: [X] [O] [X] [O] [X]
+  row 3: [X] [X] [X] [O] [X]
+  row 4: [X] [X] [X] [X] [X]
+  
+  PHASE 1: Border 'O' cells
+  
+  Top row:    (0,2) = O ★
+  Bottom row: all X
+  Left col:   all X
+  Right col:  all X
+  
+  Border 'O' cells: [(0,2)]
+  
+  PHASE 2: DFS from (0,2)
+  
+  Visit (0,2) = O → mark 'S'
+    Neighbors: up=OOB, down=(1,2), left=(0,1)=X, right=(0,3)=X
+    
+    Visit (1,2) = O → mark 'S'
+      Neighbors: up=(0,2)=S(visited), down=(2,2)=X, left=(1,1), right=(1,3)=X
+      
+      Visit (1,1) = O → mark 'S'
+        Neighbors: up=(0,1)=X, down=(2,1), left=(1,0)=X, right=(1,2)=S(visited)
+        
+        Visit (2,1) = O → mark 'S'
+          Neighbors: up=(1,1)=S, down=(3,1)=X, left=(2,0)=X, right=(2,2)=X
+          → all blocked → backtrack
+        
+        Backtrack to (1,1) → done
+      Backtrack to (1,2) → done
+    Backtrack to (0,2) → done
+  
+  Board after Phase 2:
+  
+     col: 0   1   2   3   4
+  row 0: [X] [X] [S] [X] [X]     ← (0,2) safe
+  row 1: [X] [S] [S] [X] [X]     ← (1,1),(1,2) safe (connected to border)
+  row 2: [X] [S] [X] [O] [X]     ← (2,1) safe, (2,3) still O!
+  row 3: [X] [X] [X] [O] [X]     ← (3,3) still O!
+  row 4: [X] [X] [X] [X] [X]
+  
+  PHASE 3: Final scan
+  
+  (2,3) = O → NOT safe → flip to X (captured!)
+  (3,3) = O → NOT safe → flip to X (captured!)
+  All S → restore to O
+  
+  Output:
+     col: 0   1   2   3   4
+  row 0: [X] [X] [O] [X] [X]     ← restored from S
+  row 1: [X] [O] [O] [X] [X]     ← restored from S
+  row 2: [X] [O] [X] [X] [X]     ← restored S, captured O
+  row 3: [X] [X] [X] [X] [X]     ← captured O
+  row 4: [X] [X] [X] [X] [X]
+  
+  The {(2,3),(3,3)} cluster was surrounded — no path to border
+  The {(0,2),(1,1),(1,2),(2,1)} cluster was connected to border via (0,2)</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLETE CODE</h2>
+<h3>Version 1: DFS (Recursive)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">solve</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Capture all surrounded regions of 'O'.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    STRATEGY (reverse thinking — from Problem 14):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      1. Find all border 'O' cells
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      2. DFS/BFS from each → mark connected 'O's as SAFE
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      3. Everything unmarked 'O' = surrounded = capture
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    In-place modification using temporary marker 'S':
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      'O' → 'S' (safe, border-connected)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Then: remaining 'O' → 'X' (captured)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Then: 'S' → 'O' (restore safe cells)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> board </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span>    
+<span>    rows</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── HELPER: DFS to mark border-connected 'O's as 'S' ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Boundary checks + only process 'O' cells</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> cols</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># skip 'X' (wall) and 'S' (already marked)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Mark as safe</span><span>
+</span><span>        board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Explore all 4 directions (grid neighbors — Problem 6)</span><span>
+</span><span>        dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># down</span><span>
+</span><span>        dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># up</span><span>
+</span><span>        dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># right</span><span>
+</span><span>        dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># left</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 1 + 2: DFS from every border 'O' ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Check if this cell is on the border</span><span>
+</span><span>            is_border </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> 
+</span><span>                         c </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> is_border </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># mark this 'O' and all connected 'O's as 'S'</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 3: Final scan ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># surrounded → capture</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># safe → restore</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>board </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Before:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> row </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"  "</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> row</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span>solve</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"\nAfter:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> row </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"  "</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> row</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Before:
+</span>  ['X', 'X', 'X', 'X']
+  ['X', 'O', 'O', 'X']
+  ['X', 'X', 'O', 'X']
+  ['X', 'O', 'X', 'X']
+
+After:
+  ['X', 'X', 'X', 'X']
+  ['X', 'X', 'X', 'X']
+  ['X', 'X', 'X', 'X']
+  ['X', 'O', 'X', 'X']</code></pre></div>
+<hr>
+<h3>Version 2: BFS (Iterative — avoids recursion limit)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">solve_bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same logic as Version 1, but using BFS instead of DFS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    WHY BFS VERSION?
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → DFS recursion can hit Python's recursion limit for large boards
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → A 1000×1000 board with all 'O's = 1,000,000 recursive calls
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Python default limit: ~1000 → RecursionError!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → BFS with deque has no such limit
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> board </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span>    
+<span>    rows</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 1: Collect all border 'O' cells ───</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            is_border </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> 
+</span><span>                         c </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> is_border </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># mark immediately (Problem 9 lesson)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 2: BFS from all border 'O' cells ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># This is MULTI-SOURCE BFS (Problem 13 pattern!)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># All border 'O's start in the queue simultaneously</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Bounds check + only process 'O' cells</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># mark safe BEFORE adding to queue</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 3: Final scan ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># surrounded → capture</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># safe → restore</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>board </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>solve_bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> row </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>row</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<hr>
+<h3>Version 3: DFS Iterative (Stack — no recursion limit)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">solve_dfs_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    DFS using explicit stack — same traversal order as recursive DFS
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    but without recursion limit issues.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    When to prefer this over BFS:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Same asymptotic complexity
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → DFS uses stack (LIFO), BFS uses queue (FIFO)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → For this problem, both work identically
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Stack can sometimes use less memory than queue
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        (DFS explores one branch deeply before widening)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> board </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span>    
+<span>    rows</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 1 + 2: DFS from border 'O' cells using stack ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            is_border </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> 
+</span><span>                         c </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> is_border </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Start DFS from this border 'O'</span><span>
+</span><span>                stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>                board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    cr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                    
+<span>                    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> cr </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cc </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>                        
+<span>                        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols 
+</span><span>                                </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                            board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span>
+</span><span>                            stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 3: Final scan ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span></code></pre></div>
+<hr>
+<h3>Version 4: Optimized Border Scanning</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">solve_optimized</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Slightly optimized border scanning — only iterate border cells,
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    not the entire grid looking for border cells.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> board </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span>    
+<span>    rows</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── COLLECT BORDER 'O' CELLS EFFICIENTLY ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Instead of scanning ALL M×N cells and checking "is border?",</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># only scan the 2M + 2N - 4 actual border cells</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Top and bottom rows</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Left and right columns (skip corners — already checked)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── MULTI-SOURCE BFS ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── FINAL SCAN ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'X'</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'S'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                board</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'O'</span></code></pre></div>
+<hr>
+<h2>STEP 7: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(M × N)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  WHERE M = rows, N = cols
+</span>
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  Phase 1: Scan border cells                                     │
+  │    → 2M + 2N - 4 cells (perimeter)                             │
+  │    → O(M + N)                                                   │
+  │                                                                 │
+  │  Phase 2: DFS/BFS from border 'O's                              │
+  │    → Each cell visited AT MOST ONCE                             │
+  │    → Why? Once marked 'S', never processed again                │
+  │    → Total cells: at most M × N                                 │
+  │    → O(M × N)                                                   │
+  │                                                                 │
+  │  Phase 3: Final scan of entire board                            │
+  │    → Visit every cell once                                      │
+  │    → O(M × N)                                                   │
+  │                                                                 │
+  │  TOTAL: O(M + N) + O(M × N) + O(M × N) = O(M × N)             │
+  └─────────────────────────────────────────────────────────────────┘
+
+  WHY each cell visited at most once in Phase 2:
+    → When we visit a cell, we change it from 'O' to 'S'
+    → Our condition checks "board[nr][nc] == 'O'"
+    → 'S' cells are skipped → no revisiting
+    → Same principle as "visited set" but done IN-PLACE
+      (modifying the board IS our visited tracking!)</code></pre></div>
+<h3>Space Complexity: O(M × N) worst case</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  DFS recursive: O(M × N) for recursion stack                   │
+  │    → Worst case: entire board is 'O', border 'O' exists        │
+  │    → DFS explores all M×N cells → stack depth = M×N            │
+  │    → DANGER: Python recursion limit! (Problem for large boards)│
+  │                                                                 │
+  │  BFS iterative: O(M × N) for queue                             │
+  │    → Worst case: all cells added to queue                       │
+  │    → But no recursion limit issue!                              │
+  │                                                                 │
+  │  DFS iterative: O(M × N) for explicit stack                    │
+  │    → Same as BFS but uses stack instead of queue                │
+  │    → No recursion limit issue!                                  │
+  │                                                                 │
+  │  In practice: O(border-connected 'O' count)                     │
+  │    → Usually much less than M×N                                 │
+  └─────────────────────────────────────────────────────────────────┘
+
+  BONUS: No extra "visited" array needed!
+    → We use the board itself as the visited tracker
+    → 'O' = unvisited, 'S' = visited
+    → This is the IN-PLACE marking technique (from Problem 7)</code></pre></div>
+<hr>
+<h2>STEP 8: HOW THIS CONNECTS TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Problem 5 (Connected Components):                               │
+  │    → Surrounded Regions = "which component touches border?"      │
+  │    → Instead of counting components, we classify them            │
+  │                                                                  │
+  │  Problem 6 (Flood Fill):                                         │
+  │    → Grid as implicit graph, 4-directional neighbors             │
+  │    → DFS/BFS on grid — EXACT same traversal pattern              │
+  │    → Flood fill marks connected cells — we do the same with 'S' │
+  │                                                                  │
+  │  Problem 7 (Number of Islands):                                  │
+  │    → Both find connected components on a grid                    │
+  │    → Islands: count ALL components                               │
+  │    → Surrounded Regions: classify components by border contact   │
+  │    → In-place marking technique reused                           │
+  │                                                                  │
+  │  Problem 13 (Rotten Oranges — Multi-Source BFS):                 │
+  │    → BFS version uses MULTI-SOURCE BFS from all border 'O's     │
+  │    → Same pattern: multiple starting points in queue at once     │
+  │                                                                  │
+  │  Problem 14 (01 Matrix — Reverse Thinking):                      │
+  │    → KEY CONNECTION: "Start from the ANSWER, work backward"      │
+  │    → Problem 14: start from 0s, find distance to nearest 0      │
+  │    → Problem 16: start from border, find all border-connected   │
+  │    → SAME reverse thinking principle                             │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 9: WHEN TO USE THIS VS ALTERNATIVES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────┬──────────────────────────────────────┐
+</span>  │  Approach                │  When to use                         │
+  ├──────────────────────────┼──────────────────────────────────────┤
+  │  Boundary DFS/BFS        │  ★ "Is this region connected to      │
+  │  (this problem)          │    the boundary?"                    │
+  │                          │  ★ "Capture everything NOT on border"│
+  │                          │  ★ Most natural for this problem     │
+  │                          │                                      │
+  │  Forward component scan  │  When you need to classify EACH      │
+  │  (brute force)           │  component by some property          │
+  │                          │  (not just border vs non-border)     │
+  │                          │                                      │
+  │  Union-Find (Problem 27) │  When you need dynamic connectivity  │
+  │                          │  → Can connect all border 'O's to    │
+  │                          │    a virtual "border" node            │
+  │                          │  → Then check: is this 'O' connected │
+  │                          │    to the border node?               │
+  │                          │  → More complex but same O(M×N)      │
+  └──────────────────────────┴──────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 10: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Diagonal Connections Counted?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Currently: 4-directional (up, down, left, right)
+</span>  
+  If 8-directional (including diagonals):
+    directions = [(1,0),(-1,0),(0,1),(0,-1),
+                  (1,1),(1,-1),(-1,1),(-1,-1)]
+  
+  → More cells would be border-connected
+  → Fewer regions would be "surrounded"
+  → Same algorithm, just more directions to check
+  
+  Example impact:
+       [X] [X] [X]
+       [X] [O] [X]        4-dir: O is surrounded
+       [X] [X] [O]        8-dir: O connects diagonally to border O!
+                           → NOT surrounded with 8-dir</code></pre></div>
+<h3>What if We Needed to Count Surrounded Regions?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Instead of capturing, just count how many surrounded groups exist.
+</span>  
+  → Phase 1+2: same (mark border-connected as 'S')
+  → Phase 3: instead of flipping, run island counting (Problem 7)
+             on remaining 'O' cells
+  → Count = number of surrounded regions</code></pre></div>
+<h3>What if Board Has More Than Two Characters?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Example: 'X', 'O', 'W' (wall, open, water)
+</span>  "Capture 'O' regions surrounded by 'X' that don't touch 'W'"
+  
+  → Adjust the DFS/BFS condition
+  → Instead of "== 'O'", might be "!= 'X'" or specific rules
+  → Same framework, different transition rules</code></pre></div>
+<hr>
+<h2>STEP 11: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Scanning from INTERIOR instead of BORDER            ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG approach:                                                 ║
+  ║    "For each interior 'O', check if it can reach border"         ║
+  ║    → Runs separate DFS for EACH 'O' cell                        ║
+  ║    → O(M×N) cells × O(M×N) DFS each = O((M×N)²) WORST CASE    ║
+  ║                                                                  ║
+  ║  RIGHT approach:                                                 ║
+  ║    "Start from border, mark everything reachable"                ║
+  ║    → ONE pass of DFS/BFS covers ALL border-connected cells      ║
+  ║    → O(M×N) total                                                ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Forgetting to handle single-row or single-column    ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Board: [O, X, O]  (1 row, 3 cols)                              ║
+  ║  → Every cell IS a border cell                                   ║
+  ║  → Nothing should be captured                                    ║
+  ║  → Our algorithm handles this: all 'O's found on border scan    ║
+  ║    → all marked 'S' → all restored to 'O'  ✓                    ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Recursion depth for large boards                     ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Board: 1000 × 1000, all 'O' with border 'O'                    ║
+  ║  → DFS recursion depth: up to 1,000,000                         ║
+  ║  → Python default limit: ~1000 → CRASH!                         ║
+  ║                                                                  ║
+  ║  FIX: Use BFS (Version 2) or iterative DFS (Version 3)          ║
+  ║  OR:  sys.setrecursionlimit(1000001)  ← not recommended         ║
+  ║                                                                  ║
+  ║  INTERVIEW TIP: mention this tradeoff proactively               ║
+  ║  "I'll use BFS to avoid recursion limit issues on large inputs" ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Modifying board while scanning border                ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  In Version 4 (optimized border scan):                           ║
+  ║  → We scan top row, bottom row, left col, right col             ║
+  ║  → Corner cells (0,0), (0,cols-1), etc. appear in BOTH scans   ║
+  ║  → After first scan marks (0,0) as 'S', second scan sees 'S'   ║
+  ║  → This is FINE: we only process 'O', so 'S' is skipped        ║
+  ║  → But be aware of this overlap                                 ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Empty board                                          ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  board = [] or board = [[]]                                      ║
+  ║  → Check at start: if not board or not board[0]: return          ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: All 'X' board                                       ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  No 'O' cells → no border 'O's → no DFS → no changes           ║
+  ║  Phase 3 sees all 'X' → no flips → correct  ✓                   ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: All 'O' board                                       ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Every cell is 'O' → border 'O's exist → DFS marks ALL as 'S' ║
+  ║  → Phase 3 restores ALL to 'O' → nothing captured  ✓            ║
+  ║  → Correct! If everything connects to border, nothing surrounded║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Surrounded by" / "enclosed by" / "captured"           │
+  │         → Boundary connectivity problem                            │
+  │         → Think: "what's connected to the BORDER?"                 │
+  │                                                                    │
+  │  SIGNAL 2: "Regions on the border are special/safe"                │
+  │         → Start from border, work inward                           │
+  │         → REVERSE THINKING                                         │
+  │                                                                    │
+  │  SIGNAL 3: Grid with two types, classify regions                   │
+  │         → Grid graph + connected components (Problem 7)            │
+  │         → Additional property: border contact                      │
+  │                                                                    │
+  │  THINKING CHAIN:                                                   │
+  │  "Surrounded regions on grid"                                      │
+  │     → grid graph problem                                           │
+  │        → need to check border connectivity                         │
+  │           → FORWARD: check each region → complex                   │
+  │           → REVERSE: start from border → elegant ★                 │
+  │              → DFS/BFS from border 'O's                            │
+  │                 → mark safe, capture the rest                      │
+  │                                                                    │
+  │  THE PATTERN NAME: "Boundary DFS/BFS"                              │
+  │                                                                    │
+  │  SIMILAR PROBLEMS:                                                 │
+  │    → Number of Enclaves (count cells in surrounded regions)        │
+  │    → Walls and Gates (BFS from gates to fill distances)            │
+  │    → Pacific Atlantic Water Flow (Problem 17 — next!)              │
+  │    → Any "which cells can reach the boundary?" problem             │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 13: THE REVERSE THINKING PATTERN — A General Framework</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  WHEN TO THINK IN REVERSE:                                       │
+  │                                                                  │
+  │  Problem says:        Think reverse:                             │
+  │  ─────────────        ──────────────                             │
+  │  "Find distance       "Start FROM zeros,                        │
+  │   to nearest 0"        BFS outward" (Problem 14)                │
+  │                                                                  │
+  │  "Is this region      "Start FROM border,                       │
+  │   surrounded?"          mark what's NOT surrounded" (Problem 16)│
+  │                                                                  │
+  │  "Can water flow      "Start FROM ocean,                        │
+  │   to the ocean?"       flow backward uphill" (Problem 17 next!) │
+  │                                                                  │
+  │  "Can I reach          "Start FROM exit,                        │
+  │   the exit?"            see what reaches me"                    │
+  │                                                                  │
+  │  GENERAL RULE:                                                   │
+  │  If there are FEW targets and MANY sources,                      │
+  │  start from TARGETS (reverse) instead of SOURCES (forward).     │
+  │                                                                  │
+  │  Here:                                                           │
+  │    Forward: many interior 'O' cells → each checks border path   │
+  │    Reverse: few border 'O' cells → mark everything reachable    │
+  │    Reverse wins!                                                 │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: BOUNDARY-FIRST TRAVERSAL                   ║
+  ║                                                                    ║
+  ║   → When the problem involves "surrounded" or "enclosed"          ║
+  ║     regions on a grid, think from the BOUNDARY INWARD             ║
+  ║                                                                    ║
+  ║   → THREE-PHASE pattern:                                          ║
+  ║     Phase 1: Find special cells on the boundary                   ║
+  ║     Phase 2: DFS/BFS inward to mark connected cells               ║
+  ║     Phase 3: Process unmarked cells (the "surrounded" ones)       ║
+  ║                                                                    ║
+  ║   → This is REVERSE THINKING (from Problem 14) applied to grids  ║
+  ║     "Don't ask 'is this cell surrounded?'                         ║
+  ║      Ask 'which cells are NOT surrounded?' and mark them"         ║
+  ║                                                                    ║
+  ║   → In-place marking ('O' → 'S' → 'O'/'X') avoids extra space   ║
+  ║                                                                    ║
+  ║   → For large grids, prefer BFS or iterative DFS                  ║
+  ║     over recursive DFS (recursion limit!)                         ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h3>CONNECTION TO NEXT PROBLEM</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 16 → Boundary DFS/BFS: start from border, mark inward
+</span>  Problem 17 → Pacific Atlantic Water Flow: start from TWO borders,
+               find INTERSECTION
+  
+  Problem 17 takes this boundary-first idea and DOUBLES it:
+    → BFS from Pacific border (top + left)
+    → BFS from Atlantic border (bottom + right)  
+    → Answer = cells reachable from BOTH
+    
+  It's essentially Problem 16 run TWICE with different borders,
+  then finding the OVERLAP.</code></pre></div>
+<hr>
+<p><strong>Problem 16 Complete.</strong><br>
+<strong>Ready for Problem 17: Pacific Atlantic Water Flow (Dual Multi-Source BFS)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="9" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-15.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 16 of 50</span>
+            </div>
+            <a href="problem-17.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

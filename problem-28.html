@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 28: Problem 28: Number of Provinces (Union-Find Application) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="5">
+<div class="px-2"><h1>Problem 28: Number of Provinces (Union-Find Application)</h1>
+<h2>[Algorithm Family: Union-Find / Disjoint Set Union]</h2>
+<h2>[Phase 3: Standard Interview — "I can solve real interview graph problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>There are n cities. Some of them are connected directly by roads,
+</span>and some are not. A "province" is a group of cities that are
+connected to each other directly OR indirectly (through other cities).
+
+You are given an n × n adjacency matrix isConnected where:
+  → isConnected[i][j] = 1 means city i and city j have a direct road
+  → isConnected[i][j] = 0 means they don't
+
+Find the total number of provinces (groups of connected cities).
+
+Input:
+  isConnected = [
+    [1, 1, 0, 0, 0],
+    [1, 1, 1, 0, 0],
+    [0, 1, 1, 0, 0],
+    [0, 0, 0, 1, 1],
+    [0, 0, 0, 1, 1]
+  ]
+
+Output: 2
+
+Explanation:
+  → Cities {0, 1, 2} are connected to each other → Province 1
+  → Cities {3, 4} are connected to each other → Province 2
+  → Total: 2 provinces</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Reading the adjacency matrix row by row:
+</span>
+  Row 0: [1, 1, 0, 0, 0]  →  0 connects to 0(self), 1
+  Row 1: [1, 1, 1, 0, 0]  →  1 connects to 0, 1(self), 2
+  Row 2: [0, 1, 1, 0, 0]  →  2 connects to 1, 2(self)
+  Row 3: [0, 0, 0, 1, 1]  →  3 connects to 3(self), 4
+  Row 4: [0, 0, 0, 1, 1]  →  4 connects to 3, 4(self)
+
+  The graph:
+
+      Province 1          Province 2
+    ┌──────────┐        ┌─────────┐
+    │          │        │         │
+    │  0 ── 1  │        │  3 ── 4 │
+    │      |   │        │         │
+    │      2   │        └─────────┘
+    │          │
+    └──────────┘
+
+  Two separate groups → 2 provinces</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer           │  Why?                  ║
+╠══════════════════╪═══════════════════╪════════════════════════╣
+║  NODES           │  Cities 0-4       │  Each city = node      ║
+║  EDGES           │  Direct roads     │  isConnected[i][j]=1   ║
+║  Directed?       │  NO (undirected)  │  Matrix is SYMMETRIC   ║
+║                  │                   │  [i][j] = [j][i]       ║
+║  Weighted?       │  NO               │  Just 0 or 1           ║
+║  Cyclic?         │  YES              │  0-1-2 could form one  ║
+║  Connected?      │  NO               │  Two separate groups!  ║
+║  Representation  │  Adjacency MATRIX │  Given as matrix       ║
+║  What we seek    │  COUNT of         │  "How many separate    ║
+║                  │  components       │   groups?"             ║
+╚══════════════════╧═══════════════════╧════════════════════════╝</code></pre></div>
+<h3>Key Observation: Matrix is Always Symmetric Here</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  isConnected[i][j] = isConnected[j][i]  ALWAYS
+</span>  
+  Because: "if city i connects to city j, then j connects to i"
+  → UNDIRECTED graph
+  → Diagonal is always 1 (every city connects to itself)
+
+       0  1  2  3  4
+    0 [1, 1, 0, 0, 0]     Notice the symmetry
+    1 [1, 1, 1, 0, 0]     across the diagonal ╲
+    2 [0, 1, 1, 0, 0]                          ╲
+    3 [0, 0, 0, 1, 1]
+    4 [0, 0, 0, 1, 1]</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<h3>Naive Approach: Check Every Pair, Build Groups Manually</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For each pair (i, j):
+</span>    If isConnected[i][j] == 1:
+      → Put i and j in the same group
+      → But merging groups is messy without a proper structure
+
+  Example of the mess:
+    → (0,1) connected → group: {0, 1}
+    → (1,2) connected → group: {1, 2}
+    → But wait, 0 was with 1, and 1 is now with 2
+    → So {0, 1, 2} should all be ONE group
+    → Tracking these merges manually = PAINFUL
+
+  Without Union-Find, you'd need to:
+    → Maintain a list of sets
+    → For each new edge, search ALL sets to find which ones contain u or v
+    → Merge those sets
+    → Searching all sets each time → O(n) per edge
+    → Total: O(n² × n) = O(n³)</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  O(n³) for the naive set-merging approach
+</span>  
+  For n = 10,000 cities:
+    → 10^12 operations → FAR too slow
+  
+  We need something that handles "merge two groups" FAST
+  → That's EXACTLY what Union-Find does (Problem 27)</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<h3>The Thinking Process</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "I see CITIES and CONNECTIONS"
+</span>    → This is a GRAPH problem
+
+  "I need to count how many SEPARATE GROUPS exist"
+    → This is CONNECTED COMPONENTS (Problem 5)
+
+  "I've solved connected components before with BFS/DFS (Problem 5)"
+    → That approach works here too!
+    → BUT this problem is ALSO a perfect fit for Union-Find (Problem 27)
+
+  "Input is an adjacency MATRIX"
+    → I need to extract edges from it
+    → For Union-Find: process each edge as a union operation
+
+  TWO VALID APPROACHES:
+    Approach A: BFS/DFS (from Problem 5)
+    Approach B: Union-Find (from Problem 27) ← FOCUS of this problem</code></pre></div>
+<h3>Why Union-Find is a Natural Fit</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  What does Union-Find do?
+</span>    → Tracks which elements are in the same group
+    → union(a, b): merge group containing a with group containing b
+    → find(a): which group does a belong to?
+    → Count distinct groups at the end
+
+  What does this problem ask?
+    → Given connections, how many groups?
+    → EXACTLY what Union-Find is designed for!
+
+  The mapping is DIRECT:
+    → Each city = an element in Union-Find
+    → Each road (isConnected[i][j] = 1) = a union(i, j) operation
+    → Answer = number of distinct roots at the end</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — Union-Find Approach</h2>
+<h3>Setup: Union-Find Structure (from Problem 27)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Recap of Union-Find (details in Problem 27):
+</span>    → parent[i] = parent of node i (initially itself)
+    → rank[i] = approximate depth of tree rooted at i
+    → find(x): follow parent pointers to root (with path compression)
+    → union(x, y): connect roots of x and y (by rank)</code></pre></div>
+<h3>Step-by-Step Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  n = 5
+</span>  isConnected = [
+    [1, 1, 0, 0, 0],
+    [1, 1, 1, 0, 0],
+    [0, 1, 1, 0, 0],
+    [0, 0, 0, 1, 1],
+    [0, 0, 0, 1, 1]
+  ]
+
+  ═══════════════════════════════════════════════════════
+  INITIALIZATION
+  ═══════════════════════════════════════════════════════
+
+  parent = [0, 1, 2, 3, 4]    ← each node is its own root
+  rank   = [0, 0, 0, 0, 0]    ← all trees have depth 0
+  components = 5                ← start with 5 separate groups
+
+  Visually:
+    {0}  {1}  {2}  {3}  {4}   ← 5 components
+
+
+  ═══════════════════════════════════════════════════════
+  SCANNING THE MATRIX
+  ═══════════════════════════════════════════════════════
+
+  Key optimization: only scan UPPER TRIANGLE (i &lt; j)
+  Because matrix is symmetric, isConnected[i][j] = isConnected[j][i]
+  So we avoid processing each edge twice.
+
+  Also skip diagonal (i == j) — self-connections are meaningless.
+
+       0  1  2  3  4
+    0 [_, 1, 0, 0, 0]     Only scan cells where i &lt; j
+    1 [_, _, 1, 0, 0]     (upper triangle, marked with values)
+    2 [_, _, _, 0, 0]
+    3 [_, _, _, _, 1]
+    4 [_, _, _, _, _]
+
+  Edges to process: (0,1), (1,2), (3,4)
+
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Processing isConnected[0][1] = 1  →  union(0, 1)            │
+  │                                                              │
+  │   find(0) = 0,  find(1) = 1                                 │
+  │   Different roots → MERGE                                   │
+  │   rank[0] == rank[1] == 0 → attach 1 under 0, rank[0]++    │
+  │                                                              │
+  │   parent = [0, 0, 2, 3, 4]                                  │
+  │   rank   = [1, 0, 0, 0, 0]                                  │
+  │   components = 4                                             │
+  │                                                              │
+  │   Visually:                                                  │
+  │     {0, 1}  {2}  {3}  {4}                                   │
+  │                                                              │
+  │       0                                                      │
+  │       |                                                      │
+  │       1                                                      │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Processing isConnected[0][2] = 0  →  SKIP (no connection)   │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Processing isConnected[0][3] = 0  →  SKIP                   │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Processing isConnected[0][4] = 0  →  SKIP                   │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Processing isConnected[1][2] = 1  →  union(1, 2)            │
+  │                                                              │
+  │   find(1): parent[1]=0, parent[0]=0 → root = 0              │
+  │            path compression: parent[1] = 0 (already)         │
+  │   find(2): parent[2]=2 → root = 2                           │
+  │                                                              │
+  │   root_1 = 0,  root_2 = 2                                   │
+  │   Different roots → MERGE                                   │
+  │   rank[0] = 1 &gt; rank[2] = 0 → attach 2 under 0             │
+  │                                                              │
+  │   parent = [0, 0, 0, 3, 4]                                  │
+  │   rank   = [1, 0, 0, 0, 0]                                  │
+  │   components = 3                                             │
+  │                                                              │
+  │   Visually:                                                  │
+  │     {0, 1, 2}  {3}  {4}                                     │
+  │                                                              │
+  │       0                                                      │
+  │      / \                                                     │
+  │     1   2                                                    │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Processing isConnected[1][3] = 0  →  SKIP                   │
+  │ Processing isConnected[1][4] = 0  →  SKIP                   │
+  │ Processing isConnected[2][3] = 0  →  SKIP                   │
+  │ Processing isConnected[2][4] = 0  →  SKIP                   │
+  └──────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Processing isConnected[3][4] = 1  →  union(3, 4)            │
+  │                                                              │
+  │   find(3) = 3,  find(4) = 4                                 │
+  │   Different roots → MERGE                                   │
+  │   rank[3] == rank[4] == 0 → attach 4 under 3, rank[3]++    │
+  │                                                              │
+  │   parent = [0, 0, 0, 3, 3]                                  │
+  │   rank   = [1, 0, 0, 1, 0]                                  │
+  │   components = 2                                             │
+  │                                                              │
+  │   Visually:                                                  │
+  │     {0, 1, 2}  {3, 4}                                       │
+  │                                                              │
+  │       0          3                                           │
+  │      / \         |                                           │
+  │     1   2        4                                           │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  FINAL STATE
+  ═══════════════════════════════════════════════════════════════
+
+  parent = [0, 0, 0, 3, 3]
+  rank   = [1, 0, 0, 1, 0]
+  components = 2
+
+  Province 1: {0, 1, 2}   (root = 0)
+  Province 2: {3, 4}       (root = 3)
+
+  ANSWER: 2 provinces ✓</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Solution A: Union-Find (Primary Focus)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">class</span><span> </span><span class="token" style="color: rgb(43, 145, 175);">UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Union-Find with path compression + union by rank.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Full explanation in Problem 27 — here we REUSE it.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">__init__</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># each node is its own root</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># all trees start with depth 0</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>components </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> n            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># start with n separate groups</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Path compression: make every node point directly to root</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        root_x </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        root_y </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Already in same group — no merge needed</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> root_x </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> root_y</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Union by rank: attach shorter tree under taller tree</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_y
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_x
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_y</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> root_x
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>root_x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># One fewer component after a successful merge</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>components </span><span class="token" style="color: rgb(57, 58, 52);">-=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">findCircleNum</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>isConnected</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Count number of provinces (connected components).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Strategy:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      1. Create Union-Find with n cities
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      2. For each connection in matrix, union those cities
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      3. Return number of remaining components
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Why Union-Find?
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Each connection = "merge these two cities' groups"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Count groups at the end
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → This is EXACTLY what Union-Find tracks
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>isConnected</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    uf </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Scan upper triangle of matrix (i &lt; j)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Why upper triangle only?</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   → Matrix is symmetric: [i][j] == [j][i]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   → Processing both would be redundant</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   → union(i,j) and union(j,i) have same effect</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   → Skip diagonal: [i][i] is always 1 (self-connection)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>           </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># j starts at i+1 (upper triangle)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> isConnected</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>components
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>isConnected </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Number of provinces: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">findCircleNum</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">isConnected</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 2</span></code></pre></div>
+<hr>
+<h3>Solution B: DFS Approach (Comparison from Problem 5)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">findCircleNum_DFS</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>isConnected</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Count provinces using DFS — same as connected components (Problem 5).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Strategy:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      1. For each unvisited city, run DFS
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      2. DFS marks all reachable cities as visited
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      3. Each DFS launch = one new province
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This converts the adjacency MATRIX into implicit traversal:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Neighbors of city i = all j where isConnected[i][j] == 1
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>isConnected</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    provinces </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>city</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>city</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Check all potential neighbors from matrix row</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> isConnected</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>city</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Launch DFS from each unvisited city</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> city </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>city</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>city</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># explore entire province</span><span>
+</span><span>            provinces </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># count this province</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> provinces
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>isConnected </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Number of provinces (DFS): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">findCircleNum_DFS</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">isConnected</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 2</span></code></pre></div>
+<hr>
+<h3>Solution C: BFS Approach (Another Comparison)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">findCircleNum_BFS</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>isConnected</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Count provinces using BFS — same logic as DFS version.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    BFS from each unvisited city, mark all reachable, count launches.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>isConnected</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    provinces </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> city </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>city</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># BFS from this city</span><span>
+</span><span>            queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>city</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>city</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> isConnected</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                        queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            provinces </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> provinces</span></code></pre></div>
+<hr>
+<h2>STEP 6: DFS TRACE (for comparison with Union-Find trace)</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  isConnected = [
+</span>    [1, 1, 0, 0, 0],
+    [1, 1, 1, 0, 0],
+    [0, 1, 1, 0, 0],
+    [0, 0, 0, 1, 1],
+    [0, 0, 0, 1, 1]
+  ]
+
+  visited = [F, F, F, F, F]
+  provinces = 0
+
+  ┌──────────────────────────────────────────────┐
+  │ city = 0: not visited → launch DFS           │
+  │                                              │
+  │   dfs(0):                                    │
+  │     visited = [T, F, F, F, F]                │
+  │     neighbor 1: isConnected[0][1]=1, not vis │
+  │       → dfs(1):                              │
+  │         visited = [T, T, F, F, F]            │
+  │         neighbor 0: visited → skip           │
+  │         neighbor 2: isConnected[1][2]=1      │
+  │           → dfs(2):                          │
+  │             visited = [T, T, T, F, F]        │
+  │             neighbor 1: visited → skip       │
+  │             no more connections → return     │
+  │         no more connections → return         │
+  │     neighbor 2: visited → skip               │
+  │     no more → return                         │
+  │                                              │
+  │   provinces = 1                              │
+  │   Found province: {0, 1, 2}                  │
+  └──────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────┐
+  │ city = 1: VISITED → skip                     │
+  │ city = 2: VISITED → skip                     │
+  └──────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────┐
+  │ city = 3: not visited → launch DFS           │
+  │                                              │
+  │   dfs(3):                                    │
+  │     visited = [T, T, T, T, F]                │
+  │     neighbor 4: isConnected[3][4]=1          │
+  │       → dfs(4):                              │
+  │         visited = [T, T, T, T, T]            │
+  │         neighbor 3: visited → skip           │
+  │         → return                             │
+  │     → return                                 │
+  │                                              │
+  │   provinces = 2                              │
+  │   Found province: {3, 4}                     │
+  └──────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────┐
+  │ city = 4: VISITED → skip                     │
+  └──────────────────────────────────────────────┘
+
+  ANSWER: 2 provinces ✓</code></pre></div>
+<hr>
+<h2>STEP 7: COMPLEXITY ANALYSIS</h2>
+<h3>Union-Find Approach</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  TIME: O(V² × α(V))  ≈  O(V²)                                │
+  │                                                                │
+  │  WHY:                                                          │
+  │    → Scanning upper triangle of V×V matrix: O(V²/2) = O(V²)   │
+  │    → For each cell with value 1: one union operation           │
+  │    → Each union: O(α(V)) ≈ O(1) amortized                     │
+  │    → At most V²/2 union operations                             │
+  │    → Total: O(V²) × O(α(V)) ≈ O(V²)                          │
+  │                                                                │
+  │  SPACE: O(V)                                                   │
+  │                                                                │
+  │  WHY:                                                          │
+  │    → parent array: O(V)                                        │
+  │    → rank array: O(V)                                          │
+  │    → No additional storage needed                              │
+  │    → Input matrix NOT counted (given to us)                    │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>DFS/BFS Approach</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  TIME: O(V²)                                                   │
+  │                                                                │
+  │  WHY:                                                          │
+  │    → For each node, we scan its ENTIRE row to find neighbors   │
+  │    → Each row has V entries                                    │
+  │    → V nodes × V entries per row = O(V²)                       │
+  │                                                                │
+  │  NOTE: If we had adjacency LIST, DFS would be O(V + E)        │
+  │    → But with adjacency MATRIX, finding neighbors costs O(V)   │
+  │    → So even DFS becomes O(V²) with matrix input               │
+  │                                                                │
+  │  SPACE: O(V)                                                   │
+  │                                                                │
+  │  WHY:                                                          │
+  │    → visited array: O(V)                                       │
+  │    → Recursion stack: O(V) worst case (all in one province)    │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Head-to-Head Comparison</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────┬──────────────┬──────────────┬────────────────┐
+</span>  │  Approach        │  Time        │  Space       │  Notes          │
+  ├─────────────────┼──────────────┼──────────────┼────────────────┤
+  │  Union-Find      │  O(V²)       │  O(V)        │  No recursion   │
+  │  DFS             │  O(V²)       │  O(V)        │  Stack overflow?│
+  │  BFS             │  O(V²)       │  O(V)        │  Queue-based    │
+  └─────────────────┴──────────────┴──────────────┴────────────────┘
+
+  Same complexity! Why choose Union-Find then?
+  → Read the next section...</code></pre></div>
+<hr>
+<h2>STEP 8: UNION-FIND vs DFS — WHEN TO PICK WHICH</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════════╗
+</span>  ║                UNION-FIND vs DFS FOR CONNECTED COMPONENTS            ║
+  ╠═══════════════════════════════════════════════════════════════════════╣
+  ║                                                                       ║
+  ║  USE DFS/BFS WHEN:                                                    ║
+  ║  ─────────────────                                                    ║
+  ║  → Graph is given ALL AT ONCE (static)                                ║
+  ║  → You need to TRAVERSE the graph anyway                              ║
+  ║  → You need to LIST all nodes in each component                       ║
+  ║  → Simple and straightforward                                         ║
+  ║                                                                       ║
+  ║  USE UNION-FIND WHEN:                                                 ║
+  ║  ────────────────────                                                 ║
+  ║  → Edges arrive ONE BY ONE (dynamic / streaming)                      ║
+  ║  → You need to answer "are X and Y connected?" DURING edge additions  ║
+  ║  → You need to MERGE groups and COUNT groups dynamically              ║
+  ║  → Graph modifications happen (edges added over time)                 ║
+  ║  → You want to AVOID recursion (no stack overflow risk)               ║
+  ║                                                                       ║
+  ║  EXAMPLE — Dynamic scenario:                                          ║
+  ║    "100,000 cities. Roads are built one by one.                       ║
+  ║     After each road, tell me: how many provinces now?"                ║
+  ║                                                                       ║
+  ║    DFS approach: rebuild graph + re-run DFS after EVERY road          ║
+  ║                  → O(V + E) per road → O(E × (V+E)) total = SLOW     ║
+  ║                                                                       ║
+  ║    Union-Find:   union(u, v) per road → O(α(V)) per road             ║
+  ║                  → O(E × α(V)) total ≈ O(E) = FAST                   ║
+  ║                                                                       ║
+  ╚═══════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<h3>The Dynamic Advantage — Illustrated</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Scenario: edges arrive one at a time, query component count after each
+</span>
+  Edges arriving: (0,1), (2,3), (1,2), (4,5), (3,5)
+
+  ┌──────────────┬────────────────────────────────┬──────────────┐
+  │  Edge Added   │  Union-Find State              │  Components  │
+  ├──────────────┼────────────────────────────────┼──────────────┤
+  │  (start)      │  {0}{1}{2}{3}{4}{5}            │  6           │
+  │  (0,1)        │  {0,1}{2}{3}{4}{5}             │  5           │
+  │  (2,3)        │  {0,1}{2,3}{4}{5}              │  4           │
+  │  (1,2)        │  {0,1,2,3}{4}{5}               │  3           │
+  │  (4,5)        │  {0,1,2,3}{4,5}                │  2           │
+  │  (3,5)        │  {0,1,2,3,4,5}                 │  1           │
+  └──────────────┴────────────────────────────────┴──────────────┘
+
+  Each step: O(α(V)) ≈ O(1)
+  DFS would need O(V+E) per step to recompute from scratch!</code></pre></div>
+<hr>
+<h2>STEP 9: ADDITIONAL TEST CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST CASE 2: All connected (1 province) ───</span><span>
+</span><span>isConnected_2 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findCircleNum</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>isConnected_2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 1</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#  0 ── 1</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#  |  ╲ |</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#  └── 2 ┘     ← All connected, 1 province</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST CASE 3: All disconnected (n provinces) ───</span><span>
+</span><span>isConnected_3 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findCircleNum</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>isConnected_3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 3</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#  0    1    2    ← No connections, each is its own province</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST CASE 4: Single node ───</span><span>
+</span><span>isConnected_4 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findCircleNum</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>isConnected_4</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 1</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST CASE 5: Chain connection ───</span><span>
+</span><span>isConnected_5 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findCircleNum</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>isConnected_5</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 1</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#  0 ── 1 ── 2 ── 3    ← All indirectly connected via chain</span></code></pre></div>
+<hr>
+<h2>STEP 10: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Input Were Edge List Instead of Matrix?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">provinces_from_edge_list</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same problem but input = edge list instead of matrix.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is FASTER with Union-Find: O(E × α(V)) instead of O(V²)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    because we don't scan the entire matrix.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    uf </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>components
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># n=5, edges=[(0,1),(0,2),(1,2),(3,4)]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># → 2 provinces: {0,1,2} and {3,4}</span></code></pre></div>
+<h3>What if Graph Were Directed?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Province" concept breaks down for directed graphs.
+</span>  
+  In directed graphs, we'd ask about:
+    → Weakly connected components (ignore direction → same as undirected)
+    → Strongly connected components (every node reaches every other)
+      → That's Problem 36 (Kosaraju's algorithm)
+  
+  For this problem: matrix is symmetric → undirected → standard components</code></pre></div>
+<h3>What if Graph Were Weighted?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Weights don't matter for connectivity.
+</span>  → If there's ANY edge (regardless of weight), cities are connected.
+  → Same algorithm, just check isConnected[i][j] &gt; 0 instead of == 1
+  
+  Weights matter for:
+    → Shortest path (Problem 23 Dijkstra)
+    → Minimum spanning tree (Problem 30 Kruskal)
+    → NOT for "are they connected?"</code></pre></div>
+<hr>
+<h2>STEP 11: CONNECTION TO PREVIOUS AND FUTURE PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  BUILDS ON:                                                     │
+  │                                                                 │
+  │  Problem 2  → Input is adjacency MATRIX (we learned to read it)│
+  │  Problem 5  → Connected components concept (BFS/DFS approach)  │
+  │  Problem 27 → Union-Find data structure (we built it there)    │
+  │                                                                 │
+  │  LEADS TO:                                                      │
+  │                                                                 │
+  │  Problem 29 → Redundant Connection                             │
+  │               (Union-Find for CYCLE DETECTION — "which edge     │
+  │                makes a cycle?" = "union returns false")         │
+  │                                                                 │
+  │  Problem 30 → Kruskal's MST                                    │
+  │               (Union-Find to check "does this edge create a     │
+  │                cycle?" while building minimum spanning tree)    │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Scanning full matrix instead of upper triangle      ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  NOT A BUG — but wasteful:                                       ║
+  ║                                                                  ║
+  ║  for i in range(n):                                              ║
+  ║      for j in range(n):         ← scans EVERYTHING              ║
+  ║          if isConnected[i][j]:                                   ║
+  ║              uf.union(i, j)     ← union(0,1) AND union(1,0)     ║
+  ║                                    both happen, but second is    ║
+  ║                                    harmless (same root → skip)   ║
+  ║                                                                  ║
+  ║  BETTER:                                                         ║
+  ║  for i in range(n):                                              ║
+  ║      for j in range(i+1, n):    ← upper triangle ONLY           ║
+  ║                                                                  ║
+  ║  Both correct. Upper triangle is ~2× faster in practice.         ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Forgetting isolated nodes                           ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If city 3 has NO roads to anyone:                               ║
+  ║    → It never appears in any union() call                        ║
+  ║    → But it IS its own province!                                 ║
+  ║    → Union-Find handles this: it starts with n components        ║
+  ║      and only decrements on successful merges                    ║
+  ║    → Isolated nodes remain as their own component ✓              ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Stack overflow with DFS on large input              ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If n = 100,000 and all cities in one province:                  ║
+  ║    → DFS recursion depth = 100,000                               ║
+  ║    → Python default recursion limit = 1,000                      ║
+  ║    → CRASH!                                                      ║
+  ║                                                                  ║
+  ║  Union-Find: ZERO recursion (iterative find with path comp)     ║
+  ║    → No stack overflow risk                                      ║
+  ║    → This is a real advantage in practice                        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: n = 1                                               ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  isConnected = [[1]]                                             ║
+  ║  → 1 city, 1 province                                           ║
+  ║  → No edges to process                                          ║
+  ║  → Union-Find starts with components = 1, never decrements      ║
+  ║  → Correct ✓                                                     ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 13: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TRIGGER WORDS:                                                    │
+  │    "groups"   "connected"   "provinces"   "clusters"               │
+  │    "friends of friends"   "how many separate ___?"                 │
+  │                                                                    │
+  │  MY THINKING PROCESS:                                              │
+  │                                                                    │
+  │  1. "I see entities and connections"                               │
+  │       → GRAPH problem                                              │
+  │                                                                    │
+  │  2. "I need to count separate groups"                              │
+  │       → CONNECTED COMPONENTS                                       │
+  │                                                                    │
+  │  3. "Is the graph static or dynamic?"                              │
+  │       → Static (given all at once): DFS or Union-Find both fine    │
+  │       → Dynamic (edges added over time): Union-Find wins           │
+  │                                                                    │
+  │  4. "Is input a matrix or edge list?"                              │
+  │       → Matrix: O(V²) either way — choose based on comfort        │
+  │       → Edge list: Union-Find = O(E·α(V)), DFS = O(V+E)          │
+  │                                                                    │
+  │  5. "Any constraints?"                                             │
+  │       → Large n + deep chains: Union-Find (no stack overflow)     │
+  │       → Need to list component members: DFS is more natural       │
+  │                                                                    │
+  │  DECISION:                                                         │
+  │    → Default to Union-Find when asked "count components"           │
+  │    → Mention DFS alternative to show breadth of knowledge          │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 14: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  NEW CONCEPT: Union-Find as a COMPONENT COUNTER                    ║
+  ║                                                                    ║
+  ║  → Start with n components                                        ║
+  ║  → Each successful union() decrements count by 1                  ║
+  ║  → Final count = number of connected components                   ║
+  ║                                                                    ║
+  ║  THE MENTAL MODEL:                                                 ║
+  ║                                                                    ║
+  ║    Problem 5 (DFS):     "Explore each group fully, count launches" ║
+  ║    Problem 28 (UF):     "Merge groups one edge at a time, count"  ║
+  ║                                                                    ║
+  ║  SAME ANSWER, DIFFERENT THINKING:                                  ║
+  ║    DFS  = "Let me EXPLORE the graph"                               ║
+  ║    UF   = "Let me MERGE groups as I see edges"                     ║
+  ║                                                                    ║
+  ║  THE REAL LESSON:                                                  ║
+  ║    Union-Find shines when you only care about CONNECTIVITY         ║
+  ║    (not paths, not distances, not order — just "same group?")      ║
+  ║    and especially when the graph is BUILT INCREMENTALLY.           ║
+  ║                                                                    ║
+  ║  PATTERN UNLOCKED:                                                 ║
+  ║    "Count components" + "edges given as pairs"                     ║
+  ║    → Union-Find is the CLEANEST solution                           ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>COMPLETE SOLUTION — CLEAN INTERVIEW VERSION</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">class</span><span> </span><span class="token" style="color: rgb(43, 145, 175);">UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">__init__</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>components </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        rx</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ry </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> rx </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> ry</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>ry</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            rx</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ry </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> ry</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> rx
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>ry</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> rx
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>ry</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>components </span><span class="token" style="color: rgb(57, 58, 52);">-=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">findCircleNum</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>isConnected</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>isConnected</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    uf </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> isConnected</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>components</span></code></pre></div>
+<hr>
+<h3>CONNECTION TO NEXT PROBLEM</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 28 → Union-Find to COUNT components
+</span>  Problem 29 → Union-Find to DETECT the edge that creates a CYCLE
+  
+  In Problem 29 (Redundant Connection):
+    → We add edges one by one using union()
+    → If union() returns False → both endpoints already in same group
+    → That edge is REDUNDANT (creates a cycle)
+    → Same Union-Find, new purpose: cycle detection instead of counting</code></pre></div>
+<hr>
+<p><strong>Problem 28 Complete.</strong><br>
+<strong>Ready for Problem 29: Redundant Connection (Cycle Detection via Union-Find)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="7" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-27.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 28 of 50</span>
+            </div>
+            <a href="problem-29.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

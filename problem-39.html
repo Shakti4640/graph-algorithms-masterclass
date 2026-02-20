@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 39: Problem 39: Shortest Path in Binary Matrix (0-1 BFS) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="9">
+<div class="px-2"><h1>Problem 39: Shortest Path in Binary Matrix (0-1 BFS)</h1>
+<h2>[Algorithm Family: 0-1 BFS — Deque-Based Shortest Path]</h2>
+<h2>[Phase 4: Advanced — "I can handle complex multi-concept problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are designing a network routing system. The network is a graph
+</span>where connections between routers have two types:
+  → Fiber optic links: cost = 0 (instant transfer)
+  → Copper links:      cost = 1 (one unit delay)
+
+Find the MINIMUM delay (cost) to send a packet from router 0
+to router N-1.
+
+Input:
+  n = 6  (routers: 0 to 5)
+  edges = [
+    [0, 1, 0],   # 0 → 1, fiber (cost 0)
+    [0, 2, 1],   # 0 → 2, copper (cost 1)
+    [1, 3, 0],   # 1 → 3, fiber (cost 0)
+    [2, 3, 1],   # 2 → 3, copper (cost 1)
+    [1, 4, 1],   # 1 → 4, copper (cost 1)
+    [3, 5, 0],   # 3 → 5, fiber (cost 0)
+    [4, 5, 1],   # 4 → 5, copper (cost 1)
+  ]
+
+Output: 0
+
+Explanation:
+  Path 0 →(0)→ 1 →(0)→ 3 →(0)→ 5
+  Total cost: 0 + 0 + 0 = 0  (all fiber!)</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>         0           1           0
+</span>    0 ────────→ 1 ────────→ 3 ────────→ 5
+    │           │                        ↑
+    │ 1         │ 1                      │ 1
+    ↓           ↓                        │
+    2 ────────→ (merges at 3)    4 ──────┘
+         1                        
+
+  More precisely:
+
+         ┌────── 0 ──────┐
+         │ (cost=0)       │ (cost=1)
+         ↓                ↓
+         1                2
+         │ (0)    │(1)    │ (1)
+         ↓        ↓       ↓
+         3 ←──────┘   ←──┘
+         │ (cost=0)
+         ↓
+         5 ←───── 4
+           (cost=1)
+
+  ASCII with costs on edges:
+
+    0 ——0——→ 1 ——0——→ 3 ——0——→ 5
+    |        |        ↑        ↑
+    1        1        1        1
+    ↓        ↓        |        |
+    2 ———1———→————————┘   4 ——┘
+             |
+             └———1————→ 4</code></pre></div>
+<h3>Clean Version</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>    Node 0:  → 1 (cost 0),  → 2 (cost 1)
+</span>    Node 1:  → 3 (cost 0),  → 4 (cost 1)
+    Node 2:  → 3 (cost 1)
+    Node 3:  → 5 (cost 0)
+    Node 4:  → 5 (cost 1)
+    Node 5:  (destination)
+
+    Paths from 0 to 5:
+      0→1→3→5:  0+0+0 = 0  ← BEST
+      0→1→4→5:  0+1+1 = 2
+      0→2→3→5:  1+1+0 = 2</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════╗
+</span>  ║  Property        │  Answer              │  Why?               ║
+  ╠══════════════════╪══════════════════════╪═════════════════════╣
+  ║  NODES           │  Routers 0-5         │  Network devices    ║
+  ║  EDGES           │  Links between them  │  Network connections║
+  ║  Directed?       │  YES                 │  Routing direction  ║
+  ║  Weighted?       │  YES — but only 0/1  │  Fiber vs copper    ║
+  ║  Cyclic?         │  Could be            │  Depends on layout  ║
+  ║  Connected?      │  Assume yes          │  Need path to exist ║
+  ║  Special?        │  Weights ∈ {0, 1}    │  KEY PROPERTY!      ║
+  ╚══════════════════╧══════════════════════╧═════════════════════╝
+
+  THE CRITICAL OBSERVATION:
+    Edge weights are ONLY 0 or 1.
+    Not arbitrary non-negative integers.
+    Just two possible values: 0 and 1.
+    
+    This special structure enables a FASTER algorithm
+    than Dijkstra.</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE &amp; KNOWN APPROACHES — WHY WE NEED SOMETHING NEW</h2>
+<h3>Approach 1: Standard BFS (Problem 9)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  BFS finds shortest path when ALL edges have EQUAL weight.
+</span>
+  Here edges have weight 0 AND weight 1 — NOT equal.
+
+  What goes wrong:
+
+    BFS explores level by level.
+    Level 0: node 0 (dist=0)
+    Level 1: node 1 (via cost-0 edge), node 2 (via cost-1 edge)
+    
+    BFS says: "1 and 2 are both 1 hop away"
+    Reality:  node 1 has cost 0, node 2 has cost 1
+    
+    BFS treats 0-cost edges same as 1-cost edges → WRONG DISTANCES
+
+  BFS gives: dist[1] = 1, dist[2] = 1
+  Correct:   dist[1] = 0, dist[2] = 1
+
+  VERDICT: BFS FAILS (doesn't handle mixed weights)</code></pre></div>
+<h3>Approach 2: Dijkstra (Problem 23)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Dijkstra handles arbitrary non-negative weights → WORKS here.
+</span>  
+  Time: O((V + E) log V) with priority queue
+  
+  For our example: O((6 + 7) × log 6) ≈ O(13 × 2.6) ≈ O(34)
+  
+  Dijkstra WORKS but uses a priority queue (min-heap):
+    → log V factor for every insert/extract
+    → Overhead of heap operations
+    
+  CAN WE DO BETTER?
+    → Weights are only 0 and 1
+    → We don't need full sorting power of a heap
+    → We just need to process 0-cost edges BEFORE 1-cost edges
+    → A DEQUE can do this in O(1) per operation!
+
+  ┌───────────────────────────────────────────────────────────────┐
+  │  Algorithm     │  Handles weights  │  Time         │  Note   │
+  ├───────────────┼───────────────────┼───────────────┼─────────┤
+  │  BFS           │  All equal only   │  O(V + E)     │  ✗ here │
+  │  0-1 BFS       │  Only 0 and 1     │  O(V + E)     │  ✓ BEST│
+  │  Dijkstra      │  Any non-negative │  O((V+E)logV) │  ✓ works│
+  │  Bellman-Ford  │  Any (+ negative) │  O(V × E)     │  overkill│
+  └───────────────┴───────────────────┴───────────────┴─────────┘
+
+  0-1 BFS: Same time as regular BFS, but handles 0/1 weights!
+  It sits EXACTLY between BFS and Dijkstra.</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  THINKING PROCESS:
+</span>
+  "I need shortest path"
+    → BFS/Dijkstra family
+
+  "Weights are 0 and 1 only"
+    → Special structure!
+    → Don't need full Dijkstra power
+    → 0-1 BFS is perfect
+
+  "Why does 0-1 BFS work?"
+    → In BFS, queue maintains LEVEL ORDER (all same distance together)
+    → With 0-cost edges, a neighbor might be at SAME distance (not +1)
+    → With 1-cost edges, a neighbor is at distance +1
+    
+    → SOLUTION: use a DEQUE (double-ended queue)
+      → 0-cost neighbor: add to FRONT (same distance level)
+      → 1-cost neighbor: add to BACK (next distance level)
+    
+    → This maintains the BFS invariant:
+      "Process nodes in order of increasing distance"
+      WITHOUT needing a priority queue!</code></pre></div>
+<h3>The Key Insight — Why Deque Works</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Regular BFS queue at some point:
+</span>
+    queue = [A(dist=3), B(dist=3), C(dist=3)]
+    
+    All nodes at same distance → process any order → fine.
+
+  With 0-cost edges, processing A(dist=3) might discover:
+    → D via 0-cost edge → dist=3 (SAME level!)
+    → E via 1-cost edge → dist=4 (NEXT level)
+
+  If we add D to BACK:
+    queue = [B(3), C(3), D(3), E(4)]
+    
+    B and C processed before D, but D has same distance.
+    STILL CORRECT (just slightly suboptimal ordering).
+    
+    Wait — is it really correct? Let's think harder...
+
+  PROBLEM: What if processing D(dist=3) would discover F(dist=3)
+           via another 0-cost edge?
+           If D is processed late, F gets discovered late too.
+           
+           But if D were processed EARLIER (at front), 
+           F would be found sooner.
+
+  REAL ISSUE: Dijkstra processes nodes in STRICT distance order.
+              BFS does too (for equal weights).
+              With 0/1 weights, we MUST process 0-cost neighbors
+              at the same priority as current node.
+
+  SOLUTION: 
+    0-cost edge → add to FRONT of deque (process ASAP, same distance)
+    1-cost edge → add to BACK of deque (process later, higher distance)
+
+  This maintains the invariant:
+    "The deque always has nodes ordered by distance"
+    "Front of deque = smallest distance"
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │                                                             │
+  │  deque = [... dist=d nodes ... | ... dist=d+1 nodes ...]   │
+  │           ↑ FRONT                              BACK ↑      │
+  │                                                             │
+  │  0-cost neighbor → dist = d     → add to FRONT (among d's) │
+  │  1-cost neighbor → dist = d+1   → add to BACK (among d+1's)│
+  │                                                             │
+  │  At any time, deque has AT MOST TWO distance levels!        │
+  │  (current d and next d+1)                                   │
+  │                                                             │
+  └─────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Visual: Deque vs Queue vs Priority Queue</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  REGULAR QUEUE (BFS — Problem 9):
+</span>    All edges weight 1
+    ┌───┬───┬───┬───┬───┐
+    │ 3 │ 3 │ 3 │ 4 │ 4 │   → pop from left, add to right
+    └───┴───┴───┴───┴───┘
+    All level-3 before all level-4 → CORRECT for equal weights
+
+  PRIORITY QUEUE (Dijkstra — Problem 23):
+    Any non-negative weights
+    ┌───┐
+    │ 2 │ ← min always on top
+    ├───┤
+    │ 3 │
+    ├───┤
+    │ 5 │
+    ├───┤
+    │ 7 │
+    └───┘
+    Always extracts minimum → O(log n) per operation → CORRECT for any weights
+
+  DEQUE (0-1 BFS — THIS problem):
+    Only weights 0 and 1
+    ┌───┬───┬───┬───┬───┐
+    │ 3 │ 3 │ 3 │ 4 │ 4 │   → 0-cost: add to LEFT
+    └───┴───┴───┴───┴───┘     → 1-cost: add to RIGHT
+    FRONT ←              → BACK
+    
+    Maintains order with O(1) per operation!
+    Same correctness as Dijkstra, same speed as BFS!</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH</h2>
+<h3>The 0-1 BFS Algorithm</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  1. Initialize dist[] = infinity for all nodes, dist[source] = 0
+</span>  2. Create deque, add source to front
+  3. While deque not empty:
+     a. Pop node from FRONT
+     b. For each neighbor:
+        → new_dist = dist[node] + edge_weight
+        → If new_dist &lt; dist[neighbor]:
+            → Update dist[neighbor] = new_dist
+            → If edge_weight == 0: add neighbor to FRONT
+            → If edge_weight == 1: add neighbor to BACK
+  4. Return dist[destination]</code></pre></div>
+<h3>Step-by-Step Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Graph:
+</span>    0 → 1 (cost 0)
+    0 → 2 (cost 1)
+    1 → 3 (cost 0)
+    1 → 4 (cost 1)
+    2 → 3 (cost 1)
+    3 → 5 (cost 0)
+    4 → 5 (cost 1)
+
+  Initialize:
+    dist = [0, ∞, ∞, ∞, ∞, ∞]
+    deque = [0]</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │  Iteration 1: Pop 0 from FRONT                                    │
+  │                                                                    │
+  │  dist[0] = 0                                                       │
+  │                                                                    │
+  │  Neighbor 1, edge cost 0:                                          │
+  │    new_dist = 0 + 0 = 0                                            │
+  │    0 &lt; ∞ (dist[1]) → UPDATE dist[1] = 0                           │
+  │    cost = 0 → add 1 to FRONT                                      │
+  │                                                                    │
+  │  Neighbor 2, edge cost 1:                                          │
+  │    new_dist = 0 + 1 = 1                                            │
+  │    1 &lt; ∞ (dist[2]) → UPDATE dist[2] = 1                           │
+  │    cost = 1 → add 2 to BACK                                       │
+  │                                                                    │
+  │  dist  = [0, 0, 1, ∞, ∞, ∞]                                      │
+  │  deque = [1, 2]                                                    │
+  │           ↑F     ↑B                                                │
+  │                                                                    │
+  │  Note: node 1 (dist=0) is BEFORE node 2 (dist=1)                  │
+  │        Deque maintains distance order!                             │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Iteration 2: Pop 1 from FRONT                                    │
+  │                                                                    │
+  │  dist[1] = 0                                                       │
+  │                                                                    │
+  │  Neighbor 3, edge cost 0:                                          │
+  │    new_dist = 0 + 0 = 0                                            │
+  │    0 &lt; ∞ (dist[3]) → UPDATE dist[3] = 0                           │
+  │    cost = 0 → add 3 to FRONT                                      │
+  │                                                                    │
+  │  Neighbor 4, edge cost 1:                                          │
+  │    new_dist = 0 + 1 = 1                                            │
+  │    1 &lt; ∞ (dist[4]) → UPDATE dist[4] = 1                           │
+  │    cost = 1 → add 4 to BACK                                       │
+  │                                                                    │
+  │  dist  = [0, 0, 1, 0, 1, ∞]                                      │
+  │  deque = [3, 2, 4]                                                 │
+  │           ↑F        ↑B                                             │
+  │                                                                    │
+  │  Deque order: 3(dist=0), 2(dist=1), 4(dist=1)                    │
+  │  Still sorted by distance! ✓                                       │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Iteration 3: Pop 3 from FRONT                                    │
+  │                                                                    │
+  │  dist[3] = 0                                                       │
+  │                                                                    │
+  │  Neighbor 5, edge cost 0:                                          │
+  │    new_dist = 0 + 0 = 0                                            │
+  │    0 &lt; ∞ (dist[5]) → UPDATE dist[5] = 0                           │
+  │    cost = 0 → add 5 to FRONT                                      │
+  │                                                                    │
+  │  dist  = [0, 0, 1, 0, 1, 0]                                      │
+  │  deque = [5, 2, 4]                                                 │
+  │           ↑F        ↑B                                             │
+  │                                                                    │
+  │  Deque order: 5(dist=0), 2(dist=1), 4(dist=1)  ✓                 │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Iteration 4: Pop 5 from FRONT                                    │
+  │                                                                    │
+  │  dist[5] = 0                                                       │
+  │  Node 5 has no outgoing edges.                                     │
+  │                                                                    │
+  │  deque = [2, 4]                                                    │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Iteration 5: Pop 2 from FRONT                                    │
+  │                                                                    │
+  │  dist[2] = 1                                                       │
+  │                                                                    │
+  │  Neighbor 3, edge cost 1:                                          │
+  │    new_dist = 1 + 1 = 2                                            │
+  │    2 &lt; 0 (dist[3])? NO → SKIP (already have better path)          │
+  │                                                                    │
+  │  deque = [4]                                                       │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Iteration 6: Pop 4 from FRONT                                    │
+  │                                                                    │
+  │  dist[4] = 1                                                       │
+  │                                                                    │
+  │  Neighbor 5, edge cost 1:                                          │
+  │    new_dist = 1 + 1 = 2                                            │
+  │    2 &lt; 0 (dist[5])? NO → SKIP                                     │
+  │                                                                    │
+  │  deque = []  → DONE                                                │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ═══════════════════════════════════════════════════════════════════
+  FINAL DISTANCES:
+    dist = [0, 0, 1, 0, 1, 0]
+    
+    Node 0 → 0 (start)
+    Node 1 → 0 (via 0→1, cost 0)
+    Node 2 → 1 (via 0→2, cost 1)
+    Node 3 → 0 (via 0→1→3, cost 0+0=0)
+    Node 4 → 1 (via 0→1→4, cost 0+1=1)
+    Node 5 → 0 (via 0→1→3→5, cost 0+0+0=0)  ← ANSWER
+  ═══════════════════════════════════════════════════════════════════</code></pre></div>
+<h3>Proof: Deque Always Maintains Order</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  CLAIM: At any point, the deque contains nodes with at most
+</span>         TWO distinct distance values: d and d+1.
+         All d's are before all d+1's.
+
+  WHY?
+  
+  When we pop a node with dist=d:
+    → 0-cost neighbor gets dist=d   → added to FRONT (among other d's)
+    → 1-cost neighbor gets dist=d+1 → added to BACK (among other d+1's)
+  
+  Deque before: [d, d, d, d+1, d+1]
+  Pop d from front, add neighbors:
+    → 0-cost: [d, d, d+1, d+1] → addleft → [d, d, d, d+1, d+1]
+    → 1-cost: [d, d, d+1, d+1] → append  → [d, d, d+1, d+1, d+1]
+  
+  Deque after: still [d, ..., d, d+1, ..., d+1]  ✓
+
+  When all d's are processed, deque has [d+1, d+1, ...]
+  Processing d+1 may add d+1 (front) or d+2 (back)
+  → [d+1, ..., d+1, d+2, ..., d+2]  ✓
+
+  INVARIANT MAINTAINED: always two consecutive levels, sorted.
+  
+  This is why we get Dijkstra's correctness with O(1) per operation!</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">zero_one_bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> destination</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    0-1 BFS: Shortest path when all edge weights are 0 or 1.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Key insight:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Regular BFS (Problem 9): all weights equal → queue
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Dijkstra (Problem 23): any non-negative weights → priority queue
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      0-1 BFS (THIS): weights ∈ {0,1} → DEQUE
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → 0-cost edge: neighbor at SAME distance → add to FRONT
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → 1-cost edge: neighbor at distance+1    → add to BACK
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This gives O(V+E) time — same as BFS, faster than Dijkstra's O((V+E)logV)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of nodes (0 to n-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [u, v, weight] where weight ∈ {0, 1}
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        source: starting node
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        destination: target node
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Minimum cost from source to destination, or -1 if unreachable.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Build adjacency list (weighted) ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Same as Problem 1 weighted version</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># For undirected: graph[v].append((u, w))</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Initialize distances ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Same concept as Dijkstra (Problem 23)</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── THE KEY DIFFERENCE: Use DEQUE instead of queue or heap ───</span><span>
+</span><span>    dq </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> dq</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            new_dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> weight
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Relaxation (same concept as Dijkstra Problem 23)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_dist </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_dist
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># THE MAGIC: where to add in deque</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> weight </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Same distance level → FRONT</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># "Process me soon, I'm just as close as current"</span><span>
+</span><span>                    dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>appendleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Next distance level → BACK</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># "Process me later, I'm one step further"</span><span>
+</span><span>                    dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>destination</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>destination</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST CASES ───</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 1: Main example</span><span>
+</span><span>n1 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">6</span><span>
+</span><span>edges1 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 1: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">zero_one_bfs</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">n1</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> edges1</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">5</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 0 (path: 0→1→3→5, cost 0+0+0=0)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 2: All cost-1 edges (degenerates to regular BFS)</span><span>
+</span><span>n2 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges2 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 2: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">zero_one_bfs</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">n2</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> edges2</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">3</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 1 (direct edge 0→3, cost 1)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 3: All cost-0 edges</span><span>
+</span><span>n3 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges3 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 3: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">zero_one_bfs</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">n3</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> edges3</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">3</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 0</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 4: No path</span><span>
+</span><span>n4 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span>
+</span><span>edges4 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 4: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">zero_one_bfs</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">n4</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> edges4</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">2</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: -1</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 5: Single node</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 5: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">zero_one_bfs</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">1</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 0</span></code></pre></div>
+<hr>
+<h3>Real LeetCode Problem: Minimum Cost to Make at Least One Valid Path in a Grid</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">min_cost_valid_path</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    LeetCode 1368: Grid where each cell has an arrow direction.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Moving in the arrow's direction costs 0.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Moving in any OTHER direction costs 1.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find minimum cost from (0,0) to (rows-1, cols-1).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This IS 0-1 BFS on a grid!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Following arrow = cost 0 → add to FRONT
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Going against arrow = cost 1 → add to BACK
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Directions: 1=right, 2=left, 3=down, 4=up
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    rows</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Direction mappings: grid value → (dr, dc)</span><span>
+</span><span>    dir_map </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>
+</span><span>        </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># right</span><span>
+</span><span>        </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># left</span><span>
+</span><span>        </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># down</span><span>
+</span><span>        </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># up</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># All 4 possible moves</span><span>
+</span><span>    all_dirs </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    dq </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> dq</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># The arrow at this cell points in this direction</span><span>
+</span><span>        arrow_dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> arrow_dc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dir_map</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> all_dirs</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Cost 0 if following the arrow, cost 1 otherwise</span><span>
+</span><span>                cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dr </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> arrow_dr </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> dc </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> arrow_dc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>                
+<span>                new_dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> cost
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_dist </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_dist
+</span>                    
+<span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> cost </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>appendleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># FRONT</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># BACK</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test</span><span>
+</span><span>grid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Min cost valid path: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">min_cost_valid_path</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Arrows all point right on odd rows, left on even rows</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Need to change direction at row transitions → some cost</span></code></pre></div>
+<hr>
+<h3>Another Classic: Minimum Operations to Reach Target on Number Line</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">min_operations</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>target</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    You start at position 0 on a number line.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Each step: move +1 or -1 (cost 1 each)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    SPECIAL: if you're at an EVEN position, you can jump to position/2 for FREE.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find minimum cost to reach target.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is 0-1 BFS where:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → +1 or -1: cost 1 → add to BACK
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → /2 (if even): cost 0 → add to FRONT
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    State: position on number line
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> target </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Limit search space (target can be reached within 2*target range)</span><span>
+</span><span>    max_pos </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token builtin">abs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>target</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span>
+</span>    
+<span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>max_pos </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    dq </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> dq</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        pos </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> pos </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> target</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Move +1 (cost 1)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> pos </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> max_pos </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>            dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>pos </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># cost 1 → BACK</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Move -1 (cost 1)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> pos </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>            dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>pos </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># cost 1 → BACK</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Divide by 2 if even (cost 0)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> pos </span><span class="token" style="color: rgb(57, 58, 52);">%</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> pos </span><span class="token" style="color: rgb(57, 58, 52);">//</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            half </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> pos </span><span class="token" style="color: rgb(57, 58, 52);">//</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>half</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>half</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pos</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>                dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>appendleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>half</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># cost 0 → FRONT</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>target</span><span class="token" style="color: rgb(57, 58, 52);">]</span></code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │  TIME COMPLEXITY: O(V + E)                                      │
+  │                                                                  │
+  │  WHY?                                                            │
+  │    → Each node is added to deque at most TWICE                   │
+  │      (once via 0-cost, once via 1-cost in worst case)            │
+  │    → Each edge is examined at most a constant number of times    │
+  │    → All deque operations (appendleft, append, popleft): O(1)   │
+  │    → No log factor! (unlike Dijkstra's O((V+E)logV))            │
+  │                                                                  │
+  │  WAIT — can a node be added more than twice?                     │
+  │    → A node is only added when dist improves                     │
+  │    → dist can only decrease from ∞ → some value → smaller value  │
+  │    → With 0/1 weights, dist[v] can change at most twice:         │
+  │      once from ∞, possibly once more if a shorter path found     │
+  │    → Actually: dist[v] can be updated at most O(V) times in      │
+  │      pathological cases, but total updates across ALL nodes       │
+  │      is bounded by O(V + E)                                      │
+  │                                                                  │
+  │  FORMAL: Amortized O(V + E)                                     │
+  │  (Similar argument to BFS: each edge relaxed constant times)     │
+  ├──────────────────────────────────────────────────────────────────┤
+  │                                                                  │
+  │  SPACE COMPLEXITY: O(V + E)                                      │
+  │                                                                  │
+  │  → dist array: O(V)                                              │
+  │  → Deque: at most O(V) nodes (each added limited times)         │
+  │  → Adjacency list: O(V + E)                                     │
+  │  → Total: O(V + E)                                               │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Comparison Table</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  When all weights = 1:                                             │
+  │    BFS: O(V+E)        ← BEST, use regular queue                   │
+  │                                                                    │
+  │  When weights ∈ {0, 1}:                                           │
+  │    0-1 BFS: O(V+E)   ← BEST, use deque                           │
+  │    Dijkstra: O((V+E)logV) — works but slower                      │
+  │                                                                    │
+  │  When weights ∈ {0, 1, 2, ..., W}:                               │
+  │    Dial's algorithm: O(V + E + W*V) — specialized                 │
+  │    Dijkstra: O((V+E)logV) — generally best                        │
+  │                                                                    │
+  │  When weights can be negative:                                     │
+  │    Bellman-Ford: O(V*E) — only option (Problem 26)                │
+  │                                                                    │
+  │  SPEED HIERARCHY (best to worst for each case):                   │
+  │    Equal weights:      BFS &gt; 0-1 BFS &gt; Dijkstra &gt; Bellman-Ford   │
+  │    {0,1} weights:      0-1 BFS &gt; Dijkstra &gt; Bellman-Ford         │
+  │    Non-negative:       Dijkstra &gt; Bellman-Ford                     │
+  │    With negatives:     Bellman-Ford (only option)                  │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 7: WHY NOT JUST USE DIJKSTRA EVERYWHERE?</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "If Dijkstra handles all non-negative weights, why learn 0-1 BFS?"
+</span>
+  REASON 1: SPEED
+    → 0-1 BFS: O(V + E) — no log factor
+    → Dijkstra: O((V + E) log V)
+    → For V = 10^6, E = 10^6:
+        0-1 BFS: ~2 × 10^6 operations
+        Dijkstra: ~2 × 10^6 × 20 = 4 × 10^7 operations
+    → 20x speedup!
+
+  REASON 2: SIMPLICITY
+    → No priority queue needed (Python's heapq can be slow)
+    → deque is built-in, fast, and simple
+    → Less code, fewer bugs
+
+  REASON 3: COMPETITIVE PROGRAMMING
+    → Tight time limits often REQUIRE 0-1 BFS
+    → Dijkstra might TLE where 0-1 BFS passes
+
+  REASON 4: INTERVIEW SIGNAL
+    → Shows you recognize SPECIAL STRUCTURE in the problem
+    → "Weights are only 0 and 1 → I can use 0-1 BFS for O(V+E)"
+    → Demonstrates deeper algorithmic knowledge</code></pre></div>
+<hr>
+<h2>STEP 8: HANDLING DUPLICATE ENTRIES IN DEQUE</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  IMPORTANT SUBTLETY:
+</span>
+  Unlike Dijkstra where we can use a "processed" check,
+  0-1 BFS might add the SAME node multiple times to the deque.
+
+  Example:
+    dist[3] = 5 initially
+    Later updated to dist[3] = 3 → add 3 to deque
+    Even later updated to dist[3] = 2 → add 3 to deque AGAIN
+
+  Now deque has node 3 TWICE!
+
+  HANDLING OPTIONS:
+
+  ┌────────────────────────────────────────────────────────────────┐
+  │  Option A: Lazy deletion (RECOMMENDED)                         │
+  │                                                                │
+  │  When we pop a node, check:                                    │
+  │    if dist_from_deque &gt; dist[node]: skip (stale entry)         │
+  │                                                                │
+  │  This is the SAME trick as lazy Dijkstra.                      │
+  │  Stale entries are just ignored.                                │
+  │                                                                │
+  │  OR simply: check if new_dist &lt; dist[neighbor] before adding   │
+  │  This already prevents most duplicates.                        │
+  ├────────────────────────────────────────────────────────────────┤
+  │  Option B: No special handling                                 │
+  │                                                                │
+  │  The "if new_dist &lt; dist[neighbor]" check naturally prevents   │
+  │  processing stale entries — when we pop node X, if             │
+  │  dist[X] was already updated to something smaller, the         │
+  │  relaxation of X's neighbors won't produce improvements.       │
+  │                                                                │
+  │  This means stale entries exist in deque but cause no harm     │
+  │  (they just do no useful work when processed).                 │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Version with explicit stale-entry check (more efficient in practice)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">zero_one_bfs_optimized</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> destination</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    0-1 BFS with stale-entry optimization.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    dq </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (distance, node) — store distance for stale check</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> dq</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        d</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># STALE ENTRY CHECK:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If we already found a better path to this node, skip</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> d </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            new_dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> weight
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_dist </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_dist
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> weight </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>appendleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>destination</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>destination</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span></code></pre></div>
+<hr>
+<h2>STEP 9: GRID-BASED 0-1 BFS PROBLEM</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">minimum_obstacle_removal</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    LeetCode 2290: Given a grid where:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      0 = empty cell (free to pass)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      1 = obstacle (must remove to pass, costs 1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find minimum obstacles to remove to go from (0,0) to (rows-1, cols-1).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    THIS IS 0-1 BFS ON A GRID:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Moving to empty cell (0): cost 0 → add to FRONT
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Moving to obstacle (1): cost 1 → add to BACK
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Connects to:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Problem 6  (grid as graph)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Problem 9  (BFS shortest path)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Problem 38 (state-space BFS — simpler version, no extra state needed)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    rows</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># starting cell (assumed to be 0)</span><span>
+</span>    
+<span>    dq </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> dq</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Cost to move to this cell</span><span>
+</span><span>                cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 0 (empty) or 1 (obstacle)</span><span>
+</span>                
+<span>                new_dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> cost
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_dist </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_dist
+</span>                    
+<span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> cost </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>appendleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Free move → FRONT</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        dq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Remove obstacle → BACK</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test</span><span>
+</span><span>grid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Min obstacles to remove: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">minimum_obstacle_removal</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Need to remove some obstacles to reach (2,2)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Path: (0,0)→(0,1)→(1,1)→(2,1)→(2,2) removes 3 obstacles</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Or:   (0,0)→(1,0)→(2,0)→(2,1)→(2,2) removes 3 obstacles</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Or:   (0,0)→(0,1)→(0,2)→... need to check</span></code></pre></div>
+<hr>
+<h2>STEP 10: THE ALGORITHM SPECTRUM — WHERE 0-1 BFS FITS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   THE SHORTEST PATH ALGORITHM SPECTRUM                             ║
+  ║                                                                    ║
+  ║   Constraint on weights    →    Best algorithm                     ║
+  ║   ─────────────────────────────────────────────                    ║
+  ║                                                                    ║
+  ║   All weights = 1          →    BFS (queue)                        ║
+  ║                                 O(V + E)                           ║
+  ║                                 Problem 9                          ║
+  ║                                                                    ║
+  ║         ↓ (generalize: allow weight 0)                             ║
+  ║                                                                    ║
+  ║   All weights ∈ {0, 1}    →    0-1 BFS (deque)                   ║
+  ║                                 O(V + E)                           ║
+  ║                                 THIS PROBLEM (39)                  ║
+  ║                                                                    ║
+  ║         ↓ (generalize: allow any non-negative)                     ║
+  ║                                                                    ║
+  ║   All weights ≥ 0         →    Dijkstra (priority queue)          ║
+  ║                                 O((V + E) log V)                   ║
+  ║                                 Problem 23                         ║
+  ║                                                                    ║
+  ║         ↓ (generalize: allow negative)                             ║
+  ║                                                                    ║
+  ║   Any weights             →    Bellman-Ford                        ║
+  ║   (incl. negative)             O(V × E)                           ║
+  ║                                 Problem 26                         ║
+  ║                                                                    ║
+  ║         ↓ (generalize: all pairs)                                  ║
+  ║                                                                    ║
+  ║   All pairs, any weights  →    Floyd-Warshall                      ║
+  ║                                 O(V³)                              ║
+  ║                                 Problem 33                         ║
+  ║                                                                    ║
+  ╠════════════════════════════════════════════════════════════════════╣
+  ║                                                                    ║
+  ║   DATA STRUCTURE determines the algorithm:                         ║
+  ║                                                                    ║
+  ║   Queue (FIFO)          → BFS          → equal weights             ║
+  ║   Deque (double-ended)  → 0-1 BFS      → {0,1} weights           ║
+  ║   Priority Queue (heap) → Dijkstra      → non-negative weights    ║
+  ║   None (brute relax)    → Bellman-Ford  → any weights              ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 11: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Using regular queue instead of deque                 ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG:                                                          ║
+  ║    queue.append(neighbor)  ← always adds to back                 ║
+  ║                                                                  ║
+  ║  RIGHT:                                                          ║
+  ║    if weight == 0: dq.appendleft(neighbor)  ← FRONT             ║
+  ║    if weight == 1: dq.append(neighbor)      ← BACK              ║
+  ║                                                                  ║
+  ║  Using regular queue = BFS = treats all edges as weight 1        ║
+  ║  → Wrong distances for 0-weight edges                            ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Forgetting the relaxation check                      ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG:                                                          ║
+  ║    # No check, always add                                        ║
+  ║    dist[neighbor] = new_dist                                     ║
+  ║    dq.append(neighbor)                                           ║
+  ║                                                                  ║
+  ║  RIGHT:                                                          ║
+  ║    if new_dist &lt; dist[neighbor]:   ← ONLY if improvement        ║
+  ║        dist[neighbor] = new_dist                                 ║
+  ║        dq.append(neighbor)                                       ║
+  ║                                                                  ║
+  ║  Without check: infinite additions → TLE or wrong answer         ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Using visited set instead of distance array          ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  In regular BFS: visited set works (first visit = shortest)      ║
+  ║  In 0-1 BFS: a node might be reached first via cost 1,          ║
+  ║              then later via cost 0 (shorter!)                    ║
+  ║              → Must allow RE-RELAXATION                          ║
+  ║              → Use dist[] array, NOT visited set                 ║
+  ║                                                                  ║
+  ║  Exception: if you use dist[] + stale check, that's fine         ║
+  ║  (stale check replaces visited set functionality)                ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Applying 0-1 BFS when weights aren't 0/1            ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If weights are {0, 1, 2}: 0-1 BFS BREAKS                      ║
+  ║    → Weight-2 neighbor should go even further back               ║
+  ║    → But deque only supports front/back, not "2 positions back"  ║
+  ║    → Need Dijkstra for weights &gt; 1                               ║
+  ║                                                                  ║
+  ║  VERIFY: all edges are EXACTLY 0 or 1 before using 0-1 BFS     ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Graph with only 0-weight edges                      ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  → All neighbors go to FRONT                                    ║
+  ║  → Deque behaves like a STACK (LIFO) for 0-cost edges           ║
+  ║  → This is essentially DFS-like behavior                        ║
+  ║  → Still gives correct shortest distances (all 0)               ║
+  ║  → But traversal order may look like DFS, not BFS               ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Graph with only 1-weight edges                      ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  → All neighbors go to BACK                                     ║
+  ║  → Deque behaves like regular QUEUE (FIFO)                      ║
+  ║  → Degenerates to standard BFS                                  ║
+  ║  → Correct! BFS is a special case of 0-1 BFS                   ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: CONNECTION TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 1  → Adjacency list (how we store weighted edges)
+</span>  Problem 3  → BFS (queue — foundation of 0-1 BFS)
+  Problem 6  → Grid as graph (0-1 BFS on grids)
+  Problem 9  → BFS shortest path (0-1 BFS generalizes this)
+  Problem 23 → Dijkstra (0-1 BFS is faster for {0,1} weights)
+  Problem 26 → Bellman-Ford (handles negatives, 0-1 BFS doesn't)
+  Problem 38 → State-space BFS (can combine: state-space + 0-1 BFS)
+
+  EVOLUTION:
+
+  Problem 9:  "All edges cost 1 → use queue"
+       ↓
+  Problem 39: "Edges cost 0 OR 1 → use deque"
+       ↓  
+  Problem 23: "Edges cost anything ≥ 0 → use priority queue"
+       ↓
+  Problem 26: "Edges can be negative → relax all edges V-1 times"
+
+  EACH STEP: more general weights → more powerful (but slower) algorithm
+  EACH STEP: simpler data structure → more complex data structure</code></pre></div>
+<hr>
+<h2>STEP 13: WHEN TO USE THIS VS ALTERNATIVES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  "Shortest path, weights are 0 and 1"                              │
+  │    → 0-1 BFS ✓ (fastest: O(V+E))                                 │
+  │                                                                    │
+  │  "Shortest path, all weights equal"                                │
+  │    → Regular BFS ✓ (simpler code, same speed)                     │
+  │    → 0-1 BFS also works but unnecessary                           │
+  │                                                                    │
+  │  "Shortest path, weights are 0,1,2,...,W"                         │
+  │    → Dijkstra ✓ (0-1 BFS won't work for weights &gt; 1)             │
+  │    → If W is small: Dial's algorithm (bucket-based)                │
+  │                                                                    │
+  │  "Shortest path, some negative weights"                            │
+  │    → Bellman-Ford ✓ (only option — Problem 26)                    │
+  │                                                                    │
+  │  HOW TO RECOGNIZE 0-1 BFS in an interview:                        │
+  │                                                                    │
+  │    → Grid with "free moves" and "costly moves"                     │
+  │    → Network with "fast links" and "slow links"                    │
+  │    → Binary costs: do something for free OR pay 1                  │
+  │    → Any problem where edge weights are EXACTLY {0, 1}            │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 14: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Minimum cost/steps" with TWO types of actions         │
+  │    → One type is FREE (cost 0)                                     │
+  │    → One type costs 1                                              │
+  │    → Example: "follow arrow = free, change direction = 1"          │
+  │    → Example: "move to empty = free, remove obstacle = 1"          │
+  │                                                                    │
+  │  SIGNAL 2: Grid/graph where some transitions are "special"         │
+  │    → Special = free, normal = cost 1                               │
+  │    → Or vice versa                                                 │
+  │                                                                    │
+  │  SIGNAL 3: Problem that LOOKS like BFS but has varying costs       │
+  │    → "Minimum number of X to do Y"                                 │
+  │    → Where some steps don't count toward X                         │
+  │                                                                    │
+  │  MY THOUGHT PROCESS:                                               │
+  │                                                                    │
+  │    "Shortest path problem"                                         │
+  │      → What are the edge weights?                                  │
+  │                                                                    │
+  │    "Weights are 0 and 1"                                           │
+  │      → 0-1 BFS with deque                                         │
+  │      → appendleft for 0-cost, append for 1-cost                   │
+  │      → O(V+E) — better than Dijkstra's O((V+E)logV)              │
+  │                                                                    │
+  │    "Weights are all 1"                                             │
+  │      → Plain BFS (deque unnecessary)                               │
+  │                                                                    │
+  │    "Weights are arbitrary non-negative"                            │
+  │      → Dijkstra                                                    │
+  │                                                                    │
+  │  QUICK CHECK:                                                      │
+  │    Can I classify EVERY edge as either "free" or "costs 1"?        │
+  │    YES → 0-1 BFS                                                   │
+  │    NO  → Dijkstra                                                  │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 15: COMBINING WITH STATE-SPACE BFS (Problem 38)</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  What if we have BOTH:
+</span>    → State-space (keys/locks from Problem 38)
+    → 0/1 edge weights
+
+  Example: Grid with keys, locks, AND some doors that are free
+           while others cost 1 to open.
+
+  SOLUTION: State-space 0-1 BFS!
+    → State: (row, col, keys_bitmask)
+    → 0-cost transitions: appendleft
+    → 1-cost transitions: append
+    → visited/dist tracks FULL state
+
+  This shows how graph algorithms COMPOSE:
+    → Problem 9  (BFS) 
+    + Problem 38 (state-space) 
+    + Problem 39 (0-1 weights)
+    = State-space 0-1 BFS
+
+  Each concept is a BUILDING BLOCK.</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: 0-1 BFS                                    ║
+  ║                                                                    ║
+  ║   When edge weights are ONLY 0 and 1:                              ║
+  ║     → Use a DEQUE instead of queue (BFS) or heap (Dijkstra)       ║
+  ║     → 0-cost neighbor → appendleft (FRONT — same distance)        ║
+  ║     → 1-cost neighbor → append (BACK — next distance)             ║
+  ║     → Time: O(V+E) — same as BFS, faster than Dijkstra           ║
+  ║                                                                    ║
+  ║   THE DATA STRUCTURE IS THE ALGORITHM:                             ║
+  ║     → Queue   → BFS         → equal weights                       ║
+  ║     → Deque   → 0-1 BFS     → {0,1} weights                      ║
+  ║     → Heap    → Dijkstra     → non-negative weights               ║
+  ║     → Nothing → Bellman-Ford → any weights                        ║
+  ║                                                                    ║
+  ║   WHY IT WORKS:                                                    ║
+  ║     → Deque maintains at most 2 distance levels: d and d+1        ║
+  ║     → 0-cost goes to front (stays in level d)                      ║
+  ║     → 1-cost goes to back (moves to level d+1)                    ║
+  ║     → Popleft always gives minimum distance → correct!            ║
+  ║                                                                    ║
+  ║   MANTRA:                                                          ║
+  ║   "See 0/1 weights → think deque → think 0-1 BFS"                ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<p><strong>Problem 39 Complete.</strong><br>
+<strong>Ready for Problem 40: Swim in Rising Water (Modified Dijkstra on Grid)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="11" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-38.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 39 of 50</span>
+            </div>
+            <a href="problem-40.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

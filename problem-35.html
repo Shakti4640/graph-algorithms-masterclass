@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 35: Problem 35: Articulation Points (Cut Vertices) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="25">
+<div class="px-2"><h1>Problem 35: Articulation Points (Cut Vertices)</h1>
+<h2>[Algorithm Family: Tarjan's Algorithm — Articulation Point Finding]</h2>
+<h2>[Phase 4: Advanced — "I can handle complex multi-concept problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Same network as Problem 34, but now the question changes:
+</span>
+Instead of finding critical CABLES (bridges/edges),
+find critical SERVERS (articulation points/nodes).
+
+An "articulation point" (or "cut vertex") is a server whose
+REMOVAL (along with all its cables) would disconnect the network.
+
+Input:
+  n = 7  (servers: 0, 1, 2, 3, 4, 5, 6)
+  edges = [[0,1], [1,2], [2,0], [1,3], [3,4], [3,5], [5,6]]
+
+Output: [1, 3]
+
+Explanation:
+  Remove server 1 (and all its cables):
+    → {0,2} can no longer reach {3,4,5,6} → DISCONNECTED
+    → Server 1 is an articulation point
+
+  Remove server 3 (and all its cables):
+    → {4} isolated, {5,6} isolated from {0,1,2} → DISCONNECTED
+    → Server 3 is an articulation point
+
+  No other server removal disconnects the network.</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  edges = [[0,1], [1,2], [2,0], [1,3], [3,4], [3,5], [5,6]]
+</span>
+      0 ─── 1 ─── 3 ─── 4
+      │           │
+      │           │
+      2           5 ─── 6
+
+  More clearly:
+
+    ┌─── 0 ───┐
+    │         │
+    2    ★1★ ───── ★3★ ─── 4
+              │
+              5 ─── 6
+
+  ★1★ and ★3★ are articulation points.
+
+  Let's verify by removing each node:
+
+  Remove 0: 1─2 still connected, 1─3─4, 3─5─6 → all reachable via 1
+            → Still connected → NOT artic point
+
+  Remove 1: {0,2} isolated from {3,4,5,6}
+            → DISCONNECTED → ★ ARTICULATION POINT ★
+
+  Remove 2: 0─1 still connected, 1─3─4, 3─5─6 → all reachable via 1
+            → Still connected → NOT artic point
+
+  Remove 3: {0,1,2} still connected, but 4 isolated, {5,6} isolated
+            → DISCONNECTED → ★ ARTICULATION POINT ★
+
+  Remove 4: {0,1,2,3,5,6} still connected
+            → Still connected → NOT artic point
+
+  Remove 5: {0,1,2,3,4} connected, but 6 isolated
+            Wait — is 6 isolated? 6 only connects to 5.
+            Remove 5 → 6 has no edges → 6 disconnected!
+            → DISCONNECTED → ★ ARTICULATION POINT ★ ?
+
+  Hmm, let me re-read the edges:
+    [0,1], [1,2], [2,0], [1,3], [3,4], [3,5], [5,6]
+
+  Remove 5: edges remaining involve {0,1,2,3,4,6}
+    0─1, 1─2, 2─0, 1─3, 3─4
+    What about 6? 6 only connected to 5.
+    Remove 5 → 6 is isolated → DISCONNECTED
+    → 5 IS also an articulation point!
+
+  Let me re-verify: Output should be [1, 3, 5]</code></pre></div>
+<h3>Corrected Visualization</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>    ┌─── 0 ───┐
+</span>    │         │
+    2        ★1★ ──── ★3★ ─── 4
+                       │
+                      ★5★ ─── 6
+
+  Articulation points: 1, 3, 5
+
+  WHY each is an articulation point:
+    1: removing separates {0,2} from {3,4,5,6}
+    3: removing separates {4} and {5,6} from {0,1,2}
+    5: removing separates {6} from rest
+
+  WHY others are NOT:
+    0: part of triangle 0-1-2 → 2 still reaches 1 → connected
+    2: part of triangle 0-1-2 → 0 still reaches 1 → connected
+    4: leaf node → removing it doesn't disconnect anything else
+    6: leaf node → removing it doesn't disconnect anything else</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔═══════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer               │  Why?                     ║
+╠══════════════════╪═══════════════════════╪═══════════════════════════╣
+║  NODES           │  Servers 0-6          │  Each server = node       ║
+║  EDGES           │  Cables (undirected)  │  Same as Problem 34       ║
+║  Directed?       │  NO                   │  Cables work both ways    ║
+║  Weighted?       │  NO                   │  Just connected or not    ║
+║  Connected?      │  YES                  │  All servers reachable    ║
+║  What we seek    │  ARTICULATION POINTS  │  "Remove this NODE and    ║
+║                  │  (cut vertices)       │   network breaks"         ║
+║  Compare P34     │  Bridges = critical   │  Same concept but for     ║
+║                  │  EDGES                │  NODES instead of EDGES   ║
+╚══════════════════╧═══════════════════════╧═══════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 2: BRIDGE vs ARTICULATION POINT — The Difference</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                   ║
+  ║  BRIDGE (Problem 34):                                             ║
+  ║    → Remove an EDGE → graph disconnects?                         ║
+  ║    → "Which cables are critical?"                                ║
+  ║    → Condition: low[v] &gt; disc[u]                                 ║
+  ║                 (strictly greater)                                ║
+  ║                                                                   ║
+  ║  ARTICULATION POINT (Problem 35):                                 ║
+  ║    → Remove a NODE (+ all its edges) → graph disconnects?        ║
+  ║    → "Which servers are critical?"                               ║
+  ║    → Condition: low[v] &gt;= disc[u]                                ║
+  ║                 (greater or EQUAL)                                ║
+  ║    → PLUS special case for root of DFS tree                      ║
+  ║                                                                   ║
+  ║  WHY &gt;= instead of &gt;?                                             ║
+  ║                                                                   ║
+  ║    Bridge (&gt;):                                                    ║
+  ║      "v's subtree can't reach u AT ALL"                          ║
+  ║      → Removing EDGE (u,v) disconnects v's subtree               ║
+  ║      → Even if v reaches u through back edge, the edge survives  ║
+  ║                                                                   ║
+  ║    Artic point (&gt;=):                                              ║
+  ║      "v's subtree can't reach ABOVE u"                           ║
+  ║      → Even if v reaches u (low[v] == disc[u]),                  ║
+  ║        when we REMOVE NODE u, that path dies too!                ║
+  ║      → v's subtree is stranded                                   ║
+  ║      → So u is an articulation point                             ║
+  ║                                                                   ║
+  ║  VISUAL:                                                          ║
+  ║                                                                   ║
+  ║    Bridge case:           Artic point case:                       ║
+  ║                                                                   ║
+  ║       u                      u                                    ║
+  ║       │                      │                                    ║
+  ║       v (low[v] = disc[u])   v (low[v] = disc[u])                ║
+  ║       │                      │                                    ║
+  ║       └──back to u           └──back to u                        ║
+  ║                                                                   ║
+  ║    Remove edge u─v:          Remove NODE u:                       ║
+  ║    v→back→u still works!     v→back→u... u is GONE!              ║
+  ║    → NOT bridge              → v is stranded                      ║
+  ║                              → u IS artic point                   ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 3: BRUTE FORCE FIRST</h2>
+<h3>Naive Approach: Remove Each Node, Check Connectivity</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For each node u:
+</span>    1. Remove node u and all its edges
+    2. Run BFS/DFS on remaining graph to check connectivity (Problem 5)
+    3. If remaining graph (excluding u) is disconnected → u is artic point
+    4. Put node u back
+
+  Time per node: O(V + E) for connectivity check
+  Total: V × O(V + E) = O(V × (V + E))
+
+  For V = 100,000, E = 200,000:
+    → 100,000 × 300,000 = 3 × 10¹⁰ → TOO SLOW
+
+  We need O(V + E) — single DFS pass, like Tarjan's for bridges.</code></pre></div>
+<hr>
+<h2>STEP 4: IDENTIFYING THE GRAPH PATTERN</h2>
+<h3>The Two Cases for Articulation Points</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                   ║
+  ║  A node u is an ARTICULATION POINT if EITHER:                    ║
+  ║                                                                   ║
+  ║  CASE 1: u is the ROOT of DFS tree AND has 2+ children          ║
+  ║                                                                   ║
+  ║    WHY? If root has 2+ children in DFS tree:                     ║
+  ║      → Those children are in separate subtrees                   ║
+  ║      → The ONLY path between them goes through root              ║
+  ║      → Remove root → children's subtrees disconnected            ║
+  ║                                                                   ║
+  ║    If root has only 1 child:                                      ║
+  ║      → Removing root just removes one "layer"                    ║
+  ║      → Remaining graph is still connected (the child's subtree)  ║
+  ║                                                                   ║
+  ║    Example:                                                       ║
+  ║      Root with 2 children:     Root with 1 child:                ║
+  ║           R                          R                           ║
+  ║          / \                         |                           ║
+  ║         A   B                        A                           ║
+  ║        / \   \                      / \                          ║
+  ║       C   D   E                    B   C                         ║
+  ║                                                                   ║
+  ║      Remove R → {A,C,D} and       Remove R → {A,B,C} still      ║
+  ║      {B,E} disconnected!          connected → NOT artic point    ║
+  ║                                                                   ║
+  ║                                                                   ║
+  ║  CASE 2: u is NOT root AND has child v where low[v] &gt;= disc[u]  ║
+  ║                                                                   ║
+  ║    WHY? v's subtree can only reach as far back as u.             ║
+  ║      → Remove u → v's subtree can't reach u's ancestors          ║
+  ║      → v's subtree is disconnected from the rest                 ║
+  ║                                                                   ║
+  ║    Note: We need this for AT LEAST ONE child v.                  ║
+  ║    (Even if one child can escape, another might not)             ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<h3>Summary: Bridge vs Articulation Point Conditions</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────┬──────────────────────────────────────────────┐
+</span>  │  BRIDGE              │  ARTICULATION POINT                          │
+  │  (Problem 34)        │  (Problem 35)                                │
+  ├─────────────────────┼──────────────────────────────────────────────┤
+  │  Finds critical      │  Finds critical NODES                       │
+  │  EDGES               │                                              │
+  ├─────────────────────┼──────────────────────────────────────────────┤
+  │  One condition:      │  Two conditions:                             │
+  │                      │                                              │
+  │  low[v] &gt; disc[u]   │  CASE 1 (root):                             │
+  │  (strictly greater)  │    root has ≥ 2 DFS children                │
+  │                      │                                              │
+  │                      │  CASE 2 (non-root):                         │
+  │                      │    ∃ child v: low[v] &gt;= disc[u]             │
+  │                      │    (greater or EQUAL)                        │
+  ├─────────────────────┼──────────────────────────────────────────────┤
+  │  No special case     │  Root needs SPECIAL handling                │
+  │  for root            │                                              │
+  └─────────────────────┴──────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 5: ALGORITHM WALKTHROUGH — Step by Step</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  n = 7
+</span>  edges = [[0,1], [1,2], [2,0], [1,3], [3,4], [3,5], [5,6]]
+
+  Adjacency list:
+    0: [1, 2]
+    1: [0, 2, 3]
+    2: [1, 0]
+    3: [1, 4, 5]
+    4: [3]
+    5: [3, 6]
+    6: [5]
+
+
+  ═══════════════════════════════════════════════════════════════
+  DFS TRAVERSAL (starting from node 0)
+  ═══════════════════════════════════════════════════════════════
+
+  I'll trace the DFS and show disc/low at each step.
+  Same framework as Problem 34 — just different condition check.
+
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ DFS(0, parent=-1):    ← ROOT of DFS tree                    │
+  │   disc[0] = 0, low[0] = 0, timer = 1                        │
+  │   children_count = 0                                         │
+  │                                                              │
+  │   Neighbor 1: unvisited → tree edge                          │
+  │   children_count = 1                                         │
+  │                                                              │
+  │   ┌────────────────────────────────────────────────────────┐ │
+  │   │ DFS(1, parent=0):                                      │ │
+  │   │   disc[1] = 1, low[1] = 1, timer = 2                  │ │
+  │   │                                                        │ │
+  │   │   Neighbor 0: parent → SKIP                            │ │
+  │   │                                                        │ │
+  │   │   Neighbor 2: unvisited → tree edge                    │ │
+  │   │                                                        │ │
+  │   │   ┌──────────────────────────────────────────────────┐ │ │
+  │   │   │ DFS(2, parent=1):                                │ │ │
+  │   │   │   disc[2] = 2, low[2] = 2, timer = 3            │ │ │
+  │   │   │                                                  │ │ │
+  │   │   │   Neighbor 1: parent → SKIP                      │ │ │
+  │   │   │   Neighbor 0: visited, not parent → BACK EDGE    │ │ │
+  │   │   │     low[2] = min(2, disc[0]) = min(2, 0) = 0    │ │ │
+  │   │   │                                                  │ │ │
+  │   │   │   Return: disc[2]=2, low[2]=0                    │ │ │
+  │   │   └──────────────────────────────────────────────────┘ │ │
+  │   │                                                        │ │
+  │   │   Back from child 2:                                   │ │
+  │   │   low[1] = min(low[1], low[2]) = min(1, 0) = 0        │ │
+  │   │                                                        │ │
+  │   │   ★ Artic check for node 1 (non-root), child 2:       │ │
+  │   │   low[2] = 0 &gt;= disc[1] = 1?  → 0 &gt;= 1? → NO         │ │
+  │   │   (child 2's subtree reaches above 1 → not artic here)│ │
+  │   │                                                        │ │
+  │   │   Neighbor 3: unvisited → tree edge                    │ │
+  │   │                                                        │ │
+  │   │   ┌──────────────────────────────────────────────────┐ │ │
+  │   │   │ DFS(3, parent=1):                                │ │ │
+  │   │   │   disc[3] = 3, low[3] = 3, timer = 4            │ │ │
+  │   │   │                                                  │ │ │
+  │   │   │   Neighbor 1: parent → SKIP                      │ │ │
+  │   │   │                                                  │ │ │
+  │   │   │   Neighbor 4: unvisited → tree edge              │ │ │
+  │   │   │                                                  │ │ │
+  │   │   │   ┌────────────────────────────────────────────┐ │ │ │
+  │   │   │   │ DFS(4, parent=3):                          │ │ │ │
+  │   │   │   │   disc[4] = 4, low[4] = 4, timer = 5      │ │ │ │
+  │   │   │   │                                            │ │ │ │
+  │   │   │   │   Neighbor 3: parent → SKIP                │ │ │ │
+  │   │   │   │   No more neighbors.                       │ │ │ │
+  │   │   │   │                                            │ │ │ │
+  │   │   │   │   Return: disc[4]=4, low[4]=4              │ │ │ │
+  │   │   │   │   (leaf node — can't reach anywhere)       │ │ │ │
+  │   │   │   └────────────────────────────────────────────┘ │ │ │
+  │   │   │                                                  │ │ │
+  │   │   │   Back from child 4:                             │ │ │
+  │   │   │   low[3] = min(low[3], low[4]) = min(3, 4) = 3  │ │ │
+  │   │   │                                                  │ │ │
+  │   │   │   ★ Artic check for node 3 (non-root), child 4: │ │ │
+  │   │   │   low[4] = 4 &gt;= disc[3] = 3?  → 4 &gt;= 3? → YES! │ │ │
+  │   │   │   → Node 3 IS articulation point ★               │ │ │
+  │   │   │   (child 4 can't reach above 3)                  │ │ │
+  │   │   │                                                  │ │ │
+  │   │   │   Neighbor 5: unvisited → tree edge              │ │ │
+  │   │   │                                                  │ │ │
+  │   │   │   ┌────────────────────────────────────────────┐ │ │ │
+  │   │   │   │ DFS(5, parent=3):                          │ │ │ │
+  │   │   │   │   disc[5] = 5, low[5] = 5, timer = 6      │ │ │ │
+  │   │   │   │                                            │ │ │ │
+  │   │   │   │   Neighbor 3: parent → SKIP                │ │ │ │
+  │   │   │   │                                            │ │ │ │
+  │   │   │   │   Neighbor 6: unvisited → tree edge        │ │ │ │
+  │   │   │   │                                            │ │ │ │
+  │   │   │   │   ┌──────────────────────────────────────┐ │ │ │ │
+  │   │   │   │   │ DFS(6, parent=5):                    │ │ │ │ │
+  │   │   │   │   │   disc[6] = 6, low[6] = 6, timer=7  │ │ │ │ │
+  │   │   │   │   │                                      │ │ │ │ │
+  │   │   │   │   │   Neighbor 5: parent → SKIP          │ │ │ │ │
+  │   │   │   │   │   No more neighbors.                 │ │ │ │ │
+  │   │   │   │   │                                      │ │ │ │ │
+  │   │   │   │   │   Return: disc[6]=6, low[6]=6        │ │ │ │ │
+  │   │   │   │   └──────────────────────────────────────┘ │ │ │ │
+  │   │   │   │                                            │ │ │ │
+  │   │   │   │   Back from child 6:                       │ │ │ │
+  │   │   │   │   low[5] = min(5, low[6]) = min(5,6) = 5  │ │ │ │
+  │   │   │   │                                            │ │ │ │
+  │   │   │   │   ★ Artic check for 5 (non-root), child 6:│ │ │ │
+  │   │   │   │   low[6] = 6 &gt;= disc[5] = 5? → 6&gt;=5 → YES│ │ │ │
+  │   │   │   │   → Node 5 IS articulation point ★         │ │ │ │
+  │   │   │   │   (child 6 can't reach above 5)            │ │ │ │
+  │   │   │   │                                            │ │ │ │
+  │   │   │   │   Return: disc[5]=5, low[5]=5              │ │ │ │
+  │   │   │   └────────────────────────────────────────────┘ │ │ │
+  │   │   │                                                  │ │ │
+  │   │   │   Back from child 5:                             │ │ │
+  │   │   │   low[3] = min(low[3], low[5]) = min(3, 5) = 3  │ │ │
+  │   │   │                                                  │ │ │
+  │   │   │   ★ Artic check for node 3 (non-root), child 5: │ │ │
+  │   │   │   low[5] = 5 &gt;= disc[3] = 3?  → 5 &gt;= 3? → YES! │ │ │
+  │   │   │   → Node 3 confirmed artic point (already found) │ │ │
+  │   │   │                                                  │ │ │
+  │   │   │   Return: disc[3]=3, low[3]=3                    │ │ │
+  │   │   └──────────────────────────────────────────────────┘ │ │
+  │   │                                                        │ │
+  │   │   Back from child 3:                                   │ │
+  │   │   low[1] = min(low[1], low[3]) = min(0, 3) = 0        │ │
+  │   │                                                        │ │
+  │   │   ★ Artic check for node 1 (non-root), child 3:       │ │
+  │   │   low[3] = 3 &gt;= disc[1] = 1?  → 3 &gt;= 1? → YES!       │ │
+  │   │   → Node 1 IS articulation point ★                    │ │
+  │   │   (child 3's subtree can't reach above 1)              │ │
+  │   │                                                        │ │
+  │   │   Return: disc[1]=1, low[1]=0                          │ │
+  │   └────────────────────────────────────────────────────────┘ │
+  │                                                              │
+  │   Back from child 1:                                         │
+  │   low[0] = min(low[0], low[1]) = min(0, 0) = 0              │
+  │                                                              │
+  │   Neighbor 2: VISITED, not parent → back edge                │
+  │   low[0] = min(low[0], disc[2]) = min(0, 2) = 0             │
+  │                                                              │
+  │   ★ ROOT CHECK: node 0 is root.                              │
+  │   children_count = 1 (only child 1 in DFS tree)              │
+  │   1 &lt; 2 → NOT articulation point                             │
+  │   (Root with only 1 DFS child is not artic point)            │
+  │                                                              │
+  │   Return: disc[0]=0, low[0]=0                                │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  FINAL STATE
+  ═══════════════════════════════════════════════════════════════
+
+  Node:    0  1  2  3  4  5  6
+  disc:    0  1  2  3  4  5  6
+  low:     0  0  0  3  4  5  6
+
+  Articulation points found: {1, 3, 5}
+
+  DFS Tree:
+
+    0 (disc=0, low=0)  ← ROOT (1 child → NOT artic)
+    │
+    └── 1 (disc=1, low=0)  ← non-root, child 3 has low[3]=3 ≥ disc[1]=1 → ★ARTIC★
+        │
+        ├── 2 (disc=2, low=0)  ← leaf-like (back edge to 0)
+        │   └──→ 0  [back edge]
+        │
+        └── 3 (disc=3, low=3)  ← child 4: low[4]=4 ≥ 3 → ★ARTIC★
+            │                     child 5: low[5]=5 ≥ 3 → ★ARTIC★ (confirmed)
+            ├── 4 (disc=4, low=4)  ← leaf
+            │
+            └── 5 (disc=5, low=5)  ← child 6: low[6]=6 ≥ 5 → ★ARTIC★
+                │
+                └── 6 (disc=6, low=6)  ← leaf</code></pre></div>
+<hr>
+<h3>Summary Table</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────┬──────┬─────┬────────────────────────────────────────────────────┐
+</span>  │ Node │ disc │ low │ Articulation Point?                                │
+  ├──────┼──────┼─────┼────────────────────────────────────────────────────┤
+  │  0   │  0   │  0  │ ROOT with 1 child → NO                            │
+  │  1   │  1   │  0  │ Non-root, child 3: low[3]=3 ≥ disc[1]=1 → ★ YES  │
+  │  2   │  2   │  0  │ Leaf in DFS tree → NO                             │
+  │  3   │  3   │  3  │ Non-root, child 4: low[4]=4 ≥ disc[3]=3 → ★ YES  │
+  │      │      │     │ Also child 5: low[5]=5 ≥ disc[3]=3 → ★ YES       │
+  │  4   │  4   │  4  │ Leaf → NO                                         │
+  │  5   │  5   │  5  │ Non-root, child 6: low[6]=6 ≥ disc[5]=5 → ★ YES  │
+  │  6   │  6   │  6  │ Leaf → NO                                         │
+  └──────┴──────┴─────┴────────────────────────────────────────────────────┘
+
+  Answer: {1, 3, 5}</code></pre></div>
+<hr>
+<h2>STEP 6: WHY ROOT IS SPECIAL — Deep Intuition</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║  WHY DOES THE ROOT NEED A DIFFERENT RULE?                        ║
+  ╠═══════════════════════════════════════════════════════════════════╣
+  ║                                                                   ║
+  ║  For NON-ROOT node u:                                             ║
+  ║    → u has a PARENT in DFS tree                                   ║
+  ║    → If child v can't reach above u → removing u disconnects     ║
+  ║      v from u's parent → graph breaks                             ║
+  ║    → Condition: low[v] &gt;= disc[u] works perfectly                ║
+  ║                                                                   ║
+  ║  For ROOT node:                                                   ║
+  ║    → Root has NO parent                                           ║
+  ║    → There's nothing "above" the root to disconnect from          ║
+  ║    → low[v] &gt;= disc[root] is ALWAYS true for any child v         ║
+  ║      (disc[root] = 0, smallest possible)                         ║
+  ║    → So the &gt;= condition would mark ALL roots as artic points!   ║
+  ║    → That's WRONG — root might not be an artic point              ║
+  ║                                                                   ║
+  ║  The REAL test for root:                                          ║
+  ║    → If root has 2+ DFS children:                                ║
+  ║      → Those subtrees are independent (no cross edges in DFS)    ║
+  ║      → Only connection between them is through root              ║
+  ║      → Remove root → subtrees disconnect → ARTIC POINT           ║
+  ║    → If root has 0 or 1 DFS child:                               ║
+  ║      → 0 children: isolated node, removing it doesn't help      ║
+  ║      → 1 child: remaining graph is still connected              ║
+  ║      → NOT artic point                                           ║
+  ║                                                                   ║
+  ║  EXAMPLE:                                                         ║
+  ║                                                                   ║
+  ║    Root is artic:        Root is NOT artic:                       ║
+  ║                                                                   ║
+  ║        R                      R                                   ║
+  ║       / \                     |                                   ║
+  ║      A   B                    A ── B                              ║
+  ║     (2 children)             (1 child, A─B back edge)             ║
+  ║                                                                   ║
+  ║    Remove R: A,B             Remove R: A─B still                  ║
+  ║    disconnected!             connected!                           ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 7: COMPLETE CODE</h2>
+<h3>Primary Solution: Tarjan's Articulation Points</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find_articulation_points</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Tarjan's Algorithm — Find all articulation points in an undirected graph.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    An articulation point is a node whose removal disconnects the graph.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Two conditions (from Problem 34's disc/low framework):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      CASE 1 — ROOT:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        DFS root is artic point if it has &gt;= 2 DFS children.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      CASE 2 — NON-ROOT:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Non-root u is artic point if ANY child v has low[v] &gt;= disc[u].
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        "v's subtree can't reach above u → removing u disconnects v"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Key difference from bridges (Problem 34):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Bridge:     low[v] &gt;  disc[u]  (strictly greater)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Artic pt:   low[v] &gt;= disc[u]  (greater or EQUAL)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      + root special case
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of vertices (0 to n-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [u, v] (undirected edges)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        list of articulation points
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Time: O(V + E) — single DFS pass
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Space: O(V + E)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Build adjacency list ───</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Initialize arrays ───</span><span>
+</span><span>    disc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    low </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    is_artic </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># use boolean array to avoid duplicates</span><span>
+</span><span>    timer </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Assign discovery time and initial low value</span><span>
+</span><span>        disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        children_count </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># count of DFS tree children (for root check)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Tree edge: v is unvisited ───</span><span>
+</span><span>                children_count </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Update low from child</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ CASE 1: Root check ★</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Root with 2+ children is articulation point</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> parent </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> children_count </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ CASE 2: Non-root check ★</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If child v can't reach above u → u is artic point</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> parent </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> v </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Back edge: v is visited and not parent ───</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Run DFS from every unvisited node ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Collect results ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>artic_points </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> find_articulation_points</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Articulation points: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">artic_points</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: Articulation points: [1, 3, 5]</span></code></pre></div>
+<hr>
+<h3>Version 2: Iterative (For Large Inputs)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find_articulation_points_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Iterative version to avoid Python recursion limit.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same logic as recursive, just manually managing the stack.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    disc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    low </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    is_artic </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    children_count </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    timer </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> start </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>        
+<span>        stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">iter</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer
+</span><span>        timer </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbors </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">try</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                v </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">next</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Tree edge → go deeper</span><span>
+</span><span>                    children_count</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>                    parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> u
+</span><span>                    disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer
+</span><span>                    timer </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>                    stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">iter</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> v </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Back edge → update low</span><span>
+</span><span>                    low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">except</span><span> StopIteration</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># All neighbors processed → backtrack</span><span>
+</span><span>                stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    p </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># parent node</span><span>
+</span><span>                    low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>p</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>p</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                    
+<span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Articulation point checks</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Case 1: Root</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>p</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> children_count</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>p</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>p</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Case 2: Non-root</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>p</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>p</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>p</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>                    
+<span>                    u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> p   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># restore u for next iteration</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_articulation_points_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [1, 3, 5]</span></code></pre></div>
+<hr>
+<h2>STEP 8: CODE DIFFERENCE FROM PROBLEM 34 — Highlighted</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># PROBLEM 34 (Bridges) — for reference</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs_bridges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dfs_bridges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>          </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ← strictly GREATER</span><span>
+</span><span>                bridges</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ← edge is bridge</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> v </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># PROBLEM 35 (Articulation Points) — THIS problem</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs_artic</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>    children_count </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>                     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ← NEW: count DFS children</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            children_count </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ← NEW: increment child count</span><span>
+</span><span>            dfs_artic</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ ROOT CASE (NEW)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> parent </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> children_count </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>         </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ← NEW: root with 2+ children</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ NON-ROOT CASE</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> parent </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ← &gt;= instead of &gt;</span><span>
+</span><span>                is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>         </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ← node is artic point</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> v </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># DIFFERENCES SUMMARY:</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   1. Track children_count for root special case</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   2. Root: children_count &gt;= 2 → artic point</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   3. Non-root: low[v] &gt;= disc[u] (not just &gt;)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   4. Mark NODE (not edge) as result</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   5. Use boolean array to avoid duplicate marking</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span></code></pre></div>
+<hr>
+<h2>STEP 9: COMPLEXITY ANALYSIS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TIME: O(V + E)                                                    │
+  │                                                                    │
+  │  WHY:                                                              │
+  │    → Identical to Problem 34 (bridges)                            │
+  │    → Single DFS traversal over entire graph                       │
+  │    → Each node visited once: O(V)                                 │
+  │    → Each edge traversed once (each direction): O(E)              │
+  │    → Per node: O(1) extra work (check conditions, update low)     │
+  │    → Total: O(V + E)                                              │
+  │                                                                    │
+  │  SPACE: O(V + E)                                                   │
+  │                                                                    │
+  │  WHY:                                                              │
+  │    → Adjacency list: O(V + E)                                     │
+  │    → disc[], low[], is_artic[]: O(V) each                        │
+  │    → Recursion stack: O(V) worst case                             │
+  │    → Total: O(V + E)                                              │
+  │                                                                    │
+  │  Same as Problem 34 — the extra condition checks are O(1) per node│
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 10: ADDITIONAL TEST CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 2: Root IS articulation point ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_articulation_points</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [0]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#       1 ── 3</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#      /</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    ★0★           ← root with 2 DFS children (1 and 2)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#      \</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#       2 ── 4</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Remove 0 → {1,3} and {2,4} disconnected</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 3: No articulation points (cycle) ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_articulation_points</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: []</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   0 ── 1</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   |    |</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   3 ── 2</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Every node has a cycle bypass → no artic points</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 4: Linear chain (every middle node is artic) ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_articulation_points</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [1, 2, 3]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   0 ── ★1★ ── ★2★ ── ★3★ ── 4</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Endpoints (0,4) are not artic points (leaf removal is fine)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># All middle nodes are artic points</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 5: Complete graph (no artic points) ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_articulation_points</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: []</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Every pair connected → massive redundancy → no artic points</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 6: Single edge ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_articulation_points</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: []</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Remove 0 → only 1 left (single node is "connected")</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Remove 1 → only 0 left (single node is "connected")</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Neither disconnects anything with 2+ remaining nodes</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Wait — actually depends on definition:</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If we consider "at least 2 remaining nodes must exist":</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   → n=2, remove either → only 1 node left → trivially connected</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   → No artic points</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Our code: root 0 has 1 child → not artic. Node 1 is leaf → not artic.</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [] ✓</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 7: Star graph ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_articulation_points</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [0]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   1   2</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    \ /</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    ★0★</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    / \</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   3   4</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Root 0 has 4 DFS children → articulation point</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Remove 0 → all leaves isolated from each other</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 8: Problem 34's example ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">6</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_articulation_points</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [1]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Triangle 0-1-2 ═══ 1 ═══ Triangle 3-4-5</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Node 1 is the only artic point</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   (Node 3 is NOT artic because 3-4-5 forms cycle,</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    removing 3 still leaves 4─5 connected, but</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    {4,5} disconnects from {0,1,2}...</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    Wait, remove 3: edges remaining: 0-1, 1-2, 2-0, 4-5</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    {0,1,2} connected, {4,5} connected but separate → disconnected</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    So 3 IS artic point!</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    Actually let me check code output...</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    disc: [0,1,2,3,4,5], low: [0,0,0,3,3,3]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    Node 1 (non-root): child 3 has low[3]=3 &gt;= disc[1]=1 → artic ✓</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    Node 3 (non-root): child 4 has low[4]=3 &gt;= disc[3]=3 → 3&gt;=3 → artic ✓</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    Output: [1, 3]</span></code></pre></div>
+<hr>
+<h2>STEP 11: BRIDGES vs ARTICULATION POINTS — Relationship</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║  RELATIONSHIP BETWEEN BRIDGES AND ARTICULATION POINTS            ║
+  ╠═══════════════════════════════════════════════════════════════════╣
+  ║                                                                   ║
+  ║  1. Every bridge endpoint (with degree &gt; 1) is an artic point    ║
+  ║     → If edge (u,v) is a bridge and u has degree &gt; 1,            ║
+  ║       then u is an articulation point                             ║
+  ║     → (removing u removes the bridge → disconnects)              ║
+  ║                                                                   ║
+  ║  2. An artic point doesn't need to be on a bridge                ║
+  ║     → Example:                                                    ║
+  ║            1─2                                                    ║
+  ║           / | \                                                   ║
+  ║          0  |  3                                                  ║
+  ║           \ | /                                                   ║
+  ║            ★4★                                                    ║
+  ║                                                                   ║
+  ║       Node 4 is artic point (removing it splits graph)           ║
+  ║       But no bridges exist (every edge is in a cycle)            ║
+  ║                                                                   ║
+  ║  3. A bridge can exist without artic points (n=2)                ║
+  ║     → Two nodes, one edge: edge is bridge                        ║
+  ║     → Neither node is artic point (removing either leaves 1 node)║
+  ║                                                                   ║
+  ║  SUMMARY:                                                        ║
+  ║    bridges ≠ artic points (they're related but different)        ║
+  ║    Both use same disc/low framework                              ║
+  ║    Different conditions, different outputs (edges vs nodes)      ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: FINDING BOTH IN ONE PASS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find_bridges_and_artic_points</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find BOTH bridges and articulation points in a single DFS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Combines Problems 34 and 35.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same DFS, just check both conditions at each step.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Still O(V + E) — no extra cost!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    disc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    low </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    is_artic </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    bridges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    timer </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        children_count </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                children_count </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Bridge check (Problem 34): strictly greater</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    bridges</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Artic point check (Problem 35)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Root case</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> parent </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> children_count </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Non-root case: greater or equal</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> parent </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> v </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    artic_points </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> bridges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> artic_points
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>bridges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> artic </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> find_bridges_and_artic_points</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Bridges: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">bridges</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Articulation points: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">artic</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Bridges: [[5, 6], [3, 5], [3, 4], [1, 3]]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Articulation points: [1, 3, 5]</span></code></pre></div>
+<hr>
+<h2>STEP 13: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Directed?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Articulation points are defined for UNDIRECTED graphs.
+</span>  
+  For directed graphs:
+    → "Which node removal disconnects the graph?"
+      depends on definition of "connected" (weakly vs strongly)
+    → For strong connectivity:
+      → Related to Strongly Connected Components (Problem 36)
+      → A node whose removal changes the SCC structure
+    → Much more complex analysis</code></pre></div>
+<h3>What if Disconnected?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Our code handles this with the outer loop:
+</span>    for i in range(n):
+        if disc[i] == -1:
+            dfs(i, -1)
+  
+  → Each connected component processed independently
+  → Artic points found within each component
+  → Note: removing an artic point from one component
+    doesn't affect other components</code></pre></div>
+<h3>What if We Want Biconnected Components?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  A biconnected component is a maximal subgraph with NO artic points.
+</span>  → Removing any single node from it keeps it connected.
+  → The graph can be decomposed into biconnected components
+    separated by articulation points.
+  
+  Our graph:
+    Biconnected component 1: {0, 1, 2}  (triangle)
+    Biconnected component 2: {1, 3}      (bridge)
+    Biconnected component 3: {3, 4}      (bridge)
+    Biconnected component 4: {3, 5}      (bridge)
+    Biconnected component 5: {5, 6}      (bridge)
+  
+  Note: artic points belong to MULTIPLE biconnected components.
+  This is an advanced extension beyond standard interviews.</code></pre></div>
+<hr>
+<h2>STEP 14: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Using &gt; instead of &gt;= for non-root check            ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG (this finds bridges, not artic points):                   ║
+  ║    if low[v] &gt; disc[u]:         ← misses equality case          ║
+  ║        is_artic[u] = True                                        ║
+  ║                                                                  ║
+  ║  RIGHT:                                                          ║
+  ║    if low[v] &gt;= disc[u]:        ← includes equality!             ║
+  ║        is_artic[u] = True                                        ║
+  ║                                                                  ║
+  ║  Example where this matters:                                     ║
+  ║    0 ── 1 ── 2                                                   ║
+  ║         |                                                        ║
+  ║         3                                                        ║
+  ║                                                                  ║
+  ║  disc[1]=1, child 3 has low[3]=1 (back edge to 1)               ║
+  ║  Wait, no — 3 only connects to 1. disc[3]=3, low[3]=3           ║
+  ║                                                                  ║
+  ║  Better example:                                                 ║
+  ║    0 ── 1 ── 2                                                   ║
+  ║    └────┘                                                        ║
+  ║    (cycle 0-1-0 + edge 1-2)                                     ║
+  ║                                                                  ║
+  ║  Wait, parallel edges. Let me use:                               ║
+  ║    0 ── 1 ── 2                                                   ║
+  ║    |         |                                                   ║
+  ║    └─── 3 ──┘                                                    ║
+  ║                                                                  ║
+  ║  disc: 0=0, 1=1, 2=2, 3=3                                       ║
+  ║  low:  0=0, 1=0, 2=0, 3=0                                       ║
+  ║  All low=0 → no artic points → correct (it's a cycle)           ║
+  ║                                                                  ║
+  ║  The &gt; vs &gt;= matters most in non-cycle structures                ║
+  ║  where a child reaches exactly to u but not above.               ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Forgetting the root special case                     ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Without root check:                                             ║
+  ║    → Root ALWAYS satisfies low[v] &gt;= disc[root]                  ║
+  ║      (disc[root]=0, everything is &gt;= 0)                          ║
+  ║    → Root always marked as artic point → WRONG for single-child  ║
+  ║                                                                  ║
+  ║  FIX: Root check is children_count &gt;= 2, NOT the &gt;= condition    ║
+  ║                                                                  ║
+  ║  In code:                                                        ║
+  ║    if parent == -1 and children_count &gt;= 2:   ← root case        ║
+  ║    if parent != -1 and low[v] &gt;= disc[u]:     ← non-root case    ║
+  ║                                                                  ║
+  ║  These are MUTUALLY EXCLUSIVE (if/if, not if/elif)               ║
+  ║  because a node can satisfy both in theory, but parent==-1       ║
+  ║  and parent!=-1 can't both be true.                              ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Marking artic point multiple times                   ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Node 3 in our example has TWO children (4 and 5) both           ║
+  ║  satisfying low[v] &gt;= disc[3].                                   ║
+  ║                                                                  ║
+  ║  If using a list: artic_points.append(3) → added TWICE!         ║
+  ║  If using boolean array: is_artic[3] = True → no duplicates ✓   ║
+  ║                                                                  ║
+  ║  FIX: Use boolean array (is_artic[]) or a set, not a list.      ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: children_count counts ALL children, not just         ║
+  ║  those satisfying the condition                                  ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  For root check: count ALL DFS tree children, period.            ║
+  ║  If root has 2+ DFS children → artic point.                     ║
+  ║  The &gt;= condition is NOT checked for root.                       ║
+  ║                                                                  ║
+  ║  WRONG: counting only children where low[v] &gt;= disc[u]          ║
+  ║  RIGHT: counting ALL DFS tree children (unvisited neighbors)    ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Single node                                          ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  n=1, edges=[]                                                   ║
+  ║  → DFS from 0: no neighbors, children_count=0                   ║
+  ║  → Root with 0 children → NOT artic point                       ║
+  ║  → Output: [] ✓                                                  ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Two nodes, one edge                                  ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  n=2, edges=[[0,1]]                                              ║
+  ║  → DFS from 0: child 1, children_count=1                        ║
+  ║  → Root with 1 child → NOT artic point                          ║
+  ║  → Node 1: leaf, non-root, no children → NOT artic point        ║
+  ║  → Output: [] (removing either leaves single node = connected)   ║
+  ║                                                                  ║
+  ║  BUT the edge IS a bridge (from Problem 34)!                     ║
+  ║  This shows bridges and artic points are truly different.        ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 15: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TRIGGER WORDS:                                                    │
+  │    "critical node / server / router"                               │
+  │    "removing which node disconnects"                               │
+  │    "articulation point" / "cut vertex"                             │
+  │    "single point of failure" (for nodes)                           │
+  │    "which nodes are essential for connectivity"                    │
+  │                                                                    │
+  │  MY THINKING:                                                      │
+  │                                                                    │
+  │  1. "Remove a NODE and check if graph disconnects"                │
+  │      → ARTICULATION POINT problem                                  │
+  │                                                                    │
+  │  2. "Is this different from bridges?"                              │
+  │      → YES — bridges = critical EDGES, artic points = critical    │
+  │        NODES                                                       │
+  │      → Same disc/low framework, slightly different condition      │
+  │                                                                    │
+  │  3. "What's the condition?"                                        │
+  │      → Root: 2+ DFS children                                     │
+  │      → Non-root: any child v with low[v] &gt;= disc[u]              │
+  │      → Note: &gt;= not &gt; (the key difference from bridges)           │
+  │                                                                    │
+  │  4. "Can I find both bridges AND artic points in one pass?"       │
+  │      → YES — same DFS, check both conditions                     │
+  │      → O(V+E) for everything                                     │
+  │                                                                    │
+  │  INTERVIEW DIALOGUE:                                               │
+  │    "This is an articulation point problem. I'll use Tarjan's      │
+  │     algorithm — same disc/low framework as bridge finding.        │
+  │     The difference is: bridges use strictly greater (&gt;),          │
+  │     artic points use greater-or-equal (&gt;=), plus root needs       │
+  │     a special check for 2+ DFS children. Time is O(V+E)."        │
+  │                                                                    │
+  │  COMMON FOLLOW-UP:                                                │
+  │    "Why &gt;= instead of &gt;?"                                         │
+  │    → "For bridges, if v reaches u exactly (low[v] = disc[u]),    │
+  │       the edge u-v survives because u is still there.             │
+  │       For artic points, if v reaches u exactly but we REMOVE u,  │
+  │       that path dies too — v is stranded."                        │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 16: CONNECTION TO PREVIOUS AND FUTURE PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────────┐
+</span>  │  BUILDS ON:                                                         │
+  │                                                                     │
+  │  Problem 4  → DFS traversal (the backbone)                        │
+  │                                                                     │
+  │  Problem 34 → Bridges (Tarjan's algorithm)                         │
+  │               → Same disc[]/low[] framework                        │
+  │               → Same DFS structure                                  │
+  │               → Different condition: &gt; becomes &gt;=                  │
+  │               → Additional root special case                        │
+  │                                                                     │
+  │  THE TARJAN FRAMEWORK PROGRESSION:                                  │
+  │                                                                     │
+  │    ┌───────────────────────────────────────────────────────────┐   │
+  │    │  SHARED FOUNDATION:                                       │   │
+  │    │    disc[v] = discovery time                               │   │
+  │    │    low[v]  = earliest reachable ancestor                  │   │
+  │    │    DFS with parent tracking                               │   │
+  │    └───────────────────────────────────────────────────────────┘   │
+  │                     │                                               │
+  │          ┌──────────┼──────────┐                                    │
+  │          ↓          ↓          ↓                                    │
+  │    ┌──────────┐ ┌──────────┐ ┌──────────────┐                     │
+  │    │  P34     │ │  P35     │ │  P36         │                     │
+  │    │ Bridges  │ │ Artic Pt │ │ SCC          │                     │
+  │    │ low&gt;disc │ │ low≥disc │ │ (directed)   │                     │
+  │    │ + edges  │ │ + root   │ │ Kosaraju     │                     │
+  │    │          │ │ + nodes  │ │              │                     │
+  │    └──────────┘ └──────────┘ └──────────────┘                     │
+  │                                                                     │
+  │  LEADS TO:                                                          │
+  │                                                                     │
+  │  Problem 36 → Strongly Connected Components (Kosaraju's)           │
+  │               → Moves from UNDIRECTED to DIRECTED graphs           │
+  │               → "Which groups of nodes can all reach each other?"  │
+  │               → Uses two DFS passes + graph reversal               │
+  │               → Related but different technique from disc/low      │
+  │                                                                     │
+  └─────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 17: REAL-WORLD APPLICATIONS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║  WHERE ARTICULATION POINTS MATTER                                 ║
+  ╠═══════════════════════════════════════════════════════════════════╣
+  ║                                                                   ║
+  ║  1. NETWORK RELIABILITY                                           ║
+  ║     → "Which routers, if they fail, partition the network?"      ║
+  ║     → These need redundant backup or hot standby                 ║
+  ║     → Artic points = single points of failure                    ║
+  ║                                                                   ║
+  ║  2. SOCIAL NETWORK ANALYSIS                                       ║
+  ║     → "Which people, if they leave, split the community?"        ║
+  ║     → These are key connectors / gatekeepers                     ║
+  ║     → Important for information flow analysis                    ║
+  ║                                                                   ║
+  ║  3. ROAD NETWORK PLANNING                                         ║
+  ║     → "Which intersections are critical?"                        ║
+  ║     → If an intersection is blocked → part of city unreachable   ║
+  ║     → Need alternative routes around artic points                ║
+  ║                                                                   ║
+  ║  4. BIOLOGICAL NETWORKS                                           ║
+  ║     → "Which proteins are essential for cell function?"          ║
+  ║     → Removing them disrupts the protein interaction network     ║
+  ║                                                                   ║
+  ║  5. CIRCUIT DESIGN                                                ║
+  ║     → "Which components, if they fail, break the circuit?"       ║
+  ║     → Need redundancy at articulation points                     ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 18: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  NEW CONCEPT: ARTICULATION POINTS (Cut Vertices)                   ║
+  ║                                                                    ║
+  ║  SAME framework as bridges (Problem 34):                           ║
+  ║    → disc[] = discovery time                                       ║
+  ║    → low[]  = earliest ancestor reachable from subtree            ║
+  ║    → Single DFS pass, O(V + E)                                    ║
+  ║                                                                    ║
+  ║  DIFFERENT conditions:                                             ║
+  ║                                                                    ║
+  ║    ┌─────────────────────────────────────────────────────────────┐ ║
+  ║    │                                                             │ ║
+  ║    │  BRIDGES (P34):                                             │ ║
+  ║    │    low[v] &gt; disc[u]  (strictly greater)                     │ ║
+  ║    │    No special root case                                     │ ║
+  ║    │    Result: edges                                            │ ║
+  ║    │                                                             │ ║
+  ║    │  ARTICULATION POINTS (P35):                                 │ ║
+  ║    │    Non-root: low[v] &gt;= disc[u]  (greater or EQUAL)         │ ║
+  ║    │    Root: children_count &gt;= 2     (special case)             │ ║
+  ║    │    Result: nodes                                            │ ║
+  ║    │                                                             │ ║
+  ║    └─────────────────────────────────────────────────────────────┘ ║
+  ║                                                                    ║
+  ║  WHY &gt;= instead of &gt;:                                              ║
+  ║    → Removing a NODE kills ALL edges through it                   ║
+  ║    → Even if subtree reaches u exactly (low = disc[u]),           ║
+  ║      removing u destroys that path → subtree is stranded         ║
+  ║    → For bridges, removing an EDGE doesn't kill the endpoint     ║
+  ║      node, so reaching u still works → need strict &gt;             ║
+  ║                                                                    ║
+  ║  WHY root is special:                                              ║
+  ║    → Root has no parent → &gt;= condition is always true             ║
+  ║    → Instead check: does root have 2+ independent subtrees?      ║
+  ║    → If yes → removing root disconnects them → artic point       ║
+  ║                                                                    ║
+  ║  CAN COMBINE WITH P34:                                            ║
+  ║    → One DFS finds BOTH bridges AND artic points                  ║
+  ║    → Check both conditions at each tree edge                      ║
+  ║    → Still O(V + E)                                               ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CLEAN INTERVIEW VERSION</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find_articulation_points</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Tarjan's articulation point finding. O(V+E) time.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Root: 2+ DFS children. Non-root: low[v] &gt;= disc[u].
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    disc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    low </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    is_artic </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    timer </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        children </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                children </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Root: 2+ children → artic point</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> parent </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> children </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Non-root: child can't reach above me → artic point</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> parent </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> v </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> is_artic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span></code></pre></div>
+<hr>
+<h2>QUICK REFERENCE CARD</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────┐
+</span>  │  TARJAN'S FRAMEWORK — COMPLETE REFERENCE                      │
+  │                                                                │
+  │  SHARED:                                                       │
+  │    disc[v] = discovery timestamp                               │
+  │    low[v]  = min disc reachable from subtree                   │
+  │    Single DFS, O(V+E) time, O(V+E) space                      │
+  │                                                                │
+  │  ┌─────────────────────┬───────────────────────────────────┐  │
+  │  │  BRIDGES (P34)       │  ARTICULATION POINTS (P35)        │  │
+  │  ├─────────────────────┼───────────────────────────────────┤  │
+  │  │  Find critical EDGES │  Find critical NODES              │  │
+  │  ├─────────────────────┼───────────────────────────────────┤  │
+  │  │  Condition:          │  Root: children ≥ 2               │  │
+  │  │  low[v] &gt; disc[u]   │  Non-root: low[v] ≥ disc[u]      │  │
+  │  │  (strictly greater)  │  (greater or equal)               │  │
+  │  ├─────────────────────┼───────────────────────────────────┤  │
+  │  │  No special cases    │  Root needs special handling       │  │
+  │  ├─────────────────────┼───────────────────────────────────┤  │
+  │  │  Result: edge list   │  Result: node list (use bool[])   │  │
+  │  └─────────────────────┴───────────────────────────────────┘  │
+  │                                                                │
+  │  MNEMONIC:                                                     │
+  │    Bridge &gt;  : "subtree can't reach me AT ALL"                │
+  │    Artic  &gt;= : "subtree can't reach ABOVE me"                 │
+  │    Root 2+   : "I connect 2+ independent subtrees"            │
+  │                                                                │
+  │  CAN FIND BOTH IN ONE DFS — just check both conditions!       │
+  └──────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<p><strong>Problem 35 Complete.</strong><br>
+<strong>Ready for Problem 36: Strongly Connected Components (Kosaraju's Algorithm)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="29" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-34.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 35 of 50</span>
+            </div>
+            <a href="problem-36.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 4: Problem 4: DFS Traversal (Deep Exploration) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="9">
+<div class="px-2"><h1>Problem 4: DFS Traversal (Deep Exploration)</h1>
+<h2>[Algorithm Family: DFS — Depth-First Search]</h2>
+<h2>[Phase 1: Fundamentals — "I can represent and traverse any graph"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are exploring a cave system. You start at cave 0.
+</span>From each cave, there are tunnels leading to other caves.
+
+Your exploration STRATEGY:
+  → Pick a tunnel and go as DEEP as possible
+  → When you hit a dead end (all connected caves already visited),
+    BACKTRACK to the last cave that had unexplored tunnels
+  → Continue until every reachable cave is explored
+
+Given N caves and tunnels between them, determine:
+  → The ORDER in which caves are explored
+  → When you ENTER each cave (discovery time)
+  → When you FINISH exploring each cave (finish time)
+
+Input:
+  n = 7  (caves: 0, 1, 2, 3, 4, 5, 6)
+  edges = [[0,1], [0,2], [1,3], [1,4], [2,5], [2,6]]
+  source = 0  (start here)
+
+Output:
+  DFS order: [0, 1, 3, 4, 2, 5, 6]
+  (Goes DEEP into 0→1→3, backtracks, then 4, backtracks, then 2→5, etc.)</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Same Graph as Problem 3</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>              0              ← Start exploring here
+</span>             / \
+            /   \
+           1     2           
+          / \   / \
+         3   4 5   6         
+
+
+  SAME graph, SAME adjacency list as Problem 3:
+    0: [1, 2]
+    1: [0, 3, 4]
+    2: [0, 5, 6]
+    3: [1]
+    4: [1]
+    5: [2]
+    6: [2]
+
+  Graph properties: same as Problem 3
+  (Undirected, Unweighted, Connected, Sparse, Acyclic here)</code></pre></div>
+<h3>BFS vs DFS — The Exploration Difference</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  BFS (Problem 3):                    DFS (This Problem):
+</span>  "Explore ALL neighbors first"       "Go DEEP into ONE path first"
+  
+  Visit order: 0, 1, 2, 3, 4, 5, 6   Visit order: 0, 1, 3, 4, 2, 5, 6
+  
+  Level 0: [0]                         Path: 0 → 1 → 3 (dead end!)
+  Level 1: [1, 2]                             backtrack to 1
+  Level 2: [3, 4, 5, 6]                       1 → 4 (dead end!)
+                                              backtrack to 1, then to 0
+                                              0 → 2 → 5 (dead end!)
+                                              backtrack to 2
+                                              2 → 6 (dead end!)
+                                              DONE
+
+  BFS: wide, layer by layer           DFS: deep, one path at a time
+  BFS: like a ripple                   DFS: like a maze explorer</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Same issue as Problem 3:
+</span>    → Trying all V! orderings = impractical
+    → Need a systematic exploration strategy
+  
+  BFS used a QUEUE (FIFO) → nearest first
+  DFS uses a STACK (LIFO) → deepest first
+  
+  Or equivalently: DFS uses RECURSION 
+  (the call stack IS the stack!)</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<h3>The Key Insight: "Go Deep, Then Backtrack"</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  BFS uses QUEUE (FIFO): first discovered → first explored     │
+  │    → Explores WIDE: all distance-1, then all distance-2       │
+  │                                                                │
+  │  DFS uses STACK (LIFO): last discovered → first explored      │
+  │    → Explores DEEP: follows one path to the end               │
+  │    → Then BACKTRACKS to try other paths                        │
+  │                                                                │
+  │  WHY does a stack create depth-first behavior?                 │
+  │                                                                │
+  │    Stack: [0]                                                  │
+  │    Pop 0, push neighbors 1, 2 → Stack: [1, 2]                 │
+  │    Pop 2?? NO — Pop from TOP → pop 2... wait                   │
+  │                                                                │
+  │    Actually, let me show this carefully in the walkthrough.    │
+  │    The order depends on which neighbor gets pushed last        │
+  │    (last pushed = first popped from stack)                     │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Stack vs Queue — Side by Side</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  QUEUE (BFS):                        STACK (DFS):
+</span>  ┌─────────────────────┐            ┌─────────────────────┐
+  │ Add to BACK          │            │ Add to TOP           │
+  │ Remove from FRONT    │            │ Remove from TOP      │
+  │                      │            │                      │
+  │  FRONT ← [A,B,C] ← BACK         │        [C] ← TOP    │
+  │  Remove A first      │            │        [B]           │
+  │  (earliest added)    │            │        [A]           │
+  │                      │            │  Remove C first      │
+  │  FIFO               │            │  (latest added)      │
+  └─────────────────────┘            │                      │
+                                      │  LIFO               │
+                                      └─────────────────────┘
+  
+  QUEUE guarantees: nearest first (BFS)
+  STACK guarantees: deepest first (DFS)</code></pre></div>
+<h3>Two Ways to Implement DFS</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────┐
+</span>  │                                                       │
+  │  METHOD 1: Explicit STACK (iterative)                 │
+  │    → Manually push/pop from a stack                   │
+  │    → Similar structure to BFS but stack replaces queue│
+  │    → Handles very deep graphs (no recursion limit)    │
+  │                                                       │
+  │  METHOD 2: RECURSION (implicit stack)                 │
+  │    → The function call stack IS the DFS stack          │
+  │    → More intuitive, cleaner code                     │
+  │    → But limited by recursion depth (~1000 in Python)  │
+  │                                                       │
+  │  BOTH produce DFS traversal.                          │
+  │  I'll show BOTH.                                      │
+  │                                                       │
+  └─────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — Recursive DFS</h2>
+<h3>The Recursive DFS Algorithm (in English)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  DFS(node):
+</span>    1. Mark node as visited
+    2. Process node (print it, record it, etc.)
+    3. For each neighbor of node:
+       → If neighbor is NOT visited:
+         → Recursively call DFS(neighbor)
+    4. When all neighbors are processed (or all visited), 
+       the function RETURNS → this is BACKTRACKING</code></pre></div>
+<h3>Why Recursion = Depth-First?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  When we call DFS(neighbor), we IMMEDIATELY go deeper.
+</span>  We don't come back to try other neighbors until 
+  the recursive call RETURNS (finishes).
+
+  DFS(0):
+    visit 0
+    neighbor 1: not visited → call DFS(1)
+      │
+      └─→ DFS(1):
+            visit 1
+            neighbor 0: visited → skip
+            neighbor 3: not visited → call DFS(3)
+              │
+              └─→ DFS(3):
+                    visit 3
+                    neighbor 1: visited → skip
+                    no more neighbors → RETURN  ← backtrack!
+              │
+            neighbor 4: not visited → call DFS(4)
+              │
+              └─→ DFS(4):
+                    visit 4
+                    neighbor 1: visited → skip
+                    no more neighbors → RETURN  ← backtrack!
+              │
+            no more neighbors → RETURN  ← backtrack to 0!
+      │
+    neighbor 2: not visited → call DFS(2)
+      │
+      └─→ DFS(2):
+            visit 2
+            neighbor 0: visited → skip
+            neighbor 5: not visited → call DFS(5)
+              │
+              └─→ DFS(5):
+                    visit 5
+                    neighbor 2: visited → skip
+                    RETURN
+              │
+            neighbor 6: not visited → call DFS(6)
+              │
+              └─→ DFS(6):
+                    visit 6
+                    neighbor 2: visited → skip
+                    RETURN
+              │
+            RETURN
+      │
+    RETURN  ← DFS(0) done!
+
+  Visit order: 0, 1, 3, 4, 2, 5, 6  ← DEPTH FIRST!</code></pre></div>
+<h3>Full Trace with Call Stack Visualization</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════════╗
+</span>  ║  INITIALIZATION                                                       ║
+  ╠═══════════════════════════════════════════════════════════════════════╣
+  ║                                                                       ║
+  ║  Visited:    {}                                                       ║
+  ║  Result:     []                                                       ║
+  ║  Call Stack: [empty]                                                  ║
+  ║                                                                       ║
+  ║  Call DFS(0)                                                          ║
+  ╚═══════════════════════════════════════════════════════════════════════╝
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 1: DFS(0) — Enter cave 0                                      │
+  │                                                                     │
+  │   Mark 0 visited → Visited: {0}                                     │
+  │   Result: [0]                                                       │
+  │                                                                     │
+  │   Call Stack:  [DFS(0)]                                             │
+  │                                                                     │
+  │   Neighbors of 0: [1, 2]                                            │
+  │     Check 1: not visited → call DFS(1)                              │
+  │     (we'll come back to neighbor 2 LATER, after DFS(1) returns)     │
+  │                                                                     │
+  │   Visual:                                                           │
+  │              *0*             ← EXPLORING                            │
+  │              / \                                                     │
+  │             1   2            ← 1 chosen next, 2 waits               │
+  │            / \ / \                                                   │
+  │           3  4 5  6                                                  │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 2: DFS(1) — Go deeper into cave 1                             │
+  │                                                                     │
+  │   Mark 1 visited → Visited: {0, 1}                                  │
+  │   Result: [0, 1]                                                    │
+  │                                                                     │
+  │   Call Stack:  [DFS(0), DFS(1)]     ← stack growing DEEPER          │
+  │                                                                     │
+  │   Neighbors of 1: [0, 3, 4]                                         │
+  │     Check 0: visited → SKIP                                         │
+  │     Check 3: not visited → call DFS(3)                              │
+  │     (neighbor 4 waits)                                              │
+  │                                                                     │
+  │   Visual:                                                           │
+  │              [0]                                                     │
+  │              / \                                                     │
+  │            *1*  2            ← going DEEPER through 1               │
+  │            / \ / \                                                   │
+  │           3  4 5  6          ← 3 chosen next                        │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 3: DFS(3) — Go even deeper into cave 3                        │
+  │                                                                     │
+  │   Mark 3 visited → Visited: {0, 1, 3}                               │
+  │   Result: [0, 1, 3]                                                 │
+  │                                                                     │
+  │   Call Stack:  [DFS(0), DFS(1), DFS(3)]   ← three levels deep!     │
+  │                                                                     │
+  │   Neighbors of 3: [1]                                                │
+  │     Check 1: visited → SKIP                                         │
+  │     No more neighbors → RETURN (backtrack!)                         │
+  │                                                                     │
+  │   Visual:                                                           │
+  │              [0]                                                     │
+  │              / \                                                     │
+  │            [1]  2                                                    │
+  │            / \ / \                                                   │
+  │          *3* 4 5  6          ← DEAD END! All neighbors visited      │
+  │                                                                     │
+  │   ★ BACKTRACK: DFS(3) returns → we're back in DFS(1)                │
+  │                Call Stack:  [DFS(0), DFS(1)]                        │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 4: Back in DFS(1) — Continue with remaining neighbors         │
+  │                                                                     │
+  │   We were in DFS(1), checking neighbors [0, 3, 4]                   │
+  │   Already processed: 0 (skip), 3 (done)                             │
+  │   Next: 4                                                           │
+  │                                                                     │
+  │     Check 4: not visited → call DFS(4)                              │
+  │                                                                     │
+  │   Call Stack:  [DFS(0), DFS(1), DFS(4)]                             │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 5: DFS(4) — Explore cave 4                                    │
+  │                                                                     │
+  │   Mark 4 visited → Visited: {0, 1, 3, 4}                            │
+  │   Result: [0, 1, 3, 4]                                              │
+  │                                                                     │
+  │   Call Stack:  [DFS(0), DFS(1), DFS(4)]                             │
+  │                                                                     │
+  │   Neighbors of 4: [1]                                                │
+  │     Check 1: visited → SKIP                                         │
+  │     No more neighbors → RETURN (backtrack!)                         │
+  │                                                                     │
+  │   Visual:                                                           │
+  │              [0]                                                     │
+  │              / \                                                     │
+  │            [1]  2                                                    │
+  │            / \ / \                                                   │
+  │          [3]*4* 5  6         ← another dead end, backtrack          │
+  │                                                                     │
+  │   ★ BACKTRACK: DFS(4) returns → back in DFS(1)                      │
+  │   ★ DFS(1) has no more neighbors → DFS(1) returns → back in DFS(0) │
+  │                                                                     │
+  │   Call Stack:  [DFS(0)]      ← unwound back to start!              │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 6: Back in DFS(0) — Continue with remaining neighbors         │
+  │                                                                     │
+  │   We were in DFS(0), checking neighbors [1, 2]                      │
+  │   Already processed: 1 (done, entire subtree explored)              │
+  │   Next: 2                                                           │
+  │                                                                     │
+  │     Check 2: not visited → call DFS(2)                              │
+  │                                                                     │
+  │   Call Stack:  [DFS(0), DFS(2)]                                     │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 7: DFS(2) — Explore cave 2                                    │
+  │                                                                     │
+  │   Mark 2 visited → Visited: {0, 1, 2, 3, 4}                         │
+  │   Result: [0, 1, 3, 4, 2]                                          │
+  │                                                                     │
+  │   Call Stack:  [DFS(0), DFS(2)]                                     │
+  │                                                                     │
+  │   Neighbors of 2: [0, 5, 6]                                         │
+  │     Check 0: visited → SKIP                                         │
+  │     Check 5: not visited → call DFS(5)                              │
+  │                                                                     │
+  │   Visual:                                                           │
+  │              [0]                                                     │
+  │              / \                                                     │
+  │            [1] *2*           ← NOW exploring right subtree          │
+  │            / \ / \                                                   │
+  │          [3][4] 5  6                                                 │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 8: DFS(5) — Explore cave 5                                    │
+  │                                                                     │
+  │   Mark 5 visited → Visited: {0, 1, 2, 3, 4, 5}                      │
+  │   Result: [0, 1, 3, 4, 2, 5]                                       │
+  │                                                                     │
+  │   Call Stack:  [DFS(0), DFS(2), DFS(5)]                             │
+  │                                                                     │
+  │   Neighbors of 5: [2]                                                │
+  │     Check 2: visited → SKIP                                         │
+  │     No more → RETURN                                                │
+  │                                                                     │
+  │   ★ BACKTRACK: DFS(5) returns → back in DFS(2)                      │
+  │   Call Stack:  [DFS(0), DFS(2)]                                     │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 9: Back in DFS(2), continue neighbors                         │
+  │                                                                     │
+  │   Next neighbor: 6                                                  │
+  │     Check 6: not visited → call DFS(6)                              │
+  │                                                                     │
+  │   Call Stack:  [DFS(0), DFS(2), DFS(6)]                             │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 10: DFS(6) — Explore cave 6                                   │
+  │                                                                     │
+  │   Mark 6 visited → Visited: {0, 1, 2, 3, 4, 5, 6}                   │
+  │   Result: [0, 1, 3, 4, 2, 5, 6]                                    │
+  │                                                                     │
+  │   Call Stack:  [DFS(0), DFS(2), DFS(6)]                             │
+  │                                                                     │
+  │   Neighbors of 6: [2]                                                │
+  │     Check 2: visited → SKIP                                         │
+  │     No more → RETURN                                                │
+  │                                                                     │
+  │   ★ BACKTRACK: DFS(6) → DFS(2) → DFS(0)                             │
+  │   All functions return. DFS complete!                                │
+  │                                                                     │
+  │   Final Call Stack: [empty]                                          │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ═══════════════════════════════════════════════════════════════════
+  FINAL DFS ORDER: [0, 1, 3, 4, 2, 5, 6]
+  
+  Compare with BFS (Problem 3): [0, 1, 2, 3, 4, 5, 6]
+  
+  DFS went: 0 → deep into 1 → deep into 3 → backtrack → 4 → 
+            backtrack all the way → 2 → deep into 5 → backtrack → 6
+  
+  BFS went: 0 → all of level 1 (1,2) → all of level 2 (3,4,5,6)
+  ═══════════════════════════════════════════════════════════════════</code></pre></div>
+<h3>Summary: The Path DFS Takes</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  0 ──→ 1 ──→ 3 ──✖ (dead end)
+</span>              │
+              └──→ 4 ──✖ (dead end)
+         │
+         └──→ 2 ──→ 5 ──✖ (dead end)
+                   │
+                   └──→ 6 ──✖ (dead end)
+
+  ✖ = backtrack (all neighbors visited, return from recursive call)
+
+  The call stack at deepest point:
+    [DFS(0), DFS(1), DFS(3)]  ← 3 levels deep
+    This is the "depth" in "depth-first"</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: Recursive DFS (Most Intuitive)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs_recursive</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Perform DFS starting from source using RECURSION.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        graph: adjacency list (from Problem 1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        source: starting node
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: total number of nodes
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        order: list of nodes in DFS visit order
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    How it works:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → The Python CALL STACK acts as our DFS stack
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Each recursive call = going one level deeper
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Each return = backtracking one level
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Limitation: Python recursion limit ~1000 by default
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">                For deep graphs (V &gt; 1000), use iterative version
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    order </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Inner recursive function — explores one node and its subtree."""</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Mark visited and record</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Explore each neighbor</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># GO DEEPER — this is the magic!</span><span>
+</span><span>                                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># We don't continue to next neighbor</span><span>
+</span><span>                                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># until this entire subtree is explored</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># When we reach here, ALL reachable nodes from 'node' are visited</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># This is the BACKTRACK point</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Start DFS from source</span><span>
+</span><span>    dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> order
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD GRAPH (Problem 1) ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── RUN DFS ───</span><span>
+</span><span>result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dfs_recursive</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"DFS Order: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">result</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: DFS Order: [0, 1, 3, 4, 2, 5, 6]</span></code></pre></div>
+<hr>
+<h3>Version 2: Iterative DFS (Using Explicit Stack)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Perform DFS using an EXPLICIT STACK (no recursion).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Advantages over recursive:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → No recursion depth limit (handles V &gt; 1000)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → More control over stack operations
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    KEY DIFFERENCE from BFS (Problem 3):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → BFS: queue.popleft()  (remove FRONT — FIFO)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → DFS: stack.pop()      (remove TOP — LIFO)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → That ONE change turns BFS into DFS!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    IMPORTANT SUBTLETY:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Iterative DFS marks visited when POPPING, not when pushing
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → This is DIFFERENT from BFS (which marks when enqueuing)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → WHY? Because in iterative DFS, a node might be pushed 
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">          multiple times before being popped (unlike BFS with mark-on-enqueue)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Alternative: mark when pushing (like BFS) but traversal order
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">          may differ slightly from recursive DFS
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># stack replaces queue</span><span>
+</span><span>    order </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>      </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># pop from TOP (LIFO) — not popleft!</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> current </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># might have been pushed multiple times</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>        
+<span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Push neighbors to stack</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># REVERSE order so that first neighbor in adj list is on TOP</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (gets popped first, matching recursive DFS order)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">reversed</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> order
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD GRAPH ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── RUN ───</span><span>
+</span><span>result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dfs_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"DFS Order (iterative): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">result</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: DFS Order (iterative): [0, 1, 3, 4, 2, 5, 6]</span></code></pre></div>
+<h3>Why <code>reversed(graph[current])</code>?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  graph[0] = [1, 2]
+</span>
+  WITHOUT reversed:
+    Push 1, then push 2
+    Stack: [..., 1, 2]
+    Pop 2 first (LIFO!) → visits 2 before 1
+    DFS order: [0, 2, 5, 6, 1, 3, 4]  ← different from recursive!
+  
+  WITH reversed:
+    Push 2, then push 1
+    Stack: [..., 2, 1]
+    Pop 1 first → visits 1 before 2
+    DFS order: [0, 1, 3, 4, 2, 5, 6]  ← matches recursive!
+
+  This is because STACK reverses the order:
+    Last pushed = first popped
+    So we push in REVERSE to get original order on top
+
+  NOTE: both orders are valid DFS traversals!
+  The "reversed" is only needed if you want to match
+  the recursive version exactly.</code></pre></div>
+<hr>
+<h3>Version 3: DFS with Discovery and Finish Times</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs_with_timestamps</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    DFS that tracks DISCOVERY TIME and FINISH TIME for each node.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Discovery time: when we FIRST visit a node (enter the cave)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Finish time:    when we COMPLETE exploring a node (leave the cave)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    These timestamps are CRITICAL for:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Cycle detection in directed graphs (Problem 11)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Topological sort (Problem 20)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Strongly connected components (Problem 36)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Classifying edges (tree, back, forward, cross)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Think of it like timestamps on a cave exploration log:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        "Entered cave 3 at time 5, finished exploring at time 6"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    discovery </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># when we first visit each node</span><span>
+</span><span>    finish </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>          </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># when we finish exploring each node</span><span>
+</span><span>    order </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    time </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>           </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># using list to allow mutation in nested function</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># DISCOVER this node</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        time</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        discovery</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> time</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Explore neighbors</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># FINISH this node (all descendants explored)</span><span>
+</span><span>        time</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        finish</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> time</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> order</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> discovery</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> finish
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD GRAPH ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── RUN ───</span><span>
+</span><span>order</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> fin </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dfs_with_timestamps</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"DFS Order: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">order</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">\n"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation" style="color: rgb(163, 21, 21);">'Node'</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">:</span><span class="token string-interpolation interpolation format-spec">&lt;6</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation" style="color: rgb(163, 21, 21);">'Discovery'</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">:</span><span class="token string-interpolation interpolation format-spec">&lt;12</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation" style="color: rgb(163, 21, 21);">'Finish'</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">:</span><span class="token string-interpolation interpolation format-spec">&lt;10</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"-"</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">28</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">:</span><span class="token string-interpolation interpolation format-spec">&lt;6</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">disc</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">:</span><span class="token string-interpolation interpolation format-spec">&lt;12</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">fin</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">:</span><span class="token string-interpolation interpolation format-spec">&lt;10</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>DFS Order: [0, 1, 3, 4, 2, 5, 6]
+</span>
+Node   Discovery    Finish    
+----------------------------
+0      1            14        
+1      2            9         
+2      10           13        
+3      3            4         
+4      5            6         ← NOTE: discovered AFTER 3 finished
+5      11           12        
+6      13           14... 
+
+Wait, let me retrace...</code></pre></div>
+<h3>Correct Timestamp Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Call DFS(0):
+</span>    time = 1, discovery[0] = 1
+    
+    Call DFS(1):
+      time = 2, discovery[1] = 2
+      
+      Call DFS(3):
+        time = 3, discovery[3] = 3
+        no unvisited neighbors
+        time = 4, finish[3] = 4
+      
+      Call DFS(4):
+        time = 5, discovery[4] = 5
+        no unvisited neighbors
+        time = 6, finish[4] = 6
+      
+      time = 7, finish[1] = 7
+    
+    Call DFS(2):
+      time = 8, discovery[2] = 8
+      
+      Call DFS(5):
+        time = 9, discovery[5] = 9
+        no unvisited neighbors
+        time = 10, finish[5] = 10
+      
+      Call DFS(6):
+        time = 11, discovery[6] = 11
+        no unvisited neighbors
+        time = 12, finish[6] = 12
+      
+      time = 13, finish[2] = 13
+    
+    time = 14, finish[0] = 14
+
+
+  TIMELINE:
+  Time: 1  2  3  4  5  6  7  8  9  10 11 12 13 14
+        │  │  │  │  │  │  │  │  │  │  │  │  │  │
+  Node: 0  1  3  3  4  4  1  2  5  5  6  6  2  0
+        D  D  D  F  D  F  F  D  D  F  D  F  F  F
+        
+  D = Discovery, F = Finish
+
+  PROPERTY: If node A is an ANCESTOR of node B in DFS tree:
+    → discovery[A] &lt; discovery[B]  AND  finish[A] &gt; finish[B]
+    → A's interval CONTAINS B's interval
+    
+  Example: Node 0 contains all others
+    0: [1 ............... 14]
+    1: [2 ....... 7]
+    3: [3 .. 4]
+    4: [5 .. 6]
+    2: [8 ......... 13]
+    5: [9 .. 10]
+    6: [11 . 12]
+
+  This "containment" property is used in Problems 11, 20, 36.</code></pre></div>
+<hr>
+<h3>Version 4: DFS with Parent Tracking (Needed for Problems 10, 34, 35)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs_with_parent</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    DFS that tracks the PARENT of each node in the DFS tree.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Parent = the node from which we DISCOVERED this node.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Why track parents?
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Cycle detection in undirected graphs (Problem 10):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">          "If I find a visited neighbor that's NOT my parent → CYCLE"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Finding bridges (Problem 34)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Building DFS tree structure
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># source has no parent</span><span>
+</span><span>    order </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> par</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> par
+</span><span>        order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># current node becomes parent</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># What if neighbor IS visited AND neighbor != parent?</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># → That means we found a CYCLE! (Problem 10)</span><span>
+</span>    
+<span>    dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> order</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> parent
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD GRAPH ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── RUN ───</span><span>
+</span><span>order</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dfs_with_parent</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"DFS Order: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">order</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\nDFS Tree (parent relationships):"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> ← parent: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">parent</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>DFS Order: [0, 1, 3, 4, 2, 5, 6]
+</span>
+DFS Tree (parent relationships):
+  Node 0 ← parent: -1  (root)
+  Node 1 ← parent: 0
+  Node 2 ← parent: 0
+  Node 3 ← parent: 1
+  Node 4 ← parent: 1
+  Node 5 ← parent: 2
+  Node 6 ← parent: 2
+
+DFS Tree:
+              0
+             / \
+            1   2
+           / \ / \
+          3  4 5  6
+
+(Same as original graph here because it's already a tree!)</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(V + E) — Same as BFS (Problem 3)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  WHY O(V + E)?
+</span>
+  1. Each node is visited EXACTLY ONCE
+     → visited set prevents revisiting
+     → V nodes → O(V) for visiting
+
+  2. For each visited node, we scan its NEIGHBOR LIST
+     → Same argument as BFS (Problem 3):
+     → Total neighbor scans across all nodes = sum of degrees = 2E (undirected)
+     → O(E) for edge scanning
+
+  TOTAL: O(V + E)
+
+  Same as BFS! Both traversals visit every node and check every edge once.
+  The DIFFERENCE is the ORDER, not the total work done.</code></pre></div>
+<h3>Space Complexity: O(V)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  1. visited set: O(V)
+</span>  2. order list: O(V)
+  3. Call stack (recursive): O(V) in worst case
+     → Worst case: a straight chain 0→1→2→...→V-1
+     → DFS goes all the way deep: V recursive calls on stack
+     → Call stack depth = V
+  
+  4. Explicit stack (iterative): O(V) in worst case
+     → Same reasoning — all nodes could be on stack
+
+  Total extra space: O(V)
+
+  IMPORTANT: Recursive DFS can hit Python's recursion limit!
+    → Default limit: ~1000
+    → If V &gt; 1000: use iterative DFS
+    → Or: import sys; sys.setrecursionlimit(V + 10)
+      (but this risks actual stack overflow for V &gt; ~10⁵)</code></pre></div>
+<hr>
+<h2>STEP 7: BFS vs DFS — The Complete Comparison</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────┬──────────────────────┬──────────────────────┐
+</span>  │  Property          │  BFS (Problem 3)      │  DFS (Problem 4)     │
+  ├────────────────────┼──────────────────────┼──────────────────────┤
+  │  Data Structure    │  Queue (FIFO)         │  Stack (LIFO)        │
+  │                    │  collections.deque    │  recursion or list   │
+  │                    │                       │                      │
+  │  Exploration       │  WIDE — level by      │  DEEP — one path     │
+  │  Pattern           │  level                │  to the end          │
+  │                    │                       │                      │
+  │  Visit Order       │  Nearest first        │  Deepest first       │
+  │  (from source)     │  (distance order)     │  (path order)        │
+  │                    │                       │                      │
+  │  Time              │  O(V + E)             │  O(V + E)            │
+  │  Space             │  O(V)                 │  O(V)                │
+  │                    │                       │                      │
+  │  Shortest Path?    │  YES (unweighted)     │  NO                  │
+  │                    │                       │                      │
+  │  Complete?         │  YES (finds all       │  YES (finds all      │
+  │  (finds all nodes) │  reachable nodes)     │  reachable nodes)    │
+  │                    │                       │                      │
+  │  Memory in         │  O(branching^depth)   │  O(depth)            │
+  │  Practice          │  Can be LARGE for     │  Usually SMALLER     │
+  │                    │  wide graphs          │  for wide graphs     │
+  │                    │                       │                      │
+  │  Cycle Detection   │  Possible but awkward │  NATURAL fit         │
+  │                    │                       │  (Problems 10, 11)   │
+  │                    │                       │                      │
+  │  Topological Sort  │  Kahn's (Problem 19)  │  Reverse post-order  │
+  │                    │                       │  (Problem 20)        │
+  │                    │                       │                      │
+  │  Path Finding      │  Finds shortest       │  Finds A path        │
+  │                    │  path                 │  (not necessarily    │
+  │                    │                       │  shortest)           │
+  └────────────────────┴──────────────────────┴──────────────────────┘</code></pre></div>
+<h3>When to Use Which?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  USE BFS WHEN:
+</span>    → Need SHORTEST path (unweighted) — Problem 9
+    → Need LEVEL-by-LEVEL processing — Problem 13
+    → Need MINIMUM steps/moves/hops
+    → Spreading/ripple from source(s)
+    
+  USE DFS WHEN:
+    → Need to detect CYCLES — Problems 10, 11
+    → Need TOPOLOGICAL SORT — Problem 20
+    → Need to explore ALL PATHS (backtracking)
+    → Need CONNECTED COMPONENTS — Problem 5
+    → Need to find BRIDGES/ARTICULATION POINTS — Problems 34, 35
+    → Need STRONGLY CONNECTED COMPONENTS — Problem 36
+    → Problem has tree-like structure (DFS = natural tree traversal)
+
+  EITHER WORKS WHEN:
+    → Just need to visit all reachable nodes
+    → Checking if path exists (Problem 8)
+    → Connected components (Problem 5) — BFS or DFS both fine
+    → Flood fill (Problem 6)</code></pre></div>
+<hr>
+<h2>STEP 8: DFS ON A GRAPH WITH CYCLES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Graph with cycle:
+</span>      0 ---- 1
+      |      |
+      |      |
+      3 ---- 2
+
+  Adjacency List:
+    0: [1, 3]
+    1: [0, 2]
+    2: [1, 3]
+    3: [0, 2]
+
+  DFS(0):
+    visit 0, neighbors [1, 3]
+    → DFS(1):
+        visit 1, neighbors [0, 2]
+        → 0: visited, SKIP
+        → DFS(2):
+            visit 2, neighbors [1, 3]
+            → 1: visited, SKIP
+            → DFS(3):
+                visit 3, neighbors [0, 2]
+                → 0: visited, SKIP
+                → 2: visited, SKIP
+                → RETURN
+            → RETURN
+        → RETURN
+    → 3: visited, SKIP (already visited via 0→1→2→3)
+    → RETURN
+  
+  DFS Order: [0, 1, 2, 3]
+  
+  NOTICE: DFS found a path 0→1→2→3 through the cycle
+  WITHOUT getting stuck in an infinite loop
+  BECAUSE of the visited set!
+
+  The edge 0—3 was never traversed for exploration
+  (3 was already visited when we checked it from 0)
+  This is called a "back edge" — it creates the cycle
+  (More on this in Problem 10)</code></pre></div>
+<hr>
+<h2>STEP 9: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Directed?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  DFS on directed graphs is CRITICAL for:
+</span>    → Cycle detection (Problem 11) — needs 3-state visited
+    → Topological sort (Problem 20) — reverse finish order
+    → SCC (Problem 36) — two DFS passes
+
+  In directed graph, DFS may not reach all nodes from one source:
+    0 → 1 → 2
+    ↑       ↓
+    └───────3
+
+  DFS from 0: visits 0, 1, 2, 3 ✓ (happens to reach all here)
+  DFS from 2: visits 2, 3, 0, 1 ✓
+  
+  But: 0 → 1 → 2 → 3  (no edge back)
+  DFS from 3: visits only 3!</code></pre></div>
+<h3>What if Weighted?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  DFS doesn't care about weights during traversal.
+</span>  It just explores depth-first regardless of edge costs.
+  
+  DFS CANNOT find shortest path (even in unweighted graphs).
+  
+  Example:
+      0 --- 1 --- 2 --- 3
+      |                 |
+      +--------4--------+
+  
+  DFS from 0 might find: 0→1→2→3 (path length 3)
+  But shortest path to 3 is: 0→4→3 (path length 2)
+  DFS just follows one path deeply — it doesn't compare paths!
+  
+  For shortest path: use BFS (Problem 9) or Dijkstra (Problem 23)</code></pre></div>
+<h3>What if Disconnected?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Same as BFS (Problem 3): 
+</span>  DFS from one source only visits that component.
+  
+  To visit ALL nodes:
+    for node in range(n):
+        if node not in visited:
+            dfs(node)  ← each call discovers one component
+
+  This is exactly Problem 5 (Connected Components).</code></pre></div>
+<hr>
+<h2>STEP 10: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Python recursion limit                           ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Default: sys.getrecursionlimit() = 1000                    ║
+  ║                                                              ║
+  ║  Graph with chain: 0→1→2→...→5000                           ║
+  ║  → DFS recursion depth = 5000 → RecursionError!              ║
+  ║                                                              ║
+  ║  FIX 1: sys.setrecursionlimit(200001) — risky for large V   ║
+  ║  FIX 2: Use ITERATIVE DFS — always safe                      ║
+  ║                                                              ║
+  ║  In interviews: mention this limitation                      ║
+  ║  In competitions: use iterative for V &gt; 10^4                 ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Iterative DFS — visiting same node twice         ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  In iterative DFS, a node can be pushed to stack MULTIPLE    ║
+  ║  times before being popped.                                  ║
+  ║                                                              ║
+  ║  FIX: Check "if current in visited: continue" after popping  ║
+  ║                                                              ║
+  ║  OR: Mark visited when PUSHING (like BFS)                    ║
+  ║      But this changes traversal order slightly               ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Confusing DFS order with shortest path           ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  DFS does NOT give shortest path.                            ║
+  ║  The order DFS visits nodes depends on adjacency list order, ║
+  ║  NOT on distance from source.                                ║
+  ║                                                              ║
+  ║  For shortest path → use BFS (Problem 3/9)                   ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Single node                                      ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  n = 1, edges = []                                           ║
+  ║  DFS(0): visit 0, no neighbors → Result: [0] ✓              ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Complete graph (every node connected to every)   ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  DFS still works — visited set prevents revisiting           ║
+  ║  Order depends on which neighbor is tried first              ║
+  ║  Time: still O(V + E), just E is large (V²/2)               ║
+  ╚══════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 11: DFS TEMPLATES — Use These in Every DFS Problem</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># TEMPLATE 1: Basic Recursive DFS</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs_basic_template</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># TEMPLATE 2: Iterative DFS (safe for large graphs)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs_iterative_template</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">reversed</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># TEMPLATE 3: DFS for ALL components (disconnected graph)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (Preview for Problem 5)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs_all_components</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    components </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> component</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        component</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> component</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            component </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>            dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> component</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            components</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>component</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> components</span></code></pre></div>
+<hr>
+<h2>STEP 12: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  SIGNAL 1: "Explore all possibilities" / "find any path"      │
+  │    → DFS naturally explores one complete path before others    │
+  │    → Great for backtracking problems                           │
+  │                                                                │
+  │  SIGNAL 2: "Detect cycle"                                      │
+  │    → DFS + back edge detection (Problems 10, 11)               │
+  │    → DFS is THE standard approach for cycle detection          │
+  │                                                                │
+  │  SIGNAL 3: "Ordering with dependencies"                        │
+  │    → Topological sort uses DFS (Problem 20)                    │
+  │    → "Do task A before task B" → directed graph → topo sort    │
+  │                                                                │
+  │  SIGNAL 4: "Connected components" or "grouping"                │
+  │    → DFS from each unvisited node (Problem 5)                  │
+  │    → Each DFS run = one group                                  │
+  │                                                                │
+  │  SIGNAL 5: "Tree-like exploration"                              │
+  │    → Tree problems are naturally DFS (recursive)               │
+  │    → Preorder, inorder, postorder = DFS variants               │
+  │                                                                │
+  │  THINKING PROCESS:                                             │
+  │    "I see exploration/cycles/ordering/components"              │
+  │    → "DFS explores deeply, backtracks naturally"               │
+  │    → "Use recursive DFS (or iterative for large V)"            │
+  │                                                                │
+  │  WHEN NOT TO USE DFS:                                          │
+  │    "I need SHORTEST path" → use BFS (Problem 3/9)              │
+  │    "I need level-by-level" → use BFS                           │
+  │    "I need nearest/minimum steps" → use BFS                    │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 13: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPTS LEARNED:                                            ║
+  ║                                                                    ║
+  ║   1. DFS = Depth-First Search = explore ONE PATH fully,           ║
+  ║      then BACKTRACK and try another                                ║
+  ║                                                                    ║
+  ║   2. Uses STACK (LIFO) or RECURSION (call stack)                   ║
+  ║      → Stack makes DFS go DEEP (opposite of BFS queue going WIDE) ║
+  ║                                                                    ║
+  ║   3. Two implementations: recursive (clean) vs iterative (safe)   ║
+  ║                                                                    ║
+  ║   4. Discovery/Finish times = powerful metadata                    ║
+  ║      → Used in cycle detection, topo sort, SCC                     ║
+  ║                                                                    ║
+  ║   5. Parent tracking = needed for undirected cycle detection       ║
+  ║                                                                    ║
+  ║   6. DFS does NOT find shortest path!                              ║
+  ║      → BFS (Problem 3) for shortest path                          ║
+  ║      → DFS for exploration, cycles, ordering                      ║
+  ║                                                                    ║
+  ║   7. Same time/space complexity as BFS: O(V+E) / O(V)             ║
+  ║      → Different ORDER of exploration, same total WORK             ║
+  ║                                                                    ║
+  ║   MENTAL MODEL:                                                    ║
+  ║   "DFS is like a maze explorer — follow one path until a wall,    ║
+  ║    then turn around and try the next path. Keep going until        ║
+  ║    every room is explored."                                        ║
+  ║                                                                    ║
+  ║   NOW I KNOW BOTH TRAVERSALS:                                      ║
+  ║   BFS (Problem 3) — nearest first — queue                         ║
+  ║   DFS (Problem 4) — deepest first — stack/recursion               ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CONNECTION MAP</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 1 (Adjacency List)  ── provides GRAPH structure
+</span>  Problem 2 (Adjacency Matrix) ─ alternative structure
+  Problem 3 (BFS)             ── WIDE traversal (queue)
+  Problem 4 (DFS)             ◄── YOU ARE HERE — DEEP traversal (stack)
+           │
+           ├──→ Problem 5  (Connected Components) — DFS on disconnected graphs
+           │     "Run DFS from each unvisited node → count groups"
+           │
+           ├──→ Problem 6  (Flood Fill) — DFS on grids
+           │
+           ├──→ Problem 10 (Cycle Detection Undirected) — DFS + parent
+           │
+           ├──→ Problem 11 (Cycle Detection Directed) — DFS + 3 states
+           │
+           ├──→ Problem 20 (Topological Sort DFS) — reverse finish order
+           │
+           └──→ Problem 34 (Bridges) — DFS + discovery/low times</code></pre></div>
+<hr>
+<p><strong>Problem 4 Complete.</strong><br>
+<strong>Ready for Problem 5: Count Connected Components?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="11" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-3.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 4 of 50</span>
+            </div>
+            <a href="problem-5.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 24: Problem 24: Network Delay Time (Dijkstra Application) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="25">
+<div class="px-2"><h1>Problem 24: Network Delay Time (Dijkstra Application)</h1>
+<h2>[Algorithm Family: Dijkstra — Direct Application]</h2>
+<h2>[Phase 3: Standard Interview — "I can solve real interview problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You have a network of N nodes, labeled from 1 to N.
+</span>
+Given a list of travel times as directed edges:
+  times[i] = [ui, vi, wi]
+  → a signal travels from node ui to node vi in wi time units.
+
+You send a signal from a given source node K.
+
+Return the MINIMUM TIME for ALL nodes to receive the signal.
+If it's impossible for all nodes to receive it, return -1.
+
+Example 1:
+  n = 4
+  times = [[2,1,1], [2,3,1], [3,4,1]]
+  k = 2  (source node)
+  
+  Output: 2
+  
+  Explanation:
+    Signal starts at node 2 at time 0
+    At time 1: reaches node 1 (via 2→1, cost 1)
+               reaches node 3 (via 2→3, cost 1)
+    At time 2: reaches node 4 (via 2→3→4, cost 1+1=2)
+    
+    All nodes reached! Maximum time = 2
+
+Example 2:
+  n = 2
+  times = [[1,2,1]]
+  k = 2  (source node)
+  
+  Output: -1
+  
+  Explanation:
+    Signal starts at node 2
+    No edge FROM node 2 → can't reach node 1
+    Not all nodes receive signal → return -1</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Example 1:
+</span>  times = [[2,1,1], [2,3,1], [3,4,1]]
+  k = 2
+  
+  THE GRAPH:
+  
+    1 ←──1──── 2 ────1──→ 3 ────1──→ 4
+    
+    Source = node 2
+    
+    Signal spread:
+      Time 0: node 2 has signal
+      Time 1: nodes 1 and 3 receive signal (both 1 hop away)
+      Time 2: node 4 receives signal (via node 3)
+      
+    All nodes reached! Max time = 2
+    
+  ADJACENCY LIST:
+    2 → [(1, 1), (3, 1)]
+    3 → [(4, 1)]
+    1 → []
+    4 → []</code></pre></div>
+<h3>The Key Observation</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  "Minimum time for ALL nodes to receive signal"                  │
+  │                                                                  │
+  │  = "What is the LATEST arrival among all shortest paths?"        │
+  │                                                                  │
+  │  = max(shortest_distance[node] for all nodes)                    │
+  │                                                                  │
+  │  WHY?                                                            │
+  │    → Signal reaches each node at its SHORTEST distance from K    │
+  │    → ALL nodes are "done" when the LAST one receives the signal  │
+  │    → Last one = node with MAXIMUM shortest distance              │
+  │                                                                  │
+  │  ALGORITHM:                                                      │
+  │    1. Run Dijkstra from source K (Problem 23)                    │
+  │    2. Get shortest distance to every node                        │
+  │    3. Return max(all distances)                                  │
+  │    4. If any distance is ∞ → return -1 (unreachable node)       │
+  │                                                                  │
+  │  That's it! This is a DIRECT Dijkstra application.               │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer           │  Why?                      ║
+╠══════════════════╪═══════════════════╪════════════════════════════╣
+║  NODES           │  Network nodes    │  1 to N (not 0-indexed!)  ║
+║  EDGES           │  Signal paths     │  Directed, weighted       ║
+║  Directed?       │  YES              │  Signal goes one way      ║
+║  Weighted?       │  YES              │  Travel time on each edge ║
+║  Weights         │  All ≥ 1          │  Positive times           ║
+║  What we need    │  Max of all       │  Last node to receive     ║
+║                  │  shortest paths   │  = max(dist[])            ║
+╚══════════════════╧═══════════════════╧════════════════════════════╝
+
+  ⚠️ INDEXING: Nodes are 1 to N, not 0 to N-1!
+  Must handle this in the code.</code></pre></div>
+<hr>
+<h2>STEP 2: WHY THIS IS "JUST DIJKSTRA"</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  PROBLEM REDUCTION (same skill as Problem 21):                   │
+  │                                                                  │
+  │  "Minimum time for all nodes to receive signal from K"           │
+  │       ↓                                                          │
+  │  "Time for node X to receive = shortest path from K to X"       │
+  │       ↓                                                          │
+  │  "Time for ALL nodes = max(shortest path from K to each)"       │
+  │       ↓                                                          │
+  │  "Run Dijkstra from K, return max(dist[])"                      │
+  │       ↓                                                          │
+  │  "If any dist[] is ∞ → return -1"                               │
+  │                                                                  │
+  │  NO NEW ALGORITHM NEEDED.                                        │
+  │  Just Dijkstra (Problem 23) + max() + unreachable check.        │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 3: ALGORITHM WALKTHROUGH — Example with More Nodes</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  n = 5, k = 1
+</span>  times = [[1,2,2], [1,3,4], [2,3,1], [2,4,7], [3,5,3], [4,5,1]]
+  
+  THE GRAPH:
+  
+    1 ──2──→ 2 ──7──→ 4
+    │        │         │
+    4        1         1
+    │        ↓         ↓
+    └──────→ 3 ──3──→ 5
+    
+  ADJACENCY LIST:
+    1 → [(2, 2), (3, 4)]
+    2 → [(3, 1), (4, 7)]
+    3 → [(5, 3)]
+    4 → [(5, 1)]
+    5 → []
+
+  ══════════════════════════════════════════════════════════
+  DIJKSTRA FROM SOURCE K=1 (same as Problem 23)
+  ══════════════════════════════════════════════════════════
+  
+  dist = [_, 0, ∞, ∞, ∞, ∞]     ← index 0 unused (nodes are 1-indexed)
+  heap = [(0, 1)]
+  
+  Step 1: Pop (0, 1)
+    Relax 1→2: dist[2] = 0+2 = 2, push (2, 2)
+    Relax 1→3: dist[3] = 0+4 = 4, push (4, 3)
+    dist = [_, 0, 2, 4, ∞, ∞]
+    heap = [(2, 2), (4, 3)]
+  
+  Step 2: Pop (2, 2)
+    Relax 2→3: new_dist = 2+1 = 3 &lt; dist[3]=4 → UPDATE!
+      dist[3] = 3, push (3, 3)
+    Relax 2→4: new_dist = 2+7 = 9
+      dist[4] = 9, push (9, 4)
+    dist = [_, 0, 2, 3, 9, ∞]
+    heap = [(3, 3), (4, 3), (9, 4)]
+  
+  Step 3: Pop (3, 3)
+    Relax 3→5: new_dist = 3+3 = 6
+      dist[5] = 6, push (6, 5)
+    dist = [_, 0, 2, 3, 9, 6]
+    heap = [(4, 3), (6, 5), (9, 4)]
+  
+  Step 4: Pop (4, 3)
+    cost=4 &gt; dist[3]=3 → SKIP (stale)
+  
+  Step 5: Pop (6, 5)
+    No neighbors → done
+    dist = [_, 0, 2, 3, 9, 6]
+  
+  Step 6: Pop (9, 4)
+    Relax 4→5: new_dist = 9+1 = 10 &gt; dist[5]=6 → no update
+    dist = [_, 0, 2, 3, 9, 6]
+  
+  ══════════════════════════════════════════════════════════
+  FINAL DISTANCES:
+  ══════════════════════════════════════════════════════════
+  
+    Node 1: 0  (source)
+    Node 2: 2  (path: 1→2)
+    Node 3: 3  (path: 1→2→3, not 1→3 which costs 4!)
+    Node 4: 9  (path: 1→2→4)
+    Node 5: 6  (path: 1→2→3→5)
+  
+  All distances are finite → all nodes reachable ✓
+  
+  ANSWER: max(0, 2, 3, 9, 6) = 9
+  
+  The LAST node to receive the signal is node 4, at time 9.
+  
+  ══════════════════════════════════════════════════════════
+  VISUAL TIMELINE:
+  ══════════════════════════════════════════════════════════
+  
+  Time 0: Signal at node 1
+  Time 2: Signal reaches node 2 (1→2, cost 2)
+  Time 3: Signal reaches node 3 (1→2→3, cost 2+1=3)
+  Time 6: Signal reaches node 5 (1→2→3→5, cost 3+3=6)
+  Time 9: Signal reaches node 4 (1→2→4, cost 2+7=9)  ← LAST!
+  
+  Answer: 9</code></pre></div>
+<hr>
+<h2>STEP 4: COMPLETE CODE</h2>
+<h3>Solution 1: Direct Dijkstra Application</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">import</span><span> heapq
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">networkDelayTime</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>times</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Minimum time for all nodes to receive signal from source k.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    REDUCTION:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Run Dijkstra from k (Problem 23)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Answer = max(all shortest distances)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → If any node unreachable → return -1
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    ⚠️ Nodes are 1-indexed (1 to n), not 0-indexed!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        times: list of [u, v, w] directed weighted edges
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of nodes (labeled 1 to n)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        k: source node
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        int: minimum time for all nodes to receive signal, or -1
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD GRAPH (same as Problem 23) ───</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> times</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── DIJKSTRA (Problem 23 template) ───</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 1-indexed</span><span>
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    heap </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> heap</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        cost</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> cost </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># stale entry (Problem 23)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            new_dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> cost </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> weight
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_dist </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_dist
+</span><span>                heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappush</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── COMPUTE ANSWER ───</span><span>
+</span><span>    max_dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">max</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>values</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If any node is unreachable (distance = infinity)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> max_dist </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> max_dist
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TESTS ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>networkDelayTime</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 2</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>networkDelayTime</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>                       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># -1</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>networkDelayTime</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>                       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 1</span></code></pre></div>
+<hr>
+<h3>Solution 2: Array-Based (Slightly Faster)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">import</span><span> heapq
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">networkDelayTime_v2</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>times</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same algorithm but using array instead of dict for distances.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    ⚠️ Since nodes are 1-indexed, we use size n+1 array
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">       and ignore index 0.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> times</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Array: index 0 unused, indices 1..n for nodes</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    heap </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> heap</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        cost</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> cost </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            new_dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> cost </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> weight
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_dist </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_dist
+</span><span>                heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappush</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># max of dist[1..n] (skip index 0)</span><span>
+</span><span>    max_dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">max</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">+</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> max_dist </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> max_dist </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span></code></pre></div>
+<hr>
+<h3>Solution 3: With Visited Set (from Problem 23 Version 4)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">import</span><span> heapq
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">networkDelayTime_v3</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>times</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Using visited set instead of stale entry check.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Can early-exit when all nodes are visited.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> times</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    heap </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> heap</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        cost</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>        
+<span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> cost  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># finalized</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ EARLY EXIT: all nodes visited!</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">break</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                new_dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> cost </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> weight
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_dist </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_dist
+</span><span>                    heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappush</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Check if all nodes were visited</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token builtin">max</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">+</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>networkDelayTime_v3</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 2</span></code></pre></div>
+<hr>
+<h3>Solution 4: Compact LeetCode-Style</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">import</span><span> heapq
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">networkDelayTime_clean</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>times</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Minimal clean version for interview.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> times</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    heap </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> heap</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        d</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> d </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> d </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> d </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w
+</span><span>                heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappush</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    ans </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">max</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> ans </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> ans </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span></code></pre></div>
+<hr>
+<h2>STEP 5: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O((V + E) log V)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Same as Dijkstra (Problem 23) — no additional work.
+</span>  
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  Dijkstra:     O((V + E) log V)                                │
+  │  max(dist[]):  O(V)                                            │
+  │  inf check:    O(V)                                            │
+  │                                                                 │
+  │  TOTAL: O((V + E) log V) — dominated by Dijkstra               │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Space Complexity: O(V + E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Same as Dijkstra (Problem 23).
+</span>  Graph: O(V + E), dist array: O(V), heap: O(E).</code></pre></div>
+<hr>
+<h2>STEP 6: HOW THIS CONNECTS TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Problem 23 (Dijkstra's Algorithm):                              │
+  │    → We learned the CORE algorithm                               │
+  │    → Problem 24 DIRECTLY APPLIES it                              │
+  │    → Only adds: max(dist[]) + unreachable check                 │
+  │    → No new algorithm concepts whatsoever                        │
+  │                                                                  │
+  │  Problem 13 (Rotten Oranges — Multi-Source BFS):                 │
+  │    → "Time for all oranges to rot" = max BFS level              │
+  │    → Problem 24 is the WEIGHTED version of same idea!            │
+  │    → Problem 13: unweighted → BFS → max level                   │
+  │    → Problem 24: weighted → Dijkstra → max distance             │
+  │    → SAME PATTERN, different algorithm due to weights            │
+  │                                                                  │
+  │  Problem 21 (Course Schedule — Problem Reduction):               │
+  │    → Problem 21 taught us to REDUCE problems to known algorithms│
+  │    → Problem 24 is another reduction:                            │
+  │      "Network delay time" → "max of single-source shortest paths"│
+  │      → Dijkstra + max()                                          │
+  │                                                                  │
+  │  THE PATTERN:                                                    │
+  │    Problem 13: "Time for all X to happen" = max(BFS distances)   │
+  │    Problem 24: "Time for all X to happen" = max(Dijkstra dists)  │
+  │    Same concept, weighted vs unweighted                          │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 7: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Undirected?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Signal travels in BOTH directions on each link"
+</span>  
+  → Add edges in both directions (Problem 23 Version 3)
+  → graph[u].append((v, w)) AND graph[v].append((u, w))
+  → Dijkstra works identically
+  → More nodes become reachable (might change -1 to valid answer)</code></pre></div>
+<h3>What if All Weights Were 1?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Don't need Dijkstra! BFS is sufficient (Problem 9)
+</span>  → "Max BFS level" = answer
+  → This becomes EXACTLY Problem 13 (Rotten Oranges) on a graph
+  → O(V + E) instead of O((V+E) log V)
+  
+  ALWAYS CHECK: "Are weights uniform?"
+    → Yes → BFS (simpler, faster)
+    → No → Dijkstra</code></pre></div>
+<h3>What if We Needed the Signal Path to Each Node?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Use Dijkstra with path reconstruction (Problem 23 Version 2)
+</span>  → Track parent[] array during relaxation
+  → Reconstruct path by following parents backward</code></pre></div>
+<h3>What if Some Nodes Are "Relay Stations" That Add Delay?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Each node adds processing_time[node] before forwarding signal"
+</span>  
+  → Modify edge weight: effective_weight(u,v) = edge_weight + processing_time[v]
+  → Or add processing_time to dist when relaxing:
+    new_dist = dist[node] + weight + processing_time[neighbor]
+  → Still Dijkstra, just modified relaxation</code></pre></div>
+<h3>What if Signal Weakens and Can Only Travel K Hops?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Signal can traverse at most K edges"
+</span>  
+  → This is a CONSTRAINED shortest path problem
+  → Standard Dijkstra doesn't handle hop constraints
+  → Need modified BFS or Bellman-Ford with K iterations
+  → This is exactly Problem 25 (Cheapest Flights Within K Stops)!</code></pre></div>
+<hr>
+<h2>STEP 8: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: 1-indexed vs 0-indexed nodes                        ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  This problem uses nodes 1 to N (1-indexed)                     ║
+  ║  Problem 23 used nodes 0 to N-1 (0-indexed)                     ║
+  ║                                                                  ║
+  ║  If using array: size must be N+1, skip index 0                  ║
+  ║  If using dict: keys are 1 to N                                  ║
+  ║                                                                  ║
+  ║  Common bug:                                                     ║
+  ║    dist = [float('inf')] * n  ← WRONG! needs n+1                ║
+  ║    max(dist[1:]) ← correct (skip index 0)                       ║
+  ║    max(dist) ← WRONG! includes index 0 (which is inf or unused) ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Forgetting to check for unreachable nodes            ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If any node has dist = infinity → can't reach all nodes         ║
+  ║  Must return -1, not infinity                                    ║
+  ║                                                                  ║
+  ║  WRONG: return max(dist[1:])  ← might return inf                ║
+  ║  RIGHT: ans = max(dist[1:]); return ans if ans &lt; inf else -1    ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Confusing "all nodes receive" with "target receives" ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  This is NOT "shortest path to one target"                       ║
+  ║  This is "shortest path to ALL targets, take the MAX"            ║
+  ║                                                                  ║
+  ║  Don't use early termination for single target here!             ║
+  ║  Must run Dijkstra to completion to get ALL distances.           ║
+  ║                                                                  ║
+  ║  (Unless using visited set approach with early exit when         ║
+  ║   len(visited) == n — Version 3 above)                          ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: n = 1                                                ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Only one node = the source itself                               ║
+  ║  → dist[k] = 0, no other nodes to check                         ║
+  ║  → max(dist) = 0                                                ║
+  ║  → Answer: 0  (signal is already at source, done instantly)      ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Disconnected graph                                   ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Some nodes have no path from source                             ║
+  ║  → Their dist stays infinity                                     ║
+  ║  → max includes infinity → return -1                             ║
+  ║  → Correctly indicates not all nodes can receive signal           ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Multiple edges between same nodes                    ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  times = [[1,2,3], [1,2,1]]  (two edges from 1 to 2)            ║
+  ║  → Both stored in adjacency list                                 ║
+  ║  → Dijkstra naturally picks the cheaper one during relaxation    ║
+  ║  → No special handling needed                                    ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 9: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Time for ALL nodes to receive something"               │
+  │         → Shortest path to all nodes + take maximum                │
+  │                                                                    │
+  │  SIGNAL 2: "Signal/message propagation through network"            │
+  │         → BFS if unweighted, Dijkstra if weighted                  │
+  │                                                                    │
+  │  SIGNAL 3: "Weighted edges" + "shortest/minimum time"              │
+  │         → Dijkstra (Problem 23)                                    │
+  │                                                                    │
+  │  SIGNAL 4: "Return -1 if impossible"                               │
+  │         → Check for unreachable nodes (dist = infinity)            │
+  │                                                                    │
+  │  THINKING CHAIN:                                                   │
+  │  "Minimum time for all nodes to get signal"                        │
+  │     → each node gets signal at its shortest distance from source   │
+  │        → all done when LAST node gets it                           │
+  │           → max(shortest distances)                                │
+  │              → Dijkstra from source → max(dist[])                  │
+  │                 → if any dist = inf → -1                           │
+  │                                                                    │
+  │  SIMILAR PROBLEMS:                                                 │
+  │    → "Minimum time for infection to spread to all computers"       │
+  │    → "How long until all cities hear the news?"                    │
+  │    → "Time for fire to reach all rooms" (weighted version)         │
+  │    → Any "propagation time through weighted network"               │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 10: THE APPLICATION PATTERN — "Dijkstra + Post-Processing"</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Many interview problems follow this template:                   │
+  │                                                                  │
+  │  1. Run Dijkstra to get shortest distances from source           │
+  │  2. Post-process the distance array to get the answer            │
+  │                                                                  │
+  │  COMMON POST-PROCESSING OPERATIONS:                              │
+  │                                                                  │
+  │  → max(dist[]):  "Time for ALL to receive" (this problem)        │
+  │  → dist[target]: "Shortest path to specific node"                │
+  │  → count(dist[i] &lt;= K): "How many nodes within distance K?"     │
+  │  → sum(dist[]):  "Total cost to reach all nodes"                 │
+  │  → any(dist[i] == inf): "Are all nodes reachable?"              │
+  │                                                                  │
+  │  The HARD part is recognizing "this is Dijkstra."               │
+  │  The post-processing is usually trivial.                        │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   CONCEPT REINFORCED: DIJKSTRA APPLICATION                        ║
+  ║                                                                    ║
+  ║   → Network Delay Time = Dijkstra + max(dist[])                   ║
+  ║   → No new algorithm — pure APPLICATION of Problem 23             ║
+  ║                                                                    ║
+  ║   → THE SKILL: Recognizing "this is Dijkstra" from the           ║
+  ║     problem description:                                          ║
+  ║     "weighted graph" + "minimum time/cost" → Dijkstra             ║
+  ║                                                                    ║
+  ║   → PARALLEL TO PROBLEM 13:                                       ║
+  ║     Problem 13 (Rotten Oranges): unweighted → BFS → max level    ║
+  ║     Problem 24 (Network Delay): weighted → Dijkstra → max dist   ║
+  ║     Same pattern, different weight assumptions                    ║
+  ║                                                                    ║
+  ║   → WATCH FOR: 1-indexed nodes, unreachable nodes (-1 case)      ║
+  ║                                                                    ║
+  ║   → This is the EASIEST Dijkstra application problem.            ║
+  ║     Next problems add CONSTRAINTS that make Dijkstra harder:     ║
+  ║     → Problem 25: "at most K stops" constraint                    ║
+  ║     → Problem 26: negative weights (Dijkstra can't handle)       ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h3>CONNECTION TO NEXT PROBLEM</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 24 → Dijkstra direct application (straightforward)
+</span>  Problem 25 → Cheapest Flights Within K Stops (constrained shortest path)
+  
+  Problem 25 introduces a TWIST that breaks standard Dijkstra:
+    → "Find cheapest flight from A to B with AT MOST K stops"
+    → Standard Dijkstra finds globally shortest path
+    → But the K-stop constraint means:
+      → A longer path (more stops) might be cheaper
+      → But it's INVALID if it uses too many stops
+      → A more expensive path might be the answer if it has fewer stops
+    
+  This forces us to think about STATE-SPACE expansion:
+    → Node = (city, stops_remaining)
+    → Same city at different stop counts = DIFFERENT states
+    → This is a preview of Problem 38 (State-Space BFS)
+    
+  We'll also see how Bellman-Ford (Problem 26) naturally handles
+  this with its K-iteration property.
+  
+  Problem 25 is where "just apply Dijkstra" stops working,
+  and we need to MODIFY or REPLACE the algorithm.</code></pre></div>
+<hr>
+<p><strong>Problem 24 Complete.</strong><br>
+<strong>Ready for Problem 25: Cheapest Flights Within K Stops?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="27" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-23.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 24 of 50</span>
+            </div>
+            <a href="problem-25.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

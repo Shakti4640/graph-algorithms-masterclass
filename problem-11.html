@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 11: Problem 11: Detect Cycle in Directed Graph — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="23">
+<div class="px-2"><h1>Problem 11: Detect Cycle in Directed Graph</h1>
+<h2>[Algorithm Family: DFS — 3-State Cycle Detection]</h2>
+<h2>[Phase 2: Core Patterns — "I know WHICH traversal and WHY"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are a build system engineer. Your project has N tasks 
+</span>(numbered 0 to N-1), and some tasks depend on others:
+  → "Task A must finish before Task B can start"
+
+This creates a DIRECTED graph: edge A → B means "A before B".
+
+Determine: Is there a CIRCULAR DEPENDENCY?
+
+If task A needs B, B needs C, and C needs A → IMPOSSIBLE!
+No task can start because each waits for another.
+
+Input:
+  n = 6  (tasks: 0, 1, 2, 3, 4, 5)
+  edges = [[0,1], [1,2], [2,3], [3,1], [4,5]]
+  (edge [u,v] means: task u must finish before task v)
+
+Output:
+  True — cycle exists: 1 → 2 → 3 → 1 (circular dependency!)</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  0 → 1 → 2
+</span>      ↑   ↓
+      └── 3        4 → 5
+
+  Edge List (DIRECTED):
+    0 → 1
+    1 → 2
+    2 → 3
+    3 → 1    ← this creates the cycle!
+    4 → 5</code></pre></div>
+<h3>Seeing the Cycle</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Starting at node 1:
+</span>    1 → 2 → 3 → 1    ← back to where we started!
+    
+  This is a DIRECTED cycle of length 3.
+  
+  Node 0 is NOT part of the cycle, but can REACH the cycle.
+  Nodes 4, 5 are in a separate component — no cycle there.</code></pre></div>
+<h3>Another Example — No Cycle (DAG)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Input:
+</span>    n = 6
+    edges = [[0,1], [0,2], [1,3], [2,3], [3,4], [3,5]]
+
+      0 → 1
+      |   ↓
+      ↓   3 → 4
+      2 → ↑
+            → 5
+
+  This is a DAG (Directed Acyclic Graph) — no cycle.
+  Multiple paths to node 3, but no way to get BACK to any earlier node.</code></pre></div>
+<h3>Why Problem 10's Approach FAILS Here</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  Let's try Problem 10's parent check on a DIRECTED graph:      │
+  │                                                                │
+  │  DAG (no cycle):                                               │
+  │    0 → 1                                                       │
+  │    0 → 2                                                       │
+  │    1 → 2                                                       │
+  │                                                                │
+  │    0 → 1 → 2                                                   │
+  │    └───────↑                                                   │
+  │                                                                │
+  │  DFS from 0:                                                   │
+  │    Visit 0 → Visit 1 → Visit 2 (dead end, backtrack)          │
+  │    Back at 0 → neighbor 2: VISITED and 2 ≠ parent(none)       │
+  │    → Parent check says CYCLE!                                  │
+  │    → But there IS NO CYCLE! (0→1→2 and 0→2 are just two paths)│
+  │                                                                │
+  │  PROBLEM: In directed graphs, reaching a visited node via      │
+  │  a different path is NORMAL (multiple paths to same node).     │
+  │  This is NOT a cycle — it's just a DAG with converging paths.  │
+  │                                                                │
+  │  Parent check gives FALSE POSITIVE on directed graphs!         │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════╗
+</span>  ║  Property        │  Answer           │  Why it matters         ║
+  ╠══════════════════╪═══════════════════╪═════════════════════════╣
+  ║  NODES           │  Tasks 0-5        │  Each task = node       ║
+  ║  EDGES           │  Dependencies     │  A → B = "A before B"   ║
+  ║  ★ Directed? ★  │  ★ YES ★         │  Dependencies are       ║
+  ║                  │                   │  one-way                ║
+  ║  Weighted?       │  NO               │  Irrelevant here        ║
+  ║  Connected?      │  NO               │  Two separate groups    ║
+  ║  Question        │  Cycle exists?    │  Circular dependency?   ║
+  ╚══════════════════╧═══════════════════╧═════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Naive idea: "For every node u, run DFS from u.
+</span>               If DFS ever returns to u → cycle exists."
+  
+  → V nodes to try as starting point
+  → Each DFS: O(V + E)
+  → Total: O(V × (V + E))
+  
+  For V = 100,000: 10⁵ × (10⁵ + E) → too slow
+
+  Better: single-pass DFS with smart state tracking.
+  That's what the 3-state approach gives us: O(V + E).</code></pre></div>
+<h3>Why Parent Check Fails (Detailed)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Undirected: edge u—v exists in BOTH directions
+</span>    → When DFS goes u→v, seeing v→u is just the SAME edge backward
+    → Parent check correctly identifies this
+    
+  Directed: edge u→v exists in ONE direction only
+    → There's no "parent edge" ambiguity
+    → BUT: reaching a visited node via a DIFFERENT path isn't a cycle
+    → Need to distinguish between:
+      a) Reaching a node that's CURRENTLY being explored (→ CYCLE)
+      b) Reaching a node that's FULLY DONE exploring (→ NOT a cycle)</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN — The 3-State Model</h2>
+<h3>The Key Insight: Three Node States</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  In directed cycle detection, each node has THREE states:      │
+  │                                                                │
+  │  STATE 0: UNVISITED (WHITE)                                    │
+  │    → Haven't touched this node yet                             │
+  │    → DFS hasn't reached it                                     │
+  │                                                                │
+  │  STATE 1: IN PROGRESS (GRAY)                                   │
+  │    → Currently on the DFS stack / call stack                   │
+  │    → We're exploring this node's subtree RIGHT NOW             │
+  │    → DFS started from here but hasn't finished yet             │
+  │                                                                │
+  │  STATE 2: COMPLETED (BLACK)                                    │
+  │    → Fully explored — all descendants visited                  │
+  │    → DFS from this node has completely returned                │
+  │    → No cycle found in its subtree                             │
+  │                                                                │
+  │  THE RULE:                                                     │
+  │    If DFS at node u finds a GRAY neighbor v:                   │
+  │      → v is currently being explored                           │
+  │      → u is a descendant of v in the DFS tree                  │
+  │      → Edge u → v goes BACK to an ancestor                     │
+  │      → This is a BACK EDGE → CYCLE!                            │
+  │                                                                │
+  │    If DFS at node u finds a BLACK neighbor v:                  │
+  │      → v was fully explored in a PREVIOUS DFS branch           │
+  │      → u can reach v, but v's entire subtree has no path to u  │
+  │      → NOT a cycle — just a cross/forward edge                 │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Why Two States (Visited/Unvisited) Aren't Enough</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Consider this DAG:
+</span>    0 → 1
+    0 → 2
+    1 → 3
+    2 → 3
+
+        0
+       / \
+      ↓   ↓
+      1   2
+       \ /
+        ↓
+        3
+
+  With TWO states (visited/unvisited):
+    DFS(0): mark 0 visited
+      → DFS(1): mark 1 visited
+        → DFS(3): mark 3 visited, no neighbors, return
+      → neighbor 2: not visited → DFS(2): mark 2 visited
+        → neighbor 3: VISITED!
+        → With 2-state: "visited neighbor = cycle" → WRONG!
+        → Node 3 was visited from a DIFFERENT branch, not an ancestor
+        → No cycle exists!
+
+  With THREE states:
+    DFS(0): mark 0 GRAY
+      → DFS(1): mark 1 GRAY
+        → DFS(3): mark 3 GRAY, no neighbors, mark 3 BLACK ★
+      → mark 1 BLACK ★
+      → DFS(2): mark 2 GRAY
+        → neighbor 3: state = BLACK (fully explored)
+        → BLACK neighbor = NOT a cycle ✓
+      → mark 2 BLACK
+    → mark 0 BLACK
+    
+  THREE states distinguish:
+    GRAY neighbor  → ancestor in current path → CYCLE
+    BLACK neighbor → fully explored elsewhere  → NOT a cycle</code></pre></div>
+<h3>Visual: Gray vs Black</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  At the moment DFS(2) checks neighbor 3:
+</span>
+  DFS call stack: [DFS(0), DFS(2)]
+  
+  Node states:
+    0: GRAY   (currently being explored — on call stack)
+    1: BLACK  (fully done — explored and returned)
+    2: GRAY   (currently being explored — on call stack)
+    3: BLACK  (fully done — explored and returned)
+
+  If DFS(2) sees:
+    → GRAY node  → it's an ancestor on current path → CYCLE
+    → BLACK node → it's fully done from elsewhere → safe
+
+  3 is BLACK → no cycle ✓
+
+  Now consider if there WAS a cycle:
+    0 → 1 → 2 → 0
+
+  DFS(0): mark 0 GRAY
+    → DFS(1): mark 1 GRAY
+      → DFS(2): mark 2 GRAY
+        → neighbor 0: state = GRAY! (0 is on current path!)
+        → CYCLE DETECTED!
+
+  DFS call stack: [DFS(0), DFS(1), DFS(2)]
+  All three are GRAY — they form the current exploration path.
+  Edge 2 → 0 goes BACK to an ancestor (0) → CYCLE!</code></pre></div>
+<h3>The Color Analogy</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Think of it like painting rooms in a cave:
+</span>
+  WHITE: "I haven't entered this room yet"
+  GRAY:  "I'm currently IN this room (or exploring rooms beyond it)"
+         "My flashlight is still here — I haven't left yet"
+  BLACK: "I've completely explored this room and all rooms beyond it"
+         "I've left and locked the door — nothing left to find here"
+
+  If I enter a room and find a GRAY door:
+    → That door leads back to a room I'm currently standing in
+    → I've found a loop! CYCLE!
+
+  If I enter a room and find a BLACK door:
+    → That door leads to a room I've already fully explored
+    → Dead end for new discoveries, but NOT a cycle</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — Step by Step</h2>
+<h3>Example 1: Graph WITH Cycle</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Graph:
+</span>    0 → 1 → 2
+        ↑   ↓
+        └── 3        4 → 5
+
+  Adjacency List (DIRECTED — one direction only):
+    0: [1]
+    1: [2]
+    2: [3]
+    3: [1]        ← creates cycle
+    4: [5]
+    5: []</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════════╗
+</span>  ║  INITIALIZATION                                                       ║
+  ╠═══════════════════════════════════════════════════════════════════════╣
+  ║                                                                       ║
+  ║  State: {0:WHITE, 1:WHITE, 2:WHITE, 3:WHITE, 4:WHITE, 5:WHITE}      ║
+  ║                                                                       ║
+  ║  Start outer loop: node 0 is WHITE → call DFS(0)                     ║
+  ╚═══════════════════════════════════════════════════════════════════════╝
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ DFS(0)                                                              │
+  │                                                                     │
+  │   Mark 0 → GRAY    State: {0:GRAY, 1:W, 2:W, 3:W, 4:W, 5:W}      │
+  │   Call stack: [DFS(0)]                                              │
+  │                                                                     │
+  │   Neighbors of 0: [1]                                               │
+  │     1: state = WHITE → recurse DFS(1)                               │
+  │                                                                     │
+  │   ┌─────────────────────────────────────────────────────────────┐   │
+  │   │ DFS(1)                                                       │   │
+  │   │                                                             │   │
+  │   │   Mark 1 → GRAY    State: {0:G, 1:GRAY, 2:W, 3:W, ...}    │   │
+  │   │   Call stack: [DFS(0), DFS(1)]                              │   │
+  │   │                                                             │   │
+  │   │   Neighbors of 1: [2]                                       │   │
+  │   │     2: state = WHITE → recurse DFS(2)                       │   │
+  │   │                                                             │   │
+  │   │   ┌──────────────────────────────────────────────────────┐  │   │
+  │   │   │ DFS(2)                                                │  │   │
+  │   │   │                                                       │  │   │
+  │   │   │   Mark 2 → GRAY    State: {0:G, 1:G, 2:GRAY, 3:W}   │  │   │
+  │   │   │   Call stack: [DFS(0), DFS(1), DFS(2)]                │  │   │
+  │   │   │                                                       │  │   │
+  │   │   │   Neighbors of 2: [3]                                  │  │   │
+  │   │   │     3: state = WHITE → recurse DFS(3)                  │  │   │
+  │   │   │                                                       │  │   │
+  │   │   │   ┌────────────────────────────────────────────────┐  │  │   │
+  │   │   │   │ DFS(3)                                          │  │  │   │
+  │   │   │   │                                                 │  │  │   │
+  │   │   │   │   Mark 3 → GRAY                                │  │  │   │
+  │   │   │   │   State: {0:G, 1:G, 2:G, 3:GRAY}              │  │  │   │
+  │   │   │   │   Call stack: [DFS(0),DFS(1),DFS(2),DFS(3)]    │  │  │   │
+  │   │   │   │                                                 │  │  │   │
+  │   │   │   │   Neighbors of 3: [1]                           │  │  │   │
+  │   │   │   │                                                 │  │  │   │
+  │   │   │   │     1: state = ★ GRAY ★                        │  │  │   │
+  │   │   │   │                                                 │  │  │   │
+  │   │   │   │   ★★★ CYCLE DETECTED! ★★★                     │  │  │   │
+  │   │   │   │                                                 │  │  │   │
+  │   │   │   │   Node 3 sees neighbor 1 which is GRAY          │  │  │   │
+  │   │   │   │   GRAY = currently on the call stack             │  │  │   │
+  │   │   │   │   = ancestor in current DFS path                 │  │  │   │
+  │   │   │   │   Edge 3 → 1 is a BACK EDGE                     │  │  │   │
+  │   │   │   │   Cycle: 1 → 2 → 3 → 1                         │  │  │   │
+  │   │   │   │                                                 │  │  │   │
+  │   │   │   │   Return True                                   │  │  │   │
+  │   │   │   └────────────────────────────────────────────────┘  │  │   │
+  │   │   │   DFS(3) returned True → Return True                  │  │   │
+  │   │   └──────────────────────────────────────────────────────┘  │   │
+  │   │   DFS(2) returned True → Return True                        │   │
+  │   └─────────────────────────────────────────────────────────────┘   │
+  │   DFS(1) returned True → Return True                                │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ═══════════════════════════════════════════════════════════════════
+  ANSWER: True — cycle exists: 1 → 2 → 3 → 1
+  
+  The GRAY states at detection time:
+    0: GRAY  (ancestor of current path)
+    1: GRAY  (ancestor — start of cycle)
+    2: GRAY  (in cycle)
+    3: GRAY  (in cycle — found back edge to 1)
+    
+  Call stack: [DFS(0), DFS(1), DFS(2), DFS(3)]
+  Back edge: 3 → 1 (both GRAY)
+  ═══════════════════════════════════════════════════════════════════</code></pre></div>
+<h3>Example 2: DAG — No Cycle (Where Parent Check Would Fail)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Graph:
+</span>    0 → 1
+    0 → 2
+    1 → 3
+    2 → 3
+
+        0
+       / \
+      ↓   ↓
+      1   2
+       \ /
+        ↓
+        3
+
+  Adjacency List:
+    0: [1, 2]
+    1: [3]
+    2: [3]
+    3: []</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────────┐
+</span>  │ DFS(0)                                                              │
+  │                                                                     │
+  │   Mark 0 → GRAY                                                    │
+  │                                                                     │
+  │   Neighbor 1: WHITE → DFS(1)                                       │
+  │                                                                     │
+  │   ┌───────────────────────────────────────────────────────────┐     │
+  │   │ DFS(1)                                                     │     │
+  │   │   Mark 1 → GRAY                                           │     │
+  │   │                                                           │     │
+  │   │   Neighbor 3: WHITE → DFS(3)                              │     │
+  │   │                                                           │     │
+  │   │   ┌─────────────────────────────────────────────────┐     │     │
+  │   │   │ DFS(3)                                           │     │     │
+  │   │   │   Mark 3 → GRAY                                 │     │     │
+  │   │   │   No neighbors                                   │     │     │
+  │   │   │   Mark 3 → BLACK ★                              │     │     │
+  │   │   │   Return False (no cycle)                        │     │     │
+  │   │   └─────────────────────────────────────────────────┘     │     │
+  │   │                                                           │     │
+  │   │   All neighbors of 1 done                                 │     │
+  │   │   Mark 1 → BLACK ★                                       │     │
+  │   │   Return False                                             │     │
+  │   └───────────────────────────────────────────────────────────┘     │
+  │                                                                     │
+  │   Neighbor 2: WHITE → DFS(2)                                       │
+  │                                                                     │
+  │   ┌───────────────────────────────────────────────────────────┐     │
+  │   │ DFS(2)                                                     │     │
+  │   │   Mark 2 → GRAY                                           │     │
+  │   │                                                           │     │
+  │   │   Neighbor 3: state = ★ BLACK ★                           │     │
+  │   │                                                           │     │
+  │   │   BLACK ≠ GRAY → NOT a cycle!                             │     │
+  │   │   Node 3 was fully explored from a different branch.      │     │
+  │   │   It's safe to reach it again — no cycle.                 │     │
+  │   │                                                           │     │
+  │   │   ★ THIS is where parent check would give FALSE POSITIVE ★│     │
+  │   │   ★ Parent check: "3 visited and 3 ≠ parent(0)" → CYCLE ★│     │
+  │   │   ★ 3-state:      "3 is BLACK" → no cycle ✓              ★│     │
+  │   │                                                           │     │
+  │   │   All neighbors done                                       │     │
+  │   │   Mark 2 → BLACK                                          │     │
+  │   │   Return False                                             │     │
+  │   └───────────────────────────────────────────────────────────┘     │
+  │                                                                     │
+  │   All neighbors done                                                │
+  │   Mark 0 → BLACK                                                   │
+  │   Return False                                                      │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ═══════════════════════════════════════════════════════════════════
+  ANSWER: False — no cycle (this is a DAG) ✓
+  
+  State transitions:
+    0: WHITE → GRAY → BLACK
+    1: WHITE → GRAY → BLACK
+    2: WHITE → GRAY → BLACK
+    3: WHITE → GRAY → BLACK
+    
+  Node 3 reached twice (from 1 and from 2), but:
+    First time: 3 goes WHITE → GRAY → BLACK
+    Second time: 3 is already BLACK → skip, no cycle
+  ═══════════════════════════════════════════════════════════════════</code></pre></div>
+<h3>Side-by-Side: 2-State vs 3-State on the DAG</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────┬────────────────────────────────────┐
+</span>  │  2-STATE (Problem 10)       │  3-STATE (Problem 11)              │
+  │  parent check               │  WHITE/GRAY/BLACK                  │
+  ├────────────────────────────┼────────────────────────────────────┤
+  │                              │                                    │
+  │  DFS(0): visit 0             │  DFS(0): 0 → GRAY                 │
+  │    DFS(1): visit 1           │    DFS(1): 1 → GRAY               │
+  │      DFS(3): visit 3         │      DFS(3): 3 → GRAY → BLACK    │
+  │    back at 0:                │    1 → BLACK                       │
+  │    neighbor 2: DFS(2)        │    DFS(2): 2 → GRAY               │
+  │      neighbor 3: VISITED!    │      neighbor 3: BLACK             │
+  │      3 ≠ parent(0)           │      BLACK ≠ GRAY                  │
+  │      → "CYCLE" ← WRONG!     │      → no cycle ✓                  │
+  │                              │    2 → BLACK                       │
+  │  Result: TRUE (wrong!)       │  0 → BLACK                        │
+  │                              │  Result: FALSE (correct!) ✓       │
+  │                              │                                    │
+  └────────────────────────────┴────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: DFS Recursive with 3-State Coloring</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">has_cycle_directed</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Detect cycle in a DIRECTED graph using 3-state DFS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Three states per node:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        0 (WHITE): unvisited
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        1 (GRAY):  in progress (currently on DFS path)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        2 (BLACK): completed (fully explored)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Cycle detection rule:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → If DFS finds a GRAY neighbor → CYCLE (back edge to ancestor)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → If DFS finds a BLACK neighbor → no cycle (already fully explored)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → If DFS finds a WHITE neighbor → explore it (recurse)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    WHY this differs from Problem 10 (undirected):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Undirected: parent check distinguishes "same edge" vs "back edge"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Directed: no "same edge" ambiguity (edges are one-way)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → But: need to distinguish "currently exploring" vs "already done"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → 2 states can't distinguish this → need 3 states
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of nodes
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [u, v] pairs (DIRECTED: u → v)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        True if cycle exists, False otherwise
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD DIRECTED GRAPH (Problem 1 — directed version) ───</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>      </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ONLY u → v, NOT v → u!</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── 3-STATE TRACKING ───</span><span>
+</span><span>    WHITE</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> GRAY</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> BLACK </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span>
+</span><span>    state </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>WHITE</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n         </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># all nodes start as unvisited</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Returns True if a cycle is found reachable from node.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> GRAY      </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># entering: mark as "in progress"</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> GRAY</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Neighbor is currently being explored (on DFS path)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Edge node → neighbor is a BACK EDGE → CYCLE!</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> WHITE</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Neighbor not yet visited → explore it</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># cycle found deeper</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If state[neighbor] == BLACK:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Fully explored, no cycle through it → skip (do nothing)</span><span>
+</span>        
+<span>        state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> BLACK     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># leaving: mark as "fully explored"</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># no cycle found from this node</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── CHECK ALL COMPONENTS (Problem 5 pattern) ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> WHITE</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TESTS ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Graph WITH cycle: 1 → 2 → 3 → 1</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>has_cycle_directed</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: True</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># DAG (no cycle) — where parent check would fail</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>has_cycle_directed</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: False</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Single self-loop</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>has_cycle_directed</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: True (0 → 0 is a cycle)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># No edges</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>has_cycle_directed</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: False</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Long chain (no cycle)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>has_cycle_directed</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: False</span></code></pre></div>
+<hr>
+<h3>Version 2: Using Visited Set + Recursion Stack Set (Alternative to Array)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">has_cycle_directed_sets</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Alternative implementation using TWO SETS instead of a state array.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    visited:    all nodes we've ever seen (GRAY or BLACK)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    rec_stack:  nodes currently on the recursion stack (GRAY only)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Mapping:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        WHITE = not in visited, not in rec_stack
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        GRAY  = in visited AND in rec_stack
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        BLACK = in visited AND NOT in rec_stack
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Some people find this easier to think about.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>         </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ever visited (GRAY or BLACK)</span><span>
+</span><span>    rec_stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># currently on DFS path (GRAY only)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        rec_stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ENTERING: add to recursion stack</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> rec_stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># On current path → CYCLE</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Not yet explored → recurse</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>        
+<span>        rec_stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>remove</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># LEAVING: remove from recursion stack</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TESTS ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>has_cycle_directed_sets</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># True</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>has_cycle_directed_sets</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># False</span></code></pre></div>
+<h3>Mapping Between Versions</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────┬──────────────────────────────────┐
+</span>  │  State Array (Version 1)         │  Two Sets (Version 2)            │
+  ├─────────────────────────────────┼──────────────────────────────────┤
+  │  state[node] == WHITE           │  node not in visited             │
+  │  state[node] == GRAY            │  node in visited AND rec_stack   │
+  │  state[node] == BLACK           │  node in visited, NOT rec_stack  │
+  │                                 │                                  │
+  │  state[node] = GRAY  (entering) │  visited.add(node)               │
+  │                                 │  rec_stack.add(node)             │
+  │                                 │                                  │
+  │  state[node] = BLACK (leaving)  │  rec_stack.remove(node)          │
+  │                                 │  (node stays in visited)         │
+  │                                 │                                  │
+  │  Check GRAY:                    │  Check rec_stack:                │
+  │    state[neighbor] == GRAY      │    neighbor in rec_stack          │
+  │                                 │                                  │
+  │  Check BLACK:                   │  Check visited but not rec_stack: │
+  │    state[neighbor] == BLACK     │    neighbor in visited            │
+  │                                 │    and not in rec_stack           │
+  └─────────────────────────────────┴──────────────────────────────────┘
+  
+  Both are equivalent. Version 1 (state array) is more efficient.
+  Version 2 (two sets) is more intuitive for some people.</code></pre></div>
+<hr>
+<h3>Version 3: Iterative DFS (No Recursion Limit)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">has_cycle_directed_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Iterative 3-state DFS for directed cycle detection.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Tricky because we need to know when we're LEAVING a node
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    (to mark it BLACK), not just when we're entering.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Solution: push each node TWICE to stack.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        First push: entering (mark GRAY)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Second push (with flag): leaving (mark BLACK)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    WHITE</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> GRAY</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> BLACK </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span>
+</span><span>    state </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>WHITE</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> start </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> WHITE</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Stack contains (node, is_leaving)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># is_leaving = False: we're entering this node (mark GRAY)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># is_leaving = True:  we're leaving this node (mark BLACK)</span><span>
+</span><span>        stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> is_leaving </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> is_leaving</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># We're done exploring this node → mark BLACK</span><span>
+</span><span>                state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> BLACK
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> GRAY</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Already in progress (pushed by different path in stack)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> BLACK</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Already fully explored</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Entering: mark GRAY</span><span>
+</span><span>            state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> GRAY
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Push a "leaving" marker FIRST (will be processed AFTER neighbors)</span><span>
+</span><span>            stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Push all neighbors</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> GRAY</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>         </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># back edge → CYCLE!</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> WHITE</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TESTS ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>has_cycle_directed_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># True</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>has_cycle_directed_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># False</span></code></pre></div>
+<h3>Why Iterative DFS for Directed Cycles is Tricky</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  In simple DFS (Problem 4), iterative version just pops and visits.
+</span>  
+  For cycle detection, we need to MARK BLACK when LEAVING a node.
+  In recursion, "leaving" = when the function returns.
+  In iteration, we simulate this with a "leaving flag":
+  
+  Stack operations for DFS(A → B → C):
+    Push (A, enter)
+    Pop (A, enter) → mark A GRAY, push (A, leave), push (B, enter)
+    Pop (B, enter) → mark B GRAY, push (B, leave), push (C, enter)
+    Pop (C, enter) → mark C GRAY, push (C, leave), no neighbors
+    Pop (C, leave) → mark C BLACK     ← simulates return from DFS(C)
+    Pop (B, leave) → mark B BLACK     ← simulates return from DFS(B)
+    Pop (A, leave) → mark A BLACK     ← simulates return from DFS(A)
+    
+  The (node, True) "leave" markers on the stack ensure we mark
+  nodes BLACK in the correct order — after all descendants are done.</code></pre></div>
+<hr>
+<h3>Version 4: Topological Sort Approach (Alternative — Preview of Problem 19/21)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">has_cycle_topological</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Detect cycle using Kahn's algorithm (BFS-based topological sort).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Key insight:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Topological sort processes nodes with in-degree 0
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → If there's a cycle, some nodes NEVER reach in-degree 0
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → If we process fewer than n nodes → cycle exists!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This approach is used in Problem 21 (Course Schedule).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Preview here — full explanation in Problems 19-21.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    in_degree </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># v has one more incoming edge</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Start with all nodes that have no dependencies (in-degree 0)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    processed </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        processed </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If we couldn't process all nodes → cycle exists</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> processed </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> n
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TESTS ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>has_cycle_topological</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># True</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>has_cycle_topological</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># False</span></code></pre></div>
+<h3>Why Topological Sort Detects Cycles</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Topological sort processes nodes with in-degree 0 (no dependencies).
+</span>  
+  In a DAG:
+    → There's always at least one node with in-degree 0
+    → Processing it reduces neighbors' in-degrees
+    → Eventually all nodes get processed
+    → processed == n → no cycle
+    
+  In a graph with a cycle:
+    → Nodes in the cycle ALWAYS have in-degree ≥ 1
+    → (Each node in cycle has at least one edge coming from another cycle node)
+    → These nodes NEVER reach in-degree 0
+    → NEVER get processed
+    → processed &lt; n → cycle exists!
+    
+  Example: cycle 1 → 2 → 3 → 1
+    in_degree[1] ≥ 1 (from 3)
+    in_degree[2] ≥ 1 (from 1)
+    in_degree[3] ≥ 1 (from 2)
+    None ever reaches 0 → none processed → cycle detected!</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(V + E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  WHY O(V + E)?
+</span>  
+  Same as basic DFS (Problem 4):
+    → Each node changes state: WHITE → GRAY → BLACK
+    → Each transition happens ONCE → O(V) for state changes
+    → Each edge checked ONCE (during the GRAY phase of its source) → O(E)
+    → Total: O(V + E)
+
+  With outer loop for disconnected graphs:
+    → Same O(V + E) total (visited/state prevents re-processing)
+
+  Topological sort version (Version 4):
+    → Building in-degree array: O(E)
+    → Processing queue: each node enters/leaves once → O(V)
+    → Each edge reduces in-degree once → O(E)
+    → Total: O(V + E)</code></pre></div>
+<h3>Space Complexity: O(V + E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  1. Adjacency list: O(V + E)
+</span>  2. State array: O(V)
+  3. Recursion stack: O(V) worst case
+  
+  Extra space beyond input: O(V)
+  Total including graph: O(V + E)</code></pre></div>
+<hr>
+<h2>STEP 7: EDGE TYPES IN DIRECTED DFS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  During DFS on a directed graph, each edge u → v falls into
+</span>  one of four categories based on the STATE of v when discovered:
+
+  ┌──────────────────────────────────────────────────────────────────┐
+  │                                                                    │
+  │  1. TREE EDGE:    v is WHITE → we explore v from u                │
+  │     → Part of the DFS tree                                        │
+  │     → Normal exploration                                          │
+  │                                                                    │
+  │  2. BACK EDGE:    v is GRAY → v is an ancestor of u              │
+  │     → Goes "backward" in the DFS tree                             │
+  │     → ★ THIS IS THE ONLY TYPE THAT INDICATES A CYCLE ★           │
+  │                                                                    │
+  │  3. FORWARD EDGE:  v is BLACK and disc[u] &lt; disc[v]              │
+  │     → Goes "forward" to a descendant (already fully explored)     │
+  │     → Exists in directed graphs, NOT in undirected                │
+  │                                                                    │
+  │  4. CROSS EDGE:    v is BLACK and disc[u] &gt; disc[v]              │
+  │     → Goes to a node in a different branch of DFS tree            │
+  │     → Exists in directed graphs, NOT in undirected                │
+  │                                                                    │
+  │  For CYCLE DETECTION, we only care about BACK EDGES:              │
+  │     → v is GRAY (currently on DFS path) → cycle                   │
+  │     → v is BLACK (done) → cross or forward edge → no cycle        │
+  │                                                                    │
+  └──────────────────────────────────────────────────────────────────┘
+
+  Visual:
+  
+    DFS Tree:     0 → 1 → 3
+                  ↓       ↓
+                  2       4
+  
+    Tree edges:   0→1, 0→2, 1→3, 3→4  (WHITE when discovered)
+    Back edge:    4→1                   (GRAY when discovered) → CYCLE
+    Forward edge: 0→3                   (BLACK, disc[0] &lt; disc[3])
+    Cross edge:   2→3                   (BLACK, disc[2] &gt; disc[3])</code></pre></div>
+<hr>
+<h2>STEP 8: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Undirected?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Use Problem 10's parent check instead!
+</span>  
+  3-state coloring on undirected graphs:
+    → Would detect "cycles" for every edge (because edges go both ways)
+    → WRONG for undirected — use parent check from Problem 10
+    
+  ┌──────────────────────────────────────────────────────────────┐
+  │  DECISION:                                                    │
+  │    Undirected cycle detection → parent check (Problem 10)     │
+  │    Directed cycle detection   → 3-state DFS (Problem 11)     │
+  │                                                              │
+  │    ASK YOURSELF: "Are edges one-way or two-way?"             │
+  │    This determines which algorithm to use.                    │
+  └──────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>What if We Need to Find the Actual Cycle?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  When a back edge u → v (GRAY) is found:
+</span>    → v is an ancestor of u on the current DFS path
+    → The cycle is: v → ... → u → v
+    
+  To find it, track the DFS path:
+    → When entering node: push to path list
+    → When leaving node: pop from path list
+    → When cycle detected: path from v to u is the cycle
+    
+  def dfs(node):
+      state[node] = GRAY
+      path.append(node)
+      
+      for neighbor in graph[node]:
+          if state[neighbor] == GRAY:
+              # Find cycle: from neighbor's position in path to end
+              cycle_start = path.index(neighbor)
+              cycle = path[cycle_start:] + [neighbor]
+              return cycle
+          ...
+      
+      path.pop()
+      state[node] = BLACK</code></pre></div>
+<h3>What if We Need to Detect ALL Cycles?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Finding ALL cycles is much harder:
+</span>    → A graph can have EXPONENTIALLY many cycles
+    → Example: complete graph K_n has O(2^n) cycles
+    → Usually not asked in interviews
+    
+  For "does ANY cycle exist?" → this problem's algorithm is enough.
+  For "find one cycle" → extend with path tracking (above).
+  For "find all cycles" → Johnson's algorithm (advanced).</code></pre></div>
+<hr>
+<h2>STEP 9: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Using 2-state (visited/unvisited) for directed   ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  WRONG:                                                      ║
+  ║    if neighbor in visited:                                   ║
+  ║        return True        ← false positive on DAGs!          ║
+  ║                                                              ║
+  ║  RIGHT:                                                      ║
+  ║    if state[neighbor] == GRAY:                               ║
+  ║        return True        ← only GRAY means cycle            ║
+  ║                                                              ║
+  ║  A visited BLACK node is NOT a cycle indicator!              ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Forgetting to mark node BLACK when leaving       ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  If you mark GRAY but never BLACK:                           ║
+  ║    → All visited nodes stay GRAY forever                     ║
+  ║    → Reaching any previously visited node → false "cycle"    ║
+  ║    → Effectively same as 2-state → WRONG                     ║
+  ║                                                              ║
+  ║  MUST mark BLACK after processing all neighbors:             ║
+  ║    state[node] = BLACK    ← at end of DFS function           ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Using parent check for directed graphs           ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Parent check is for UNDIRECTED only (Problem 10).           ║
+  ║  In directed graphs, there's no "parent edge" ambiguity.     ║
+  ║  Using parent check gives false positives on DAGs.           ║
+  ║                                                              ║
+  ║  ALWAYS use 3-state for directed graphs.                     ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Not handling disconnected directed graphs        ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Some nodes might not be reachable from any earlier node.    ║
+  ║  Must try DFS from EVERY WHITE node.                         ║
+  ║                                                              ║
+  ║  for node in range(n):                                       ║
+  ║      if state[node] == WHITE:                                ║
+  ║          if dfs(node): return True                           ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Self-loop                                        ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Edge [3, 3]: node 3 points to itself                        ║
+  ║                                                              ║
+  ║  DFS(3): mark 3 GRAY                                        ║
+  ║    Neighbor 3: state = GRAY → CYCLE! ✓                      ║
+  ║                                                              ║
+  ║  Self-loops are correctly detected.                          ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: No edges                                         ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  n = 5, edges = [] → False (no cycle possible)              ║
+  ║  All nodes go WHITE → GRAY → BLACK individually.            ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Two-node cycle                                   ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  edges = [[0, 1], [1, 0]]                                   ║
+  ║  0 → 1 → 0 → ... (cycle of length 2)                        ║
+  ║                                                              ║
+  ║  DFS(0): mark 0 GRAY                                        ║
+  ║    DFS(1): mark 1 GRAY                                      ║
+  ║      Neighbor 0: GRAY → CYCLE! ✓                            ║
+  ╚══════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 10: COMPLETE COMPARISON — Problem 10 vs Problem 11</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                     ║
+  ║        UNDIRECTED (Problem 10)    vs    DIRECTED (Problem 11)       ║
+  ║                                                                     ║
+  ╠═════════════════════════════════════════════════════════════════════╣
+  ║                                                                     ║
+  ║  Graph type:  Edges go both ways      Edges go one way             ║
+  ║                                                                     ║
+  ║  States:      2 (visited/unvisited)   3 (WHITE/GRAY/BLACK)         ║
+  ║                                                                     ║
+  ║  Key check:   visited AND ≠ parent    state == GRAY                ║
+  ║                                                                     ║
+  ║  Parent:      Needed (track parent)   Not needed                   ║
+  ║                                                                     ║
+  ║  BLACK state: Not needed              Essential! (prevents          ║
+  ║                                       false positives on DAGs)     ║
+  ║                                                                     ║
+  ║  Back edge:   visited + ≠ parent      GRAY neighbor                ║
+  ║                                                                     ║
+  ║  Time:        O(V + E)               O(V + E)                     ║
+  ║  Space:       O(V)                   O(V)                          ║
+  ║                                                                     ║
+  ║  Alternative: Union-Find (Prob 29)    Topo Sort (Prob 19/21)       ║
+  ║                                                                     ║
+  ║  REMEMBER:                                                         ║
+  ║    "Is the graph directed?"                                        ║
+  ║    YES → 3-state (this problem)                                    ║
+  ║    NO  → parent check (Problem 10)                                 ║
+  ║                                                                     ║
+  ╚═════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 11: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  SIGNAL 1: "Cycle in a directed graph"                         │
+  │    → 3-state DFS (WHITE/GRAY/BLACK)                            │
+  │    → NOT parent check (that's for undirected — Problem 10)     │
+  │                                                                │
+  │  SIGNAL 2: "Can all tasks be completed?" (with dependencies)   │
+  │    → Dependency = directed edge                                │
+  │    → Circular dependency = directed cycle                      │
+  │    → 3-state DFS or Topological Sort (Problems 19-21)          │
+  │                                                                │
+  │  SIGNAL 3: "Is the graph a DAG?"                               │
+  │    → DAG = Directed Acyclic Graph = no directed cycles         │
+  │    → Check: does 3-state DFS find a cycle?                     │
+  │    → If no cycle → it's a DAG → can do topological sort        │
+  │                                                                │
+  │  SIGNAL 4: "Deadlock detection"                                │
+  │    → Processes waiting for each other = directed cycle          │
+  │    → 3-state DFS on the "waits-for" graph                     │
+  │                                                                │
+  │  THINKING PROCESS:                                             │
+  │    "I see directed edges and need to check for cycles"         │
+  │    → "Directed → can't use parent check"                       │
+  │    → "Need 3 states: WHITE, GRAY, BLACK"                       │
+  │    → "GRAY neighbor = back edge = cycle"                       │
+  │    → "BLACK neighbor = already explored = safe"                │
+  │                                                                │
+  │  FIRST QUESTION TO ASK:                                        │
+  │    "Are the edges directed or undirected?"                     │
+  │    This DETERMINES which algorithm to use.                     │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPTS LEARNED:                                            ║
+  ║                                                                    ║
+  ║   1. THREE-STATE DFS: WHITE → GRAY → BLACK                       ║
+  ║      → WHITE: unvisited                                            ║
+  ║      → GRAY: currently being explored (on DFS path)               ║
+  ║      → BLACK: fully explored (all descendants done)               ║
+  ║                                                                    ║
+  ║   2. GRAY NEIGHBOR = CYCLE (in directed graphs)                   ║
+  ║      → Gray means "on the current DFS path"                       ║
+  ║      → Edge to gray node = back edge = cycle                      ║
+  ║      → Edge to black node = cross/forward edge = NOT a cycle      ║
+  ║                                                                    ║
+  ║   3. WHY 2 STATES AREN'T ENOUGH:                                  ║
+  ║      → Can't distinguish "currently exploring" from "already done"║
+  ║      → DAGs have nodes reachable via multiple paths               ║
+  ║      → 2-state gives false positives on these                     ║
+  ║                                                                    ║
+  ║   4. Undirected vs Directed = DIFFERENT algorithms:               ║
+  ║      → Undirected: parent check (Problem 10)                      ║
+  ║      → Directed: 3-state DFS (this problem)                       ║
+  ║      → NEVER mix them!                                            ║
+  ║                                                                    ║
+  ║   5. Alternative: Topological Sort (Kahn's algorithm)             ║
+  ║      → If topo sort processes &lt; n nodes → cycle exists            ║
+  ║      → Elegant BFS-based approach (Problems 19-21)                ║
+  ║                                                                    ║
+  ║   MENTAL MODEL:                                                    ║
+  ║   "Imagine DFS as a person exploring a cave system.               ║
+  ║    Gray rooms have their flashlight on — you're still in there.   ║
+  ║    If you walk into a room with its flashlight already on,        ║
+  ║    you've gone in a circle — CYCLE!                               ║
+  ║    Black rooms are locked — fully explored, no cycle through them."║
+  ║                                                                    ║
+  ║   DECISION TREE:                                                   ║
+  ║   ┌──────────────────────────────────────────────────────────┐     ║
+  ║   │  "Detect cycle" →                                        │     ║
+  ║   │    Undirected? → parent check (Problem 10)               │     ║
+  ║   │    Directed?   → 3-state DFS (Problem 11)               │     ║
+  ║   │                  OR Topological Sort (Problem 21)        │     ║
+  ║   └──────────────────────────────────────────────────────────┘     ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CONNECTION MAP</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 10 (Undirected Cycle) ──┐
+</span>                                   ├── Problem 11 (Directed Cycle) ◄── HERE
+  Problem 4 (DFS) ────────────────┘
+           │
+           ├──→ Problem 12 (Bipartite Check)
+           │     → "Can I 2-color the graph?"
+           │     → Uses BFS/DFS with coloring
+           │     → Different from cycle detection but similar DFS skill
+           │
+           ├──→ Problem 19 (Topological Sort — Kahn's BFS)
+           │     → "Order tasks by dependencies"
+           │     → If can't order all → cycle exists (connects to this problem)
+           │
+           ├──→ Problem 20 (Topological Sort — DFS)
+           │     → Reverse post-order = topological order
+           │     → Uses the BLACK marking from this problem
+           │
+           └──→ Problem 21 (Course Schedule)
+                 → "Can I finish all courses?"
+                 → = "Does the prerequisite graph have a cycle?"
+                 → DIRECT application of Problem 11</code></pre></div>
+<hr>
+<p><strong>Problem 11 Complete.</strong><br>
+<strong>Ready for Problem 12: Bipartite Graph Check?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="25" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-10.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 11 of 50</span>
+            </div>
+            <a href="problem-12.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

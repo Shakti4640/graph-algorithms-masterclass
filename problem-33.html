@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 33: Problem 33: Floyd-Warshall (All-Pairs Shortest Path) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="17">
+<div class="px-2"><h1>Problem 33: Floyd-Warshall (All-Pairs Shortest Path)</h1>
+<h2>[Algorithm Family: Dynamic Programming on Graphs]</h2>
+<h2>[Phase 4: Advanced — "I can handle complex multi-concept problems"]</h2>
+<hr>
+<h2>PHASE 4 BEGINS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  PHASE 4: ADVANCED (Problems 33-42)                                ║
+  ║  "I can handle complex multi-concept problems"                     ║
+  ║                                                                    ║
+  ║  What changes from Phase 3:                                        ║
+  ║    → Problems combine MULTIPLE algorithms                          ║
+  ║    → Graph properties become more nuanced                         ║
+  ║    → Algorithm choice requires deeper analysis                    ║
+  ║    → Some algorithms have beautiful but non-obvious insights      ║
+  ║                                                                    ║
+  ║  Phase 4 roadmap:                                                  ║
+  ║    P33: Floyd-Warshall (all-pairs shortest path)    ← HERE        ║
+  ║    P34: Bridges (Tarjan's)                                        ║
+  ║    P35: Articulation Points (Tarjan's extension)                  ║
+  ║    P36: Strongly Connected Components (Kosaraju's)                ║
+  ║    P37: Alien Dictionary (complex topo sort)                      ║
+  ║    P38: State-space BFS                                           ║
+  ║    P39: 0-1 BFS                                                   ║
+  ║    P40: Swim in Rising Water (grid Dijkstra)                      ║
+  ║    P41: Eulerian Path                                             ║
+  ║    P42: Bidirectional BFS                                         ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You manage a network of N cities connected by roads with known
+</span>travel times. You need to answer MANY queries of the form:
+
+  "What is the shortest travel time from city A to city B?"
+
+for ALL possible pairs of cities (A, B).
+
+Some roads are ONE-WAY (directed).
+Some roads might have NEGATIVE travel times (think: downhill
+highways with tailwinds giving net time savings).
+But there are NO negative cycles.
+
+Input:
+  n = 4  (cities: 0, 1, 2, 3)
+  edges = [
+    [0, 1, 3],     # 0 → 1 costs 3
+    [0, 3, 7],     # 0 → 3 costs 7
+    [1, 0, 8],     # 1 → 0 costs 8
+    [1, 2, 2],     # 1 → 2 costs 2
+    [2, 0, 5],     # 2 → 0 costs 5
+    [2, 3, 1],     # 2 → 3 costs 1
+    [3, 0, 2],     # 3 → 0 costs 2
+  ]
+
+Output:
+  Shortest distance matrix:
+       to:  0    1    2    3
+  from 0: [ 0,   3,   5,   6 ]
+  from 1: [ 5,   0,   2,   3 ]
+  from 2: [ 3,   6,   0,   1 ]
+  from 3: [ 2,   5,   7,   0 ]
+
+  Example queries:
+    Shortest 0→2 = 5  (path: 0→1→2, cost 3+2)
+    Shortest 0→3 = 6  (path: 0→1→2→3, cost 3+2+1)
+    Shortest 3→1 = 5  (path: 3→0→1, cost 2+3)</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>        3
+</span>  0 ─────────→ 1
+  ↑ ╲           │
+  │   ╲ 7       │ 2
+  │ 2  ╲        │
+  │     ↘       ↓
+  3 ←────────── 2
+      1     5 ↗
+            (2→0)
+
+  More precisely:
+
+       ┌──── 3 ────→ 1
+       │              │
+     8 │   ┌── 7 ──┐ │ 2
+       │   ↓        │ │
+       0 ←─┘        │ ↓
+       ↑     5       │ 2
+       └──────────── ┘
+       ↑      1
+       │ 2 ←──── 3
+       └─────────┘
+
+  Let me redraw clearly:
+
+    0 ──(3)──→ 1
+    ↑↑         |
+    ||         (2)
+    |└─(7)─┐   |
+    |       ↓   ↓
+   (2)      3 ← 2
+    |    ←(1)  |
+    |          |
+    └──(5)─────┘
+       (2→0)
+
+  Edge list:
+    0 → 1 : 3
+    0 → 3 : 7
+    1 → 0 : 8
+    1 → 2 : 2
+    2 → 0 : 5
+    2 → 3 : 1
+    3 → 0 : 2</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer                │  Why?                         ║
+╠══════════════════╪════════════════════════╪═══════════════════════════════╣
+║  NODES           │  Cities 0-3            │  Each city = node             ║
+║  EDGES           │  Roads with times      │  Each road = weighted edge    ║
+║  Directed?       │  YES                   │  One-way roads (0→1 ≠ 1→0)   ║
+║  Weighted?       │  YES                   │  Travel times                 ║
+║  Negative wts?   │  Possible              │  Problem states "might have"  ║
+║  Neg cycles?     │  NO                    │  Problem guarantees no neg    ║
+║                  │                        │  cycles                       ║
+║  Connected?      │  YES (every pair has   │  At least one path between    ║
+║                  │  some path)            │  any two nodes                ║
+║  What we seek    │  ALL-PAIRS shortest    │  Shortest dist from EVERY     ║
+║                  │  paths                 │  node to EVERY other node     ║
+╚══════════════════╧════════════════════════╧═══════════════════════════════╝
+
+  KEY OBSERVATION: We want ALL pairs, not just single source.
+    → Single source: Dijkstra (Problem 23) or Bellman-Ford (Problem 26)
+    → ALL pairs: something new is needed</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST — Run Single-Source from Every Node</h2>
+<h3>Approach A: Dijkstra from Every Node</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Run Dijkstra V times, once from each source:
+</span>
+  Dijkstra from 0 → dist[0][0..3]
+  Dijkstra from 1 → dist[1][0..3]
+  Dijkstra from 2 → dist[2][0..3]
+  Dijkstra from 3 → dist[3][0..3]
+
+  Time per Dijkstra: O((V+E) log V)
+  Total: V × O((V+E) log V) = O(V(V+E) log V)
+
+  For sparse graph (E ≈ V):  O(V² log V)
+  For dense graph (E ≈ V²):  O(V³ log V)</code></pre></div>
+<h3>Approach B: Bellman-Ford from Every Node</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Run Bellman-Ford V times:
+</span>
+  Time per Bellman-Ford: O(V × E)
+  Total: V × O(V × E) = O(V² × E)
+
+  For sparse graph (E ≈ V):  O(V³)
+  For dense graph (E ≈ V²):  O(V⁴)</code></pre></div>
+<h3>Why These Approaches Have Issues</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │  Approach              │ Handles Negatives? │ Time (dense)       │
+  ├────────────────────────┼────────────────────┼────────────────────┤
+  │  V × Dijkstra          │  ❌ NO              │  O(V³ log V)       │
+  │  V × Bellman-Ford      │  ✅ YES             │  O(V⁴)             │
+  │  Floyd-Warshall        │  ✅ YES             │  O(V³)     ★ BEST  │
+  └────────────────────────┴────────────────────┴────────────────────┘
+
+  Floyd-Warshall:
+    → Handles negative weights ✓ (like Bellman-Ford)
+    → O(V³) — faster than V × Bellman-Ford for dense graphs
+    → Simpler to code (just three nested loops!)
+    → Perfect when V is small-to-moderate (V ≤ 500)
+
+  BUT: If graph is SPARSE and no negative weights:
+    → V × Dijkstra = O(V² log V) &lt; O(V³) = Floyd-Warshall
+    → So Dijkstra from each node might win for sparse, non-negative graphs</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<h3>The Thinking Process</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "I need shortest path between ALL pairs"
+</span>    → ALL-PAIRS shortest path problem
+
+  "Graph might have negative weights"
+    → Can't use Dijkstra (Problem 23: no negative weights)
+    → Need Bellman-Ford (Problem 26) or Floyd-Warshall
+
+  "V is small (≤ 500)"
+    → O(V³) is acceptable: 500³ = 125,000,000 ≈ OK
+
+  "I need answers for ALL pairs, not just one source"
+    → Floyd-Warshall is DESIGNED for this
+    → One clean algorithm gives the complete distance matrix
+    → Three nested loops, no complex data structures</code></pre></div>
+<h3>What Makes Floyd-Warshall Special?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                   ║
+  ║  THE KEY INSIGHT — "What if we go THROUGH another node?"          ║
+  ║                                                                   ║
+  ║  For each pair (i, j), ask:                                       ║
+  ║    "Is there a node k such that going i→k→j is shorter            ║
+  ║     than going i→j directly?"                                     ║
+  ║                                                                   ║
+  ║  If dist[i][k] + dist[k][j] &lt; dist[i][j]:                        ║
+  ║    → YES! Update: dist[i][j] = dist[i][k] + dist[k][j]           ║
+  ║                                                                   ║
+  ║  Try this for EVERY possible intermediate node k.                 ║
+  ║  Try this for EVERY pair (i, j).                                  ║
+  ║  That's the entire algorithm!                                     ║
+  ║                                                                   ║
+  ║  THE FORMULA (one line!):                                         ║
+  ║                                                                   ║
+  ║    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])         ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<h3>Why It's Dynamic Programming</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Floyd-Warshall is DP on graphs:
+</span>
+  SUBPROBLEM:
+    dist_k[i][j] = shortest path from i to j using only
+                    nodes {0, 1, ..., k} as intermediates
+
+  BASE CASE:
+    dist_0[i][j] = direct edge weight from i to j
+                    (no intermediate nodes allowed)
+
+  TRANSITION:
+    dist_k[i][j] = min(
+        dist_{k-1}[i][j],              ← don't use node k
+        dist_{k-1}[i][k] + dist_{k-1}[k][j]  ← use node k as intermediate
+    )
+
+  ANSWER:
+    dist_{V-1}[i][j] = shortest path using ANY node as intermediate
+                      = true shortest path
+
+  We iterate k from 0 to V-1, expanding the set of allowed intermediates.
+  At each step, we either:
+    → Keep the old path (don't use k)
+    → Route through k (if it's shorter)</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — Step by Step</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  n = 4
+</span>  edges = [
+    [0,1,3], [0,3,7], [1,0,8], [1,2,2],
+    [2,0,5], [2,3,1], [3,0,2]
+  ]
+
+  ═══════════════════════════════════════════════════════════════
+  STEP 1: INITIALIZE distance matrix
+  ═══════════════════════════════════════════════════════════════
+
+  Rules:
+    → dist[i][i] = 0         (distance to self)
+    → dist[i][j] = weight    (if direct edge exists)
+    → dist[i][j] = INF       (if no direct edge)
+
+  Initial matrix:
+                to:  0     1     2     3
+  from 0:        [  0,    3,   INF,   7  ]
+  from 1:        [  8,    0,    2,   INF ]
+  from 2:        [  5,   INF,   0,    1  ]
+  from 3:        [  2,   INF,  INF,   0  ]
+
+  This represents: "shortest paths using ZERO intermediate nodes"
+  (i.e., only direct edges)
+
+  Reading the matrix:
+    0→1 = 3 ✓ (direct edge)
+    0→2 = INF (no direct edge from 0 to 2)
+    0→3 = 7 ✓ (direct edge)
+    1→3 = INF (no direct edge from 1 to 3)
+    etc.
+
+
+  ═══════════════════════════════════════════════════════════════
+  STEP 2: Try k=0 as intermediate
+  "What if we route THROUGH node 0?"
+  ═══════════════════════════════════════════════════════════════
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ k = 0: "Can going through node 0 improve any path?"         │
+  │                                                              │
+  │ For every pair (i, j), check:                                │
+  │   dist[i][j] vs dist[i][0] + dist[0][j]                     │
+  │                                                              │
+  │ Check (1, 2):                                                │
+  │   dist[1][2] = 2                                             │
+  │   dist[1][0] + dist[0][2] = 8 + INF = INF                   │
+  │   2 &lt; INF → no change                                       │
+  │                                                              │
+  │ Check (1, 3):                                                │
+  │   dist[1][3] = INF                                           │
+  │   dist[1][0] + dist[0][3] = 8 + 7 = 15                      │
+  │   15 &lt; INF → ✅ UPDATE! dist[1][3] = 15                      │
+  │   Path: 1 → 0 → 3                                           │
+  │                                                              │
+  │ Check (2, 1):                                                │
+  │   dist[2][1] = INF                                           │
+  │   dist[2][0] + dist[0][1] = 5 + 3 = 8                       │
+  │   8 &lt; INF → ✅ UPDATE! dist[2][1] = 8                        │
+  │   Path: 2 → 0 → 1                                           │
+  │                                                              │
+  │ Check (2, 3):                                                │
+  │   dist[2][3] = 1                                             │
+  │   dist[2][0] + dist[0][3] = 5 + 7 = 12                      │
+  │   1 &lt; 12 → no change (direct edge is better)                 │
+  │                                                              │
+  │ Check (3, 1):                                                │
+  │   dist[3][1] = INF                                           │
+  │   dist[3][0] + dist[0][1] = 2 + 3 = 5                       │
+  │   5 &lt; INF → ✅ UPDATE! dist[3][1] = 5                        │
+  │   Path: 3 → 0 → 1                                           │
+  │                                                              │
+  │ Check (3, 2):                                                │
+  │   dist[3][2] = INF                                           │
+  │   dist[3][0] + dist[0][2] = 2 + INF = INF                   │
+  │   no change                                                  │
+  │                                                              │
+  │ After k=0:                                                   │
+  │           to:  0     1     2     3                            │
+  │ from 0:    [  0,    3,   INF,   7  ]                         │
+  │ from 1:    [  8,    0,    2,  ★15  ]  ← 1→0→3               │
+  │ from 2:    [  5,   ★8,    0,    1  ]  ← 2→0→1               │
+  │ from 3:    [  2,   ★5,   INF,   0  ]  ← 3→0→1               │
+  │                                                              │
+  │ "Paths that go through node 0 have been discovered"          │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  STEP 3: Try k=1 as intermediate
+  "What if we route THROUGH node 1?"
+  ═══════════════════════════════════════════════════════════════
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ k = 1: "Can going through node 1 improve any path?"         │
+  │                                                              │
+  │ Check (0, 2):                                                │
+  │   dist[0][2] = INF                                           │
+  │   dist[0][1] + dist[1][2] = 3 + 2 = 5                       │
+  │   5 &lt; INF → ✅ UPDATE! dist[0][2] = 5                        │
+  │   Path: 0 → 1 → 2                                           │
+  │                                                              │
+  │ Check (0, 3):                                                │
+  │   dist[0][3] = 7                                             │
+  │   dist[0][1] + dist[1][3] = 3 + 15 = 18                     │
+  │   7 &lt; 18 → no change                                        │
+  │                                                              │
+  │ Check (2, 0):                                                │
+  │   dist[2][0] = 5                                             │
+  │   dist[2][1] + dist[1][0] = 8 + 8 = 16                      │
+  │   5 &lt; 16 → no change                                        │
+  │                                                              │
+  │ Check (3, 2):                                                │
+  │   dist[3][2] = INF                                           │
+  │   dist[3][1] + dist[1][2] = 5 + 2 = 7                       │
+  │   7 &lt; INF → ✅ UPDATE! dist[3][2] = 7                        │
+  │   Path: 3 → 0 → 1 → 2  (using previously discovered 3→0→1) │
+  │                                                              │
+  │ Check (3, 0):                                                │
+  │   dist[3][0] = 2                                             │
+  │   dist[3][1] + dist[1][0] = 5 + 8 = 13                      │
+  │   2 &lt; 13 → no change                                        │
+  │                                                              │
+  │ Check (2, 3):                                                │
+  │   dist[2][3] = 1                                             │
+  │   dist[2][1] + dist[1][3] = 8 + 15 = 23                     │
+  │   1 &lt; 23 → no change                                        │
+  │                                                              │
+  │ After k=1:                                                   │
+  │           to:  0     1     2     3                            │
+  │ from 0:    [  0,    3,   ★5,    7  ]  ← 0→1→2               │
+  │ from 1:    [  8,    0,    2,   15  ]                         │
+  │ from 2:    [  5,    8,    0,    1  ]                         │
+  │ from 3:    [  2,    5,   ★7,    0  ]  ← 3→(0→1)→2           │
+  │                                                              │
+  │ "Paths that go through nodes {0,1} have been discovered"     │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  STEP 4: Try k=2 as intermediate
+  "What if we route THROUGH node 2?"
+  ═══════════════════════════════════════════════════════════════
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ k = 2: "Can going through node 2 improve any path?"         │
+  │                                                              │
+  │ Check (0, 0):  skip (same node)                              │
+  │                                                              │
+  │ Check (0, 3):                                                │
+  │   dist[0][3] = 7                                             │
+  │   dist[0][2] + dist[2][3] = 5 + 1 = 6                       │
+  │   6 &lt; 7 → ✅ UPDATE! dist[0][3] = 6                          │
+  │   Path: 0 → 1 → 2 → 3                                       │
+  │                                                              │
+  │ Check (1, 0):                                                │
+  │   dist[1][0] = 8                                             │
+  │   dist[1][2] + dist[2][0] = 2 + 5 = 7                       │
+  │   7 &lt; 8 → ✅ UPDATE! dist[1][0] = 7                          │
+  │   Wait — let me recalculate...                               │
+  │   dist[1][2] = 2, dist[2][0] = 5                             │
+  │   2 + 5 = 7 &lt; 8 → ✅ UPDATE! dist[1][0] = 7                 │
+  │   Path: 1 → 2 → 0                                           │
+  │                                                              │
+  │ Check (1, 3):                                                │
+  │   dist[1][3] = 15                                            │
+  │   dist[1][2] + dist[2][3] = 2 + 1 = 3                       │
+  │   3 &lt; 15 → ✅ UPDATE! dist[1][3] = 3                         │
+  │   Path: 1 → 2 → 3                                           │
+  │                                                              │
+  │ Check (3, 0):                                                │
+  │   dist[3][0] = 2                                             │
+  │   dist[3][2] + dist[2][0] = 7 + 5 = 12                      │
+  │   2 &lt; 12 → no change                                        │
+  │                                                              │
+  │ Check (3, 3):  skip (same node)                              │
+  │                                                              │
+  │ Check (0, 1):                                                │
+  │   dist[0][1] = 3                                             │
+  │   dist[0][2] + dist[2][1] = 5 + 8 = 13                      │
+  │   3 &lt; 13 → no change                                        │
+  │                                                              │
+  │ Check (3, 1):                                                │
+  │   dist[3][1] = 5                                             │
+  │   dist[3][2] + dist[2][1] = 7 + 8 = 15                      │
+  │   5 &lt; 15 → no change                                        │
+  │                                                              │
+  │ After k=2:                                                   │
+  │           to:  0     1     2     3                            │
+  │ from 0:    [  0,    3,    5,   ★6  ]  ← 0→1→2→3             │
+  │ from 1:    [ ★7,    0,    2,   ★3  ]  ← 1→2→0, 1→2→3       │
+  │ from 2:    [  5,    8,    0,    1  ]                         │
+  │ from 3:    [  2,    5,    7,    0  ]                         │
+  │                                                              │
+  │ "Paths through nodes {0,1,2} have been discovered"           │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  STEP 5: Try k=3 as intermediate
+  "What if we route THROUGH node 3?"
+  ═══════════════════════════════════════════════════════════════
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ k = 3: "Can going through node 3 improve any path?"         │
+  │                                                              │
+  │ Check (1, 0):                                                │
+  │   dist[1][0] = 7                                             │
+  │   dist[1][3] + dist[3][0] = 3 + 2 = 5                       │
+  │   5 &lt; 7 → ✅ UPDATE! dist[1][0] = 5                          │
+  │   Path: 1 → 2 → 3 → 0                                       │
+  │                                                              │
+  │ Check (1, 1):  skip (same node)                              │
+  │                                                              │
+  │ Check (1, 2):                                                │
+  │   dist[1][2] = 2                                             │
+  │   dist[1][3] + dist[3][2] = 3 + 7 = 10                      │
+  │   2 &lt; 10 → no change                                        │
+  │                                                              │
+  │ Check (0, 0):  skip                                          │
+  │                                                              │
+  │ Check (0, 1):                                                │
+  │   dist[0][1] = 3                                             │
+  │   dist[0][3] + dist[3][1] = 6 + 5 = 11                      │
+  │   3 &lt; 11 → no change                                        │
+  │                                                              │
+  │ Check (0, 2):                                                │
+  │   dist[0][2] = 5                                             │
+  │   dist[0][3] + dist[3][2] = 6 + 7 = 13                      │
+  │   5 &lt; 13 → no change                                        │
+  │                                                              │
+  │ Check (2, 0):                                                │
+  │   dist[2][0] = 5                                             │
+  │   dist[2][3] + dist[3][0] = 1 + 2 = 3                       │
+  │   3 &lt; 5 → ✅ UPDATE! dist[2][0] = 3                          │
+  │   Path: 2 → 3 → 0                                           │
+  │                                                              │
+  │ Check (2, 1):                                                │
+  │   dist[2][1] = 8                                             │
+  │   dist[2][3] + dist[3][1] = 1 + 5 = 6                       │
+  │   6 &lt; 8 → ✅ UPDATE! dist[2][1] = 6                          │
+  │   Path: 2 → 3 → 0 → 1  (or 2 → 3 → (0→1))                 │
+  │                                                              │
+  │ After k=3:                                                   │
+  │           to:  0     1     2     3                            │
+  │ from 0:    [  0,    3,    5,    6  ]                         │
+  │ from 1:    [ ★5,    0,    2,    3  ]  ← 1→2→3→0             │
+  │ from 2:    [ ★3,   ★6,    0,    1  ]  ← 2→3→0, 2→3→0→1     │
+  │ from 3:    [  2,    5,    7,    0  ]                         │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  FINAL RESULT
+  ═══════════════════════════════════════════════════════════════
+
+  All-pairs shortest path matrix:
+
+           to:  0     1     2     3
+  from 0:    [  0,    3,    5,    6  ]
+  from 1:    [  5,    0,    2,    3  ]
+  from 2:    [  3,    6,    0,    1  ]
+  from 3:    [  2,    5,    7,    0  ]
+
+  Verification of some paths:
+    0→2 = 5:  0→1(3) + 1→2(2) = 5 ✓
+    0→3 = 6:  0→1(3) + 1→2(2) + 2→3(1) = 6 ✓
+    1→0 = 5:  1→2(2) + 2→3(1) + 3→0(2) = 5 ✓
+    2→1 = 6:  2→3(1) + 3→0(2) + 0→1(3) = 6 ✓
+    3→2 = 7:  3→0(2) + 0→1(3) + 1→2(2) = 7 ✓</code></pre></div>
+<hr>
+<h3>The Evolution of the Distance Matrix</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────┐
+</span>  │  INITIAL (direct edges only):                            │
+  │     0    3   INF   7                                     │
+  │     8    0    2   INF                                    │
+  │     5   INF   0    1                                     │
+  │     2   INF  INF   0                                     │
+  │                                                          │
+  │  After k=0 (through node 0):                             │
+  │     0    3   INF   7         3 cells improved            │
+  │     8    0    2   [15]       1→0→3 = 15                  │
+  │     5   [8]   0    1         2→0→1 = 8                   │
+  │     2   [5]  INF   0         3→0→1 = 5                   │
+  │                                                          │
+  │  After k=1 (through nodes {0,1}):                        │
+  │     0    3   [5]   7         2 cells improved            │
+  │     8    0    2    15        0→1→2 = 5                   │
+  │     5    8    0     1        3→1→2 = 7                   │
+  │     2    5   [7]    0                                    │
+  │                                                          │
+  │  After k=2 (through nodes {0,1,2}):                      │
+  │     0    3    5   [6]        3 cells improved            │
+  │    [7]   0    2   [3]        0→1→2→3, 1→2→0, 1→2→3     │
+  │     5    8    0    1                                     │
+  │     2    5    7    0                                     │
+  │                                                          │
+  │  After k=3 (through nodes {0,1,2,3}):  ★ FINAL          │
+  │     0    3    5    6         3 cells improved            │
+  │    [5]   0    2    3         1→2→3→0, 2→3→0, 2→3→0→1   │
+  │    [3]  [6]   0    1                                     │
+  │     2    5    7    0                                     │
+  │                                                          │
+  │  Total improvements: 3 + 2 + 3 + 3 = 11 relaxations     │
+  └─────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 5: WHY THE k-LOOP ORDER MATTERS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║  CRITICAL: The loop order MUST be k → i → j (k is OUTERMOST)    ║
+  ╠═══════════════════════════════════════════════════════════════════╣
+  ║                                                                   ║
+  ║  CORRECT:                                                         ║
+  ║    for k in range(n):          ← k outermost                     ║
+  ║        for i in range(n):                                         ║
+  ║            for j in range(n):                                     ║
+  ║                dist[i][j] = min(dist[i][j],                       ║
+  ║                                 dist[i][k] + dist[k][j])         ║
+  ║                                                                   ║
+  ║  WRONG (common mistake):                                          ║
+  ║    for i in range(n):          ← i outermost — WRONG!            ║
+  ║        for j in range(n):                                         ║
+  ║            for k in range(n):                                     ║
+  ║                ...                                                ║
+  ║                                                                   ║
+  ║  WHY k must be outermost?                                         ║
+  ║                                                                   ║
+  ║  The DP states are: "shortest path using intermediates {0..k}"    ║
+  ║  When processing k=2, we need ALL pairs' answers for k=1          ║
+  ║  to already be computed.                                          ║
+  ║                                                                   ║
+  ║  If k is innermost, when we check "should I go through k=2?",    ║
+  ║  the dist[i][2] and dist[2][j] values haven't been fully         ║
+  ║  computed for all intermediates yet → WRONG answers.              ║
+  ║                                                                   ║
+  ║  ANALOGY:                                                         ║
+  ║    k outermost = "Let me fully explore ALL paths through          ║
+  ║    node 0 first. Then fully explore ALL paths through {0,1}.     ║
+  ║    Then {0,1,2}. Each step builds on the previous."              ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLETE CODE</h2>
+<h3>Primary Solution: Floyd-Warshall</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">floyd_warshall</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Floyd-Warshall Algorithm — All-Pairs Shortest Path.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Strategy:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      1. Initialize distance matrix from direct edges
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      2. For each intermediate node k (0 to n-1):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">         For each pair (i, j):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">           Check if i→k→j is shorter than current i→j
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">           If yes, update dist[i][j]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Why this works (DP insight):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → After processing k=0: all shortest paths using node 0 as intermediate
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → After processing k=1: all shortest paths using {0,1} as intermediates
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → After processing k=n-1: all shortest paths using ANY node as intermediate
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        = TRUE shortest paths
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Handles:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Directed graphs ✓
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Negative weights ✓ (but NOT negative cycles)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Disconnected pairs (remain INF)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of vertices (0 to n-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [u, v, weight] (directed edges)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        dist: n×n matrix where dist[i][j] = shortest path from i to j
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    INF </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Step 1: Initialize distance matrix ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># dist[i][j] = weight of direct edge, or INF if no direct edge</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>INF</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Distance to self is 0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Fill in direct edges</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> w
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># For undirected: also dist[v][u] = w</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Step 2: Floyd-Warshall — three nested loops ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># k MUST be the outermost loop (DP ordering requirement)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> k </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>          </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># intermediate node</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>      </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># source</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># destination</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Can we improve i→j by going i→k→j?</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">8</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> floyd_warshall</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"All-Pairs Shortest Path Matrix:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"       to:"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"    "</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>join</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">str</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    row </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            row</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">" INF"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            row</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">i</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">j</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">:</span><span class="token string-interpolation interpolation format-spec">4d</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"from </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">i</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: [</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation" style="color: rgb(163, 21, 21);">', '</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">join</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">row</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">]"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>All-Pairs Shortest Path Matrix:
+</span>       to: 0    1    2    3
+from 0: [   0,    3,    5,    6]
+from 1: [   5,    0,    2,    3]
+from 2: [   3,    6,    0,    1]
+from 3: [   2,    5,    7,    0]</code></pre></div>
+<hr>
+<h3>Version 2: With Path Reconstruction</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">floyd_warshall_with_paths</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Floyd-Warshall with PATH RECONSTRUCTION.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    In addition to shortest distances, we can also recover
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    the actual shortest PATH between any two nodes.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Key idea: next_node[i][j] = the next node to visit
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">              when going from i to j along shortest path.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    To reconstruct path i → j:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Start at i
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Next = next_node[i][j]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Next = next_node[next][j]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      ... until we reach j
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    INF </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Distance matrix</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>INF</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Next-hop matrix for path reconstruction</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># next_node[i][j] = first node to visit on shortest path from i to j</span><span>
+</span><span>    next_node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">None</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Initialize</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>        next_node</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> i
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> w
+</span><span>        next_node</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> v   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># direct edge: next hop from u toward v is v itself</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Floyd-Warshall</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> k </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Path from i to j now goes through k</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># So first hop from i toward j = first hop from i toward k</span><span>
+</span><span>                    next_node</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> next_node</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> next_node
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">reconstruct_path</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>next_node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> end</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Reconstruct shortest path from start to end."""</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> next_node</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>end</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">is</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># no path exists</span><span>
+</span>    
+<span>    path </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> start
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> current </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> end</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> next_node</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>end</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        path</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> path
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">8</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> next_node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> floyd_warshall_with_paths</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Query some paths</span><span>
+</span><span>queries </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> start</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> end </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> queries</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    path </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> reconstruct_path</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>next_node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> end</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Shortest </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">start</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">→</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">end</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: distance=</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">start</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">end</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">, path=</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">path</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Shortest 0→3: distance=6, path=[0, 1, 2, 3]
+</span>Shortest 1→0: distance=5, path=[1, 2, 3, 0]
+Shortest 2→1: distance=6, path=[2, 3, 0, 1]
+Shortest 3→2: distance=7, path=[3, 0, 1, 2]</code></pre></div>
+<hr>
+<h3>Version 3: Negative Cycle Detection</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">floyd_warshall_neg_cycle</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Floyd-Warshall with negative cycle detection.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    After running Floyd-Warshall:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → If dist[i][i] &lt; 0 for any node i
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Then there's a negative cycle passing through node i
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Why? dist[i][i] starts at 0 (distance to self).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    If it becomes negative, we found a path from i back to i
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    with negative total weight = negative cycle!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    INF </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>INF</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> w
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Standard Floyd-Warshall</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> k </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> INF </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> INF</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Check for negative cycles</span><span>
+</span><span>    has_negative_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            has_negative_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Negative cycle detected through node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">i</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">!"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> has_negative_cycle
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST with negative cycle ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span>
+</span><span>edges_neg </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Cycle: 0→1→2→0 costs 1 + (-3) + 1 = -1 (NEGATIVE!)</span><span>
+</span>
+<span>dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> has_neg </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> floyd_warshall_neg_cycle</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_neg</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Has negative cycle: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">has_neg</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: Has negative cycle: True</span></code></pre></div>
+<hr>
+<h2>STEP 7: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(V³)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TIME: O(V³)                                                       │
+  │                                                                    │
+  │  WHY:                                                              │
+  │    → Three nested loops, each runs V times                         │
+  │    → k: 0 to V-1  (V iterations)                                  │
+  │    → i: 0 to V-1  (V iterations)                                  │
+  │    → j: 0 to V-1  (V iterations)                                  │
+  │    → Inner operation: one comparison + one addition = O(1)         │
+  │    → Total: V × V × V × O(1) = O(V³)                             │
+  │                                                                    │
+  │  Concrete:                                                         │
+  │    V = 100  → 10⁶ operations → instant                            │
+  │    V = 500  → 1.25 × 10⁸ → ~1 second                             │
+  │    V = 1000 → 10⁹ → ~10 seconds (borderline)                     │
+  │    V = 5000 → 1.25 × 10¹¹ → WAY too slow                        │
+  │                                                                    │
+  │  PRACTICAL LIMIT: V ≤ 400-500 for competitive programming         │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Space Complexity: O(V²)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SPACE: O(V²)                                                      │
+  │                                                                    │
+  │  WHY:                                                              │
+  │    → dist matrix: V × V = O(V²)                                   │
+  │    → next_node matrix (if path reconstruction): V × V = O(V²)     │
+  │    → No other data structures                                     │
+  │    → Total: O(V²)                                                  │
+  │                                                                    │
+  │  Note: We modify dist IN-PLACE (no need for two separate          │
+  │  matrices for "previous k" and "current k")                       │
+  │  This works because dist[i][k] and dist[k][j] for the current    │
+  │  k don't change during the k-th iteration (they're already        │
+  │  optimal for intermediate set {0..k}).                             │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: WHEN TO USE WHICH ALL-PAIRS ALGORITHM</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════════╗
+</span>  ║              ALL-PAIRS SHORTEST PATH — ALGORITHM SELECTION           ║
+  ╠═══════════════════════════════════════════════════════════════════════╣
+  ║                                                                       ║
+  ║  ┌─────────────────┬──────────────┬──────────────┬────────────────┐  ║
+  ║  │  Algorithm       │  Time        │  Neg weights │  Best when     │  ║
+  ║  ├─────────────────┼──────────────┼──────────────┼────────────────┤  ║
+  ║  │  V × BFS         │  O(V²+VE)   │  ❌           │  Unweighted    │  ║
+  ║  │  (Problem 9)     │             │              │  graphs        │  ║
+  ║  ├─────────────────┼──────────────┼──────────────┼────────────────┤  ║
+  ║  │  V × Dijkstra    │  O(VE logV) │  ❌           │  Sparse,       │  ║
+  ║  │  (Problem 23)    │             │              │  non-negative  │  ║
+  ║  ├─────────────────┼──────────────┼──────────────┼────────────────┤  ║
+  ║  │  V × Bellman-Ford│  O(V²E)     │  ✅           │  Neg weights,  │  ║
+  ║  │  (Problem 26)    │             │              │  sparse graph  │  ║
+  ║  ├─────────────────┼──────────────┼──────────────┼────────────────┤  ║
+  ║  │  Floyd-Warshall  │  O(V³)      │  ✅           │  Dense graphs, │  ║
+  ║  │  (THIS problem)  │             │              │  small V,      │  ║
+  ║  │                  │             │              │  neg weights   │  ║
+  ║  └─────────────────┴──────────────┴──────────────┴────────────────┘  ║
+  ║                                                                       ║
+  ║  DECISION PROCESS:                                                    ║
+  ║                                                                       ║
+  ║  1. "Do I need ALL pairs or just single source?"                      ║
+  ║      → Single source: Dijkstra or Bellman-Ford (Problems 23, 26)     ║
+  ║      → All pairs: continue below                                     ║
+  ║                                                                       ║
+  ║  2. "Are there negative weights?"                                     ║
+  ║      → No:  V × Dijkstra might be fastest for sparse graphs          ║
+  ║      → Yes: Floyd-Warshall or V × Bellman-Ford                       ║
+  ║                                                                       ║
+  ║  3. "Is the graph sparse or dense?"                                   ║
+  ║      → Sparse (E ≈ V):                                               ║
+  ║        V × Dijkstra = O(V² log V) &lt; Floyd O(V³)                     ║
+  ║      → Dense (E ≈ V²):                                               ║
+  ║        Floyd O(V³) &lt; V × Dijkstra O(V³ log V)                       ║
+  ║                                                                       ║
+  ║  4. "Is V small (≤ 500)?"                                            ║
+  ║      → Yes: Floyd-Warshall is simplest to code                      ║
+  ║      → No (V &gt; 1000): Floyd too slow, use V × Dijkstra              ║
+  ║                                                                       ║
+  ║  RULE OF THUMB:                                                       ║
+  ║    → V ≤ 500 + need all pairs → FLOYD-WARSHALL (simplest)           ║
+  ║    → V &gt; 500 + no neg weights → V × DIJKSTRA                        ║
+  ║    → V &gt; 500 + neg weights → V × BELLMAN-FORD (or Johnson's)        ║
+  ║                                                                       ║
+  ╚═══════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 9: ADDITIONAL TEST CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 2: Undirected graph ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span>
+</span><span>edges_undirected </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># undirected: add BOTH directions</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">10</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">10</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> floyd_warshall</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_undirected</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># dist[0][2] = 7 (0→1→2 = 4+3) rather than 10 (direct)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"0→2: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">2</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 7</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 3: Disconnected graph ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges_disc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> floyd_warshall</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_disc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"0→2: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">2</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: inf (no path)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"0→1: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">1</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 5</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 4: Negative weights (no negative cycle) ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span>
+</span><span>edges_neg </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">11</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># negative weight!</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> floyd_warshall</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_neg</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"0→2: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">2</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: -1 (0→1→2 = 4 + (-5) = -1)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Direct 0→2 = 11, but through node 1: 4 + (-5) = -1 ← BETTER</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 5: Single node ───</span><span>
+</span><span>dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> floyd_warshall</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"0→0: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 0</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 6: Self-loop ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span>
+</span><span>edges_self </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> has_neg </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> floyd_warshall_neg_cycle</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_self</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Has neg cycle: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">has_neg</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># True (0→0 with weight -1)</span></code></pre></div>
+<hr>
+<h2>STEP 10: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Undirected?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For undirected graphs, each edge [u, v, w] needs to be added
+</span>  in BOTH directions during initialization:
+  
+    dist[u][v] = w
+    dist[v][u] = w
+
+  Rest of algorithm is IDENTICAL.
+  
+  OR add both [u,v,w] and [v,u,w] to the edge list.</code></pre></div>
+<h3>What if Unweighted?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Set all edge weights to 1.
+</span>  Floyd-Warshall works but is OVERKILL.
+  
+  Better: V × BFS = O(V × (V+E))
+    → For sparse: O(V²) &lt; Floyd's O(V³)
+    → For dense: O(V³) = same as Floyd
+    → BFS is simpler for unweighted</code></pre></div>
+<h3>What if Negative Cycles Exist?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Floyd-Warshall can DETECT negative cycles:
+</span>    → After running, check if dist[i][i] &lt; 0 for any i
+    → If yes, negative cycle exists through node i
+  
+  BUT: shortest paths become UNDEFINED in presence of neg cycles
+    → You can keep going around the cycle, making path shorter forever
+    → dist values for nodes affected by the cycle become meaningless
+    → Need special handling (mark affected nodes as -INF)</code></pre></div>
+<h3>What if V is Large (&gt; 1000)?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Floyd-Warshall's O(V³) becomes too slow.
+</span>  
+  Alternatives:
+    → V × Dijkstra: O(VE log V) — better for sparse, non-negative
+    → Johnson's Algorithm: reweight edges to remove negatives,
+      then run V × Dijkstra
+      → O(VE + V² log V) for sparse graphs with negative weights
+      → Advanced topic, not commonly asked in interviews</code></pre></div>
+<hr>
+<h2>STEP 11: REAL-WORLD APPLICATIONS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║  WHERE FLOYD-WARSHALL IS USED                                    ║
+  ╠═══════════════════════════════════════════════════════════════════╣
+  ║                                                                   ║
+  ║  1. ROUTING PROTOCOLS                                             ║
+  ║     → Small networks where ALL routers need to know              ║
+  ║       shortest path to ALL other routers                          ║
+  ║     → RIP (Routing Information Protocol) uses similar ideas      ║
+  ║                                                                   ║
+  ║  2. TRANSITIVE CLOSURE                                            ║
+  ║     → "Can node i reach node j?" for ALL pairs                   ║
+  ║     → Set all weights to 1, use OR instead of +                  ║
+  ║     → reach[i][j] = reach[i][j] OR (reach[i][k] AND reach[k][j])║
+  ║                                                                   ║
+  ║  3. GRAPH DIAMETER                                                ║
+  ║     → Longest shortest path in the graph                         ║
+  ║     → Run Floyd-Warshall, take max of all dist[i][j]            ║
+  ║                                                                   ║
+  ║  4. MINIMUM WEIGHT CYCLE                                          ║
+  ║     → Shortest cycle in a weighted graph                         ║
+  ║     → After Floyd-Warshall: min of dist[i][i] for all i         ║
+  ║       (but need to ensure i→i uses at least one edge)            ║
+  ║                                                                   ║
+  ║  5. INTERVIEW PROBLEMS                                            ║
+  ║     → "Find shortest path between EVERY pair of cities"          ║
+  ║     → "Check if every node can reach every other node"           ║
+  ║     → "Find the minimum cost to convert string A to string B"    ║
+  ║       (where conversions form a graph)                            ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: TRANSITIVE CLOSURE (Bonus Application)</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">transitive_closure</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Can node i reach node j? For ALL pairs.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is Floyd-Warshall with boolean logic:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Instead of min(dist, dist+dist), use OR(reach, reach AND reach)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → reach[i][j] = True if i can reach j through any path
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Time: O(V³)  Space: O(V²)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Initialize reachability matrix</span><span>
+</span><span>    reach </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        reach</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>      </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># every node reaches itself</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        reach</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>      </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># direct edge means reachable</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Floyd-Warshall with OR logic</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> k </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Can i reach j through k?</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> reach</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> reach</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    reach</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> reach
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># chain: 0→1→2→3</span><span>
+</span>
+<span>reach </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> transitive_closure</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"0 can reach 3? </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">reach</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">3</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># True  (0→1→2→3)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"3 can reach 0? </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">reach</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">3</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># False (directed, no back path)</span></code></pre></div>
+<hr>
+<h2>STEP 13: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Wrong loop order (k must be outermost)              ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG:                                                          ║
+  ║    for i in range(n):                                            ║
+  ║        for j in range(n):                                        ║
+  ║            for k in range(n):     ← k innermost = WRONG          ║
+  ║                                                                  ║
+  ║  RIGHT:                                                          ║
+  ║    for k in range(n):             ← k outermost = RIGHT          ║
+  ║        for i in range(n):                                        ║
+  ║            for j in range(n):                                    ║
+  ║                                                                  ║
+  ║  This is THE most common Floyd-Warshall bug.                     ║
+  ║  The DP depends on "all paths through {0..k-1}" being            ║
+  ║  fully computed before we consider node k as intermediate.       ║
+  ║  k outermost guarantees this.                                    ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Integer overflow with INF                            ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  DANGEROUS:                                                      ║
+  ║    dist[i][k] + dist[k][j]                                       ║
+  ║    If both are INF: INF + INF = ??? (overflow in some languages) ║
+  ║                                                                  ║
+  ║  In Python: float('inf') + float('inf') = float('inf') → SAFE    ║
+  ║                                                                  ║
+  ║  In C++/Java with INT_MAX:                                       ║
+  ║    INT_MAX + INT_MAX = OVERFLOW → negative number → BUG!         ║
+  ║                                                                  ║
+  ║  FIX for C++/Java:                                               ║
+  ║    if dist[i][k] != INF and dist[k][j] != INF:                   ║
+  ║        if dist[i][k] + dist[k][j] &lt; dist[i][j]:               ║
+  ║            dist[i][j] = dist[i][k] + dist[k][j]                  ║
+  ║                                                                  ║
+  ║  In Python: not strictly necessary but good practice             ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Forgetting dist[i][i] = 0 initialization             ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If you initialize entire matrix to INF but forget:              ║
+  ║    for i in range(n): dist[i][i] = 0                             ║
+  ║                                                                  ║
+  ║  Then dist[i][i] = INF                                           ║
+  ║  → The relaxation i→k→j when i==j or i==k or k==j                ║
+  ║    will produce wrong results                                    ║
+  ║  → Negative cycle detection breaks (can't check dist[i][i] &lt; 0) ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Duplicate edges (multiple edges between same pair)   ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If input has [0,1,5] AND [0,1,3]:                               ║
+  ║    → During initialization, the LAST one overwrites              ║
+  ║    → dist[0][1] = 3 (the 5 is lost)                              ║
+  ║                                                                  ║
+  ║  FIX: Take the MINIMUM during initialization                     ║
+  ║    for u, v, w in edges:                                         ║
+  ║        dist[u][v] = min(dist[u][v], w)   ← keep cheapest         ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 5: Using Floyd-Warshall when V is too large             ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  V = 10,000 → V³ = 10¹² → IMPOSSIBLE                             ║
+  ║                                                                  ║
+  ║  CHECK V FIRST:                                                  ║
+  ║    V ≤ 400-500 → Floyd-Warshall is fine                          ║
+  ║    V &gt; 500 → consider V × Dijkstra or other approaches        ║
+  ║                                                                  ║
+  ║  Many interview problems with "all pairs" have small V           ║
+  ║  specifically so Floyd-Warshall is the intended solution.        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: No edges at all                                      ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  n = 3, edges = []                                               ║
+  ║  → dist[i][i] = 0 for all i                                      ║
+  ║  → dist[i][j] = INF for all i ≠ j                                ║
+  ║  → No path between any distinct nodes → correct ✓                ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 14: THE BEAUTY OF FLOYD-WARSHALL — Why It's Elegant</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                   ║
+  ║  THE ENTIRE ALGORITHM IS 6 LINES:                                 ║
+  ║                                                                   ║
+  ║    for k in range(n):                                             ║
+  ║        for i in range(n):                                         ║
+  ║            for j in range(n):                                     ║
+  ║                if dist[i][k] + dist[k][j] &lt; dist[i][j]:          ║
+  ║                    dist[i][j] = dist[i][k] + dist[k][j]          ║
+  ║                                                                   ║
+  ║  That's IT. No heaps. No queues. No visited sets.                 ║
+  ║  No adjacency lists. No complex data structures.                  ║
+  ║  Just a 2D array and three nested loops.                          ║
+  ║                                                                   ║
+  ║  COMPARE with getting the same result other ways:                 ║
+  ║                                                                   ║
+  ║    V × Dijkstra: ~20 lines of heap-based code, run V times       ║
+  ║    V × Bellman-Ford: ~15 lines, run V times                      ║
+  ║    Floyd-Warshall: 6 lines, run once                              ║
+  ║                                                                   ║
+  ║  For small V: Floyd-Warshall is the SIMPLEST correct solution.   ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 15: FLOYD-WARSHALL vs EVERYTHING — Complete Decision Tree</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  "I need shortest paths in a graph"                              │
+  │     │                                                            │
+  │     ├─ "From ONE source to all?"                                 │
+  │     │     │                                                      │
+  │     │     ├─ Unweighted? → BFS (Problem 9)                      │
+  │     │     ├─ Non-negative weights? → Dijkstra (Problem 23)      │
+  │     │     ├─ Negative weights? → Bellman-Ford (Problem 26)      │
+  │     │     └─ 0/1 weights? → 0-1 BFS (Problem 39, coming)       │
+  │     │                                                            │
+  │     └─ "From ALL sources to all?" (ALL PAIRS)                   │
+  │           │                                                      │
+  │           ├─ V ≤ 500?                                            │
+  │           │     │                                                │
+  │           │     ├─ Any weights? → Floyd-Warshall O(V³) ★        │
+  │           │     └─ Simplest code wins → Floyd-Warshall ★        │
+  │           │                                                      │
+  │           └─ V &gt; 500?                                            │
+  │                 │                                                │
+  │                 ├─ Non-negative? → V × Dijkstra O(VE log V)     │
+  │                 ├─ Negative? → V × Bellman-Ford O(V²E)          │
+  │                 └─ Negative + sparse? → Johnson's algorithm     │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 16: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TRIGGER WORDS:                                                    │
+  │    "shortest path between ALL pairs"                               │
+  │    "distance between every pair of nodes"                          │
+  │    "can every node reach every other node?"                        │
+  │    "find the diameter of the graph"                                │
+  │    "minimum weight cycle"                                          │
+  │    Small V (≤ 500) with all-pairs query                           │
+  │                                                                    │
+  │  MY THINKING:                                                      │
+  │                                                                    │
+  │  1. "I need ALL pairs of shortest paths"                           │
+  │      → ALL-PAIRS shortest path problem                             │
+  │                                                                    │
+  │  2. "How big is V?"                                                │
+  │      → V ≤ 500: Floyd-Warshall is perfect                        │
+  │      → V &gt; 500: need V × Dijkstra                                │
+  │                                                                    │
+  │  3. "Negative weights?"                                            │
+  │      → Yes: Floyd-Warshall handles them (Dijkstra doesn't)       │
+  │      → No: Floyd still works, just might be slower than V×Dijkstra│
+  │                                                                    │
+  │  4. "Need paths or just distances?"                                │
+  │      → Just distances: basic Floyd-Warshall                       │
+  │      → Need paths: add next_node[][] matrix                       │
+  │                                                                    │
+  │  INTERVIEW DIALOGUE:                                               │
+  │    "This requires all-pairs shortest paths. Since V is small,      │
+  │     I'll use Floyd-Warshall — O(V³) time, O(V²) space.           │
+  │     It's three nested loops with one relaxation step.              │
+  │     The key insight is using intermediate nodes 0 through k,       │
+  │     expanding k one at a time. The outer loop must be k."         │
+  │                                                                    │
+  │  TIME TO CODE: ~3 minutes                                          │
+  │    → 1 min: initialize distance matrix                             │
+  │    → 1 min: three nested loops with relaxation                     │
+  │    → 1 min: handle edge cases (INF, self-loops)                   │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 17: CONNECTION TO PREVIOUS AND FUTURE PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────────┐
+</span>  │  BUILDS ON:                                                         │
+  │                                                                     │
+  │  Problem 2  → Adjacency MATRIX representation                     │
+  │               → Floyd-Warshall works ON the matrix directly        │
+  │               → dist[][] IS the adjacency matrix, modified in-place│
+  │                                                                     │
+  │  Problem 9  → BFS shortest path (unweighted, single source)       │
+  │  Problem 23 → Dijkstra (weighted, single source, non-negative)    │
+  │  Problem 26 → Bellman-Ford (weighted, single source, negative OK) │
+  │               → Floyd-Warshall: ALL sources, negative OK           │
+  │               → Completes the "shortest path family"               │
+  │                                                                     │
+  │  THE SHORTEST PATH EVOLUTION:                                       │
+  │                                                                     │
+  │    P9:  BFS         (unweighted, single source)                    │
+  │    P23: Dijkstra    (weighted, single source, non-negative)        │
+  │    P26: Bellman-Ford (weighted, single source, negative OK)        │
+  │    P33: Floyd-Warshall (weighted, ALL sources, negative OK) ← HERE│
+  │                                                                     │
+  │    Each algorithm EXPANDS the capability:                           │
+  │      unweighted → weighted → negative → all-pairs                 │
+  │                                                                     │
+  │  LEADS TO:                                                          │
+  │                                                                     │
+  │  Problem 34 → Tarjan's algorithm (bridges)                         │
+  │               → Different topic: graph STRUCTURE (not distances)    │
+  │               → "Which edges are critical for connectivity?"       │
+  │               → Uses DFS with discovery time + low values          │
+  │                                                                     │
+  └─────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>The Complete Shortest Path Family</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │              SHORTEST PATH ALGORITHM FAMILY                        │
+  │                                                                    │
+  │  ┌───────────────┐  ┌───────────────┐  ┌───────────────────────┐ │
+  │  │    BFS (P9)    │  │ Dijkstra(P23) │  │ Bellman-Ford (P26)    │ │
+  │  │               │  │               │  │                       │ │
+  │  │ Unweighted    │  │ Weighted      │  │ Weighted              │ │
+  │  │ Single source │  │ Single source │  │ Single source         │ │
+  │  │ O(V+E)        │  │ O(ElogV)      │  │ O(VE)                 │ │
+  │  │ No negatives  │  │ No negatives  │  │ Negatives OK          │ │
+  │  └───────────────┘  └───────────────┘  └───────────────────────┘ │
+  │                                                                    │
+  │  ┌────────────────────────────────────────────────────────────┐   │
+  │  │              Floyd-Warshall (P33)                           │   │
+  │  │                                                            │   │
+  │  │  Weighted, ALL pairs, O(V³), Negatives OK                  │   │
+  │  │  "The ultimate shortest path — but only for small V"       │   │
+  │  └────────────────────────────────────────────────────────────┘   │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 18: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  NEW CONCEPT: DYNAMIC PROGRAMMING ON GRAPHS                        ║
+  ║                                                                    ║
+  ║  Floyd-Warshall is the first algorithm where we see                ║
+  ║  GRAPH + DP combined:                                              ║
+  ║                                                                    ║
+  ║    → Subproblem: shortest path using intermediates {0..k}          ║
+  ║    → Transition: dist[i][j] = min(dist[i][j],                     ║
+  ║                                   dist[i][k] + dist[k][j])        ║
+  ║    → Base case: direct edge weights (k = -1, no intermediates)    ║
+  ║    → Answer: dist[i][j] after considering all intermediates       ║
+  ║                                                                    ║
+  ║  THE ALGORITHM IN ONE SENTENCE:                                    ║
+  ║    "For each possible intermediate node k, check if routing        ║
+  ║     through k improves any pair's shortest path."                  ║
+  ║                                                                    ║
+  ║  REMEMBER:                                                         ║
+  ║    → k MUST be outermost loop (DP ordering)                       ║
+  ║    → O(V³) time, O(V²) space                                      ║
+  ║    → Works with negative weights (not negative cycles)            ║
+  ║    → Best for small V (≤ 500) + all-pairs queries                 ║
+  ║    → Simplest all-pairs algorithm (6 lines of core logic)         ║
+  ║                                                                    ║
+  ║  GRAPH + DP BRIDGE:                                                ║
+  ║    This pattern returns in:                                        ║
+  ║      → Problem 46: Tree DP (DFS + DP on trees)                   ║
+  ║      → Problem 47: Graph DP (Topo sort + DP on DAGs)             ║
+  ║    Floyd-Warshall is the first taste of this powerful combo.      ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CLEAN INTERVIEW VERSION</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">floyd_warshall</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    All-pairs shortest path. O(V³) time, O(V²) space.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Handles negative weights (not negative cycles).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    INF </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Initialize distance matrix</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>INF</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># handle duplicate edges</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Floyd-Warshall: k MUST be outermost</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> k </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>k</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span></code></pre></div>
+<hr>
+<h2>QUICK REFERENCE CARD</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────┐
+</span>  │  FLOYD-WARSHALL TEMPLATE                                  │
+  │                                                            │
+  │  # Initialize                                              │
+  │  dist = [[INF]*n for _ in range(n)]                        │
+  │  for i in range(n): dist[i][i] = 0                        │
+  │  for u, v, w in edges: dist[u][v] = w                     │
+  │                                                            │
+  │  # Core algorithm (k outermost!)                           │
+  │  for k in range(n):                                        │
+  │      for i in range(n):                                    │
+  │          for j in range(n):                                │
+  │              dist[i][j] = min(dist[i][j],                  │
+  │                              dist[i][k] + dist[k][j])     │
+  │                                                            │
+  │  # Query                                                   │
+  │  shortest_path_i_to_j = dist[i][j]                        │
+  │                                                            │
+  │  # Negative cycle check                                    │
+  │  if any(dist[i][i] &lt; 0 for i in range(n)):                │
+  │      print("Negative cycle exists!")                       │
+  │                                                            │
+  │  Time: O(V³)    Space: O(V²)    V ≤ 500                   │
+  └──────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<p><strong>Problem 33 Complete.</strong><br>
+<strong>Ready for Problem 34: Find Bridges in Graph (Tarjan's Algorithm)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="21" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-32.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 33 of 50</span>
+            </div>
+            <a href="problem-34.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

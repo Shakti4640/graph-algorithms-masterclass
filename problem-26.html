@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 26: Problem 26: Bellman-Ford Algorithm (Negative Weight Handling) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="29">
+<div class="px-2"><h1>Problem 26: Bellman-Ford Algorithm (Negative Weight Handling)</h1>
+<h2>[Algorithm Family: Bellman-Ford — Single Source Shortest Path with Negative Weights]</h2>
+<h2>[Phase 3: Standard Interview — "I can solve real interview problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are managing a financial trading network.
+</span>
+There are N currencies (numbered 0 to N-1) and a list of
+exchange rates between them.
+
+Each exchange [u, v, w] means:
+  → Converting from currency u to currency v has a cost of w
+  → w can be POSITIVE (you pay a fee)
+  → w can be NEGATIVE (you GAIN money — arbitrage!)
+
+Given a source currency, find the CHEAPEST conversion cost
+to reach every other currency.
+
+ALSO detect if there's a "negative cycle" — a loop where you
+can keep converting and gain unlimited money (arbitrage loop).
+
+Input:
+  n = 5
+  edges = [[0,1,6], [0,2,7], [1,2,8], [1,3,5], [1,4,-4],
+           [2,3,-3], [2,4,9], [3,0,2], [4,3,7]]
+  source = 0
+
+Output:
+  Shortest distances from source 0:
+    0 → 0: 0
+    0 → 1: 6
+    0 → 2: 7
+    0 → 3: 4   (path: 0→2→3, cost 7+(-3)=4)
+    0 → 4: 2   (path: 0→1→4, cost 6+(-4)=2)
+  
+  No negative cycle detected.</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph with Negative Weights</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  edges = [[0,1,6], [0,2,7], [1,2,8], [1,3,5], [1,4,-4],
+</span>           [2,3,-3], [2,4,9], [3,0,2], [4,3,7]]
+
+  THE WEIGHTED DIRECTED GRAPH:
+
+            6              -4
+    0 ──────────→ 1 ──────────→ 4
+    │  ↑          │ \            │
+    │  │2         │8 \5          │7
+    │  │          ↓   ↓          ↓
+    7  └───────── 2    3 ←───────┘
+                  │  ↑
+                  │  │
+               -3 │  │  (also 2→4 with weight 9)
+                  ↓  │
+                  3──┘ (wait, that's 2→3, not 3→3)
+
+  Let me redraw more carefully:
+
+    0 ──6──→ 1 ──(-4)──→ 4
+    │  ↑     │ \          │
+    7  2     8  5         7
+    ↓  │     ↓   ↓        ↓
+    2 ─┘     2   3 ←──────┘
+    │(-3)         ↑
+    ↓             │
+    3 ────────────┘ (wait, 3→0 with weight 2)
+
+  CLEAN ADJACENCY LIST:
+    0 → [(1, 6), (2, 7)]
+    1 → [(2, 8), (3, 5), (4, -4)]
+    2 → [(3, -3), (4, 9)]
+    3 → [(0, 2)]
+    4 → [(3, 7)]
+
+  FINAL ASCII:
+  
+          6          -4
+    0 ────────→ 1 ────────→ 4
+    │↖          │↘           │
+    │ 2         │8  5        │7
+    7  \        ↓    ↓       ↓
+    │   └────── 2    3 ←─────┘
+    ↓          ↙
+    2 ──(-3)──→ 3
+         │
+         9
+         ↓
+         4 (also edge 2→4 with weight 9)</code></pre></div>
+<h3>Spotting the Negative Edges</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  POSITIVE edges: 0→1(6), 0→2(7), 1→2(8), 1→3(5), 2→4(9), 3→0(2), 4→3(7)
+</span>  NEGATIVE edges: 1→4(-4), 2→3(-3)  ★
+  
+  Negative edges mean:
+    1→4 costs -4: converting currency 1 to 4 EARNS you 4 units
+    2→3 costs -3: converting currency 2 to 3 EARNS you 3 units
+    
+  These negative edges are WHY Dijkstra fails.</code></pre></div>
+<h3>Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer             │  Why?                        ║
+╠══════════════════╪═════════════════════╪══════════════════════════════╣
+║  NODES           │  Currencies 0-4     │  Each currency = node        ║
+║  EDGES           │  Exchange rates     │  Directed, weighted          ║
+║  Directed?       │  YES                │  Exchange is one-directional ║
+║  Weighted?       │  YES                │  Each exchange has a cost    ║
+║  NEGATIVE weights│  YES! ★             │  Some exchanges earn money   ║
+║  Cyclic?         │  YES                │  0→2→3→0 is a cycle         ║
+║  Negative cycle? │  Need to check      │  If cycle has net negative   ║
+║                  │                     │  cost → infinite arbitrage   ║
+║  What we need    │  Shortest paths +   │  Handle negatives +          ║
+║                  │  negative cycle det │  detect infinite loops       ║
+╚══════════════════╧═════════════════════╧══════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 2: WHY DIJKSTRA FAILS WITH NEGATIVE WEIGHTS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  DIJKSTRA'S GREEDY GUARANTEE (from Problem 23):                  │
+  │  "When we pop node X from heap, its distance is FINAL."          │
+  │                                                                  │
+  │  WHY? Any alternative path goes through unprocessed nodes        │
+  │  with distance ≥ X's distance. Adding non-negative weights       │
+  │  only makes it worse. So X can't be improved.                    │
+  │                                                                  │
+  │  WITH NEGATIVE WEIGHTS — THIS BREAKS:                            │
+  │                                                                  │
+  │  Example:                                                        │
+  │    0 ──1──→ 1                                                    │
+  │    0 ──5──→ 2 ──(-10)──→ 1                                      │
+  │                                                                  │
+  │  Dijkstra:                                                       │
+  │    Pop (1, node 1): dist[1] = 1 → FINALIZED!                    │
+  │    Pop (5, node 2): dist[2] = 5                                  │
+  │      Relax 2→1: 5 + (-10) = -5 &lt; dist[1] = 1                   │
+  │      → dist[1] should be -5, but already finalized!             │
+  │      → Dijkstra MISSES the shorter path!                         │
+  │                                                                  │
+  │  Correct answer: dist[1] = -5 (via 0→2→1)                       │
+  │  Dijkstra answer: dist[1] = 1 (via 0→1) ← WRONG!               │
+  │                                                                  │
+  │  THE ROOT CAUSE:                                                 │
+  │  An unprocessed node with HIGHER distance can lead to a          │
+  │  LOWER distance via a negative edge. Dijkstra's assumption       │
+  │  that "higher distance = can't improve" is WRONG.                │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>What About Negative CYCLES?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  A negative cycle is a cycle whose total edge weight is NEGATIVE.
+</span>  
+  Example:
+    A ──1──→ B ──(-3)──→ C ──1──→ A
+    Cycle cost: 1 + (-3) + 1 = -1
+    
+    Going around: A→B→C→A costs -1 (you GAIN 1)
+    Going twice:  A→B→C→A→B→C→A costs -2
+    Going N times: costs -N
+    
+    → You can reduce cost INFINITELY by looping!
+    → "Shortest path" is -∞ (undefined!)
+    
+  In the real world: this is ARBITRAGE.
+    Convert USD→EUR→GBP→USD and end up with MORE money.
+    Repeat infinitely = infinite money (until the market corrects).
+    
+  Bellman-Ford can DETECT negative cycles.
+  Dijkstra cannot.</code></pre></div>
+<hr>
+<h2>STEP 3: THE BELLMAN-FORD IDEA</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  BELLMAN-FORD ALGORITHM:                                         │
+  │                                                                  │
+  │  1. Initialize dist[source] = 0, dist[all others] = ∞           │
+  │  2. Repeat V-1 times:                                            │
+  │     → For EVERY edge (u, v, w):                                  │
+  │       → If dist[u] + w &lt; dist[v]:                                │
+  │         → dist[v] = dist[u] + w   (RELAX the edge)              │
+  │  3. (Optional) V-th iteration to detect negative cycles:         │
+  │     → For every edge (u, v, w):                                  │
+  │       → If dist[u] + w &lt; dist[v]:                                │
+  │         → NEGATIVE CYCLE EXISTS!                                 │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘
+  
+  COMPARISON WITH DIJKSTRA:
+  
+  ┌─────────────────────────────┬─────────────────────────────────┐
+  │  Dijkstra (Problem 23)      │  Bellman-Ford (this problem)    │
+  ├─────────────────────────────┼─────────────────────────────────┤
+  │  Relax neighbors of CHEAPEST│  Relax ALL edges every          │
+  │  unprocessed node           │  iteration                      │
+  │                             │                                 │
+  │  Process each node ONCE     │  Process all edges V-1 times    │
+  │  (greedy finalization)      │  (no finalization until done)   │
+  │                             │                                 │
+  │  Uses priority queue (heap) │  Uses simple edge list          │
+  │  O((V+E) log V)            │  O(V × E)                      │
+  │                             │                                 │
+  │  Non-negative weights ONLY  │  ANY weights (including neg)    │
+  │  Can't detect neg cycles    │  CAN detect neg cycles          │
+  └─────────────────────────────┴─────────────────────────────────┘</code></pre></div>
+<h3>WHY V-1 Iterations?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  CLAIM: V-1 iterations are sufficient for correct shortest paths.│
+  │                                                                  │
+  │  WHY?                                                            │
+  │                                                                  │
+  │  The shortest path from source to any node uses at most          │
+  │  V-1 edges (in a graph with V nodes, a simple path visits       │
+  │  at most V nodes = V-1 edges).                                   │
+  │                                                                  │
+  │  After iteration i: dist[] has correct shortest paths using      │
+  │  at most i edges.                                                │
+  │                                                                  │
+  │  Proof by induction:                                             │
+  │    Iteration 1: paths with ≤ 1 edge → correct (direct edges)    │
+  │    Iteration 2: paths with ≤ 2 edges → correct                  │
+  │      (extends 1-edge paths by 1 more edge)                       │
+  │    ...                                                           │
+  │    Iteration V-1: paths with ≤ V-1 edges → correct              │
+  │      (ALL possible simple paths)                                 │
+  │                                                                  │
+  │  EXACTLY the same principle used in Problem 25!                  │
+  │  Problem 25: K+1 iterations for K stops                          │
+  │  Problem 26: V-1 iterations for unlimited stops (full solution)  │
+  │                                                                  │
+  │  ─────────────────────────────────────────────────────────       │
+  │                                                                  │
+  │  WHY the V-th iteration detects negative cycles:                 │
+  │                                                                  │
+  │  If after V-1 iterations (which finds ALL shortest simple paths),│
+  │  we can STILL improve some distance in iteration V:              │
+  │  → That improvement uses a path with V+ edges                    │
+  │  → A path with V+ edges in a V-node graph must revisit a node   │
+  │  → Revisiting a node = using a cycle                             │
+  │  → The cycle must be negative (otherwise no improvement)         │
+  │  → NEGATIVE CYCLE EXISTS!                                        │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Connection to Problem 25</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 25: Bellman-Ford with K+1 iterations (LIMITED)
+</span>    → "At most K stops = K+1 edges"
+    → Run K+1 iterations, use dist[dst]
+    → MUST copy dist[] each iteration (to enforce edge count)
+    
+  Problem 26: Bellman-Ford with V-1 iterations (FULL)
+    → "No edge limit, just find shortest paths"
+    → Run V-1 iterations
+    → DON'T need to copy dist[] (no edge count constraint!)
+    → Then V-th iteration for negative cycle detection
+    
+  ★ KEY DIFFERENCE: The COPY from Problem 25 is NOT needed here!
+  
+  WHY?
+    Problem 25: copying prevents "chaining" → enforces edge limit
+    Problem 26: chaining is FINE — we want the shortest path
+                regardless of how many edges (up to V-1)
+                Chaining actually makes convergence FASTER
+                
+  In fact, standard Bellman-Ford does NOT copy.
+  Problem 25's copy was a special modification for the K-constraint.</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — Step by Step</h2>
+<h3>Setup</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  n = 5, source = 0
+</span>  edges = [[0,1,6], [0,2,7], [1,2,8], [1,3,5], [1,4,-4],
+           [2,3,-3], [2,4,9], [3,0,2], [4,3,7]]
+  
+  dist = [0, ∞, ∞, ∞, ∞]
+  
+  Need V-1 = 4 iterations</code></pre></div>
+<h3>Iteration-by-Iteration Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ══════════════════════════════════════════════════════════
+</span>  ITERATION 1: Relax ALL 9 edges
+  ══════════════════════════════════════════════════════════
+  
+  dist = [0, ∞, ∞, ∞, ∞]
+  
+  Edge [0,1,6]:  dist[0]+6 = 6 &lt; dist[1]=∞    → dist[1] = 6     ★
+  Edge [0,2,7]:  dist[0]+7 = 7 &lt; dist[2]=∞    → dist[2] = 7     ★
+  Edge [1,2,8]:  dist[1]+8 = 6+8 = 14 &gt; dist[2]=7 → no update
+  Edge [1,3,5]:  dist[1]+5 = 6+5 = 11 &lt; dist[3]=∞ → dist[3]=11  ★
+  Edge [1,4,-4]: dist[1]+(-4) = 6-4 = 2 &lt; dist[4]=∞ → dist[4]=2 ★
+  Edge [2,3,-3]: dist[2]+(-3) = 7-3 = 4 &lt; dist[3]=11 → dist[3]=4 ★
+  Edge [2,4,9]:  dist[2]+9 = 7+9 = 16 &gt; dist[4]=2 → no update
+  Edge [3,0,2]:  dist[3]+2 = 4+2 = 6 &gt; dist[0]=0 → no update
+  Edge [4,3,7]:  dist[4]+7 = 2+7 = 9 &gt; dist[3]=4 → no update
+  
+  After iteration 1:
+    dist = [0, 6, 7, 4, 2]
+    
+    NOTE: We found multi-edge paths in ONE iteration!
+    (e.g., 0→1→4 cost 2 was found because dist[1]=6 was updated
+     before processing edge 1→4 in the SAME iteration)
+    This "chaining" is fine in standard Bellman-Ford (no K constraint).
+  
+  ══════════════════════════════════════════════════════════
+  ITERATION 2: Relax ALL 9 edges
+  ══════════════════════════════════════════════════════════
+  
+  dist = [0, 6, 7, 4, 2]
+  
+  Edge [0,1,6]:  dist[0]+6 = 6 = dist[1]=6    → no update
+  Edge [0,2,7]:  dist[0]+7 = 7 = dist[2]=7    → no update
+  Edge [1,2,8]:  6+8 = 14 &gt; 7                  → no update
+  Edge [1,3,5]:  6+5 = 11 &gt; 4                  → no update
+  Edge [1,4,-4]: 6-4 = 2 = dist[4]=2           → no update
+  Edge [2,3,-3]: 7-3 = 4 = dist[3]=4           → no update
+  Edge [2,4,9]:  7+9 = 16 &gt; 2                  → no update
+  Edge [3,0,2]:  4+2 = 6 &gt; 0                   → no update
+  Edge [4,3,7]:  2+7 = 9 &gt; 4                   → no update
+  
+  After iteration 2:
+    dist = [0, 6, 7, 4, 2]  ← NO CHANGES!
+    
+  ══════════════════════════════════════════════════════════
+  ITERATIONS 3 and 4: Same — no changes
+  ══════════════════════════════════════════════════════════
+  
+  When no updates happen in an iteration, the algorithm has CONVERGED.
+  Remaining iterations won't change anything.
+  (This is an optimization opportunity — early termination!)
+  
+  ══════════════════════════════════════════════════════════
+  NEGATIVE CYCLE CHECK (V-th iteration = iteration 5)
+  ══════════════════════════════════════════════════════════
+  
+  Try relaxing ALL edges one more time:
+  
+  Edge [0,1,6]:  0+6 = 6 = dist[1]  → no improvement
+  Edge [0,2,7]:  0+7 = 7 = dist[2]  → no improvement
+  Edge [1,2,8]:  6+8 = 14 &gt; 7       → no improvement
+  Edge [1,3,5]:  6+5 = 11 &gt; 4       → no improvement
+  Edge [1,4,-4]: 6-4 = 2 = dist[4]  → no improvement
+  Edge [2,3,-3]: 7-3 = 4 = dist[3]  → no improvement
+  Edge [2,4,9]:  7+9 = 16 &gt; 2       → no improvement
+  Edge [3,0,2]:  4+2 = 6 &gt; 0        → no improvement
+  Edge [4,3,7]:  2+7 = 9 &gt; 4        → no improvement
+  
+  NO improvements in V-th iteration → NO NEGATIVE CYCLE! ✓
+  
+  ══════════════════════════════════════════════════════════
+  FINAL ANSWER
+  ══════════════════════════════════════════════════════════
+  
+  dist = [0, 6, 7, 4, 2]
+  
+  0 → 0: 0
+  0 → 1: 6   (path: 0→1)
+  0 → 2: 7   (path: 0→2)
+  0 → 3: 4   (path: 0→2→3, cost 7+(-3)=4)
+  0 → 4: 2   (path: 0→1→4, cost 6+(-4)=2)
+  
+  Check cycle 0→2→3→0: cost = 7+(-3)+2 = 6 &gt; 0 → NOT negative cycle ✓</code></pre></div>
+<h3>Trace: Graph WITH Negative Cycle</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Example with negative cycle:
+</span>  
+  n = 3
+  edges = [[0,1,1], [1,2,-3], [2,0,1]]
+  source = 0
+  
+  Cycle: 0→1→2→0, cost = 1+(-3)+1 = -1 (NEGATIVE!)
+  
+  Graph:
+    0 ──1──→ 1 ──(-3)──→ 2 ──1──→ 0
+    
+  ══════════════════════════════════════════════════════════
+  ITERATION 1:
+  ══════════════════════════════════════════════════════════
+  
+  dist = [0, ∞, ∞]
+  
+  Edge [0,1,1]:  0+1 = 1 &lt; ∞   → dist[1] = 1
+  Edge [1,2,-3]: 1-3 = -2 &lt; ∞  → dist[2] = -2
+  Edge [2,0,1]:  -2+1 = -1 &lt; 0 → dist[0] = -1  ★ source got cheaper!
+  
+  dist = [-1, 1, -2]
+  
+  ══════════════════════════════════════════════════════════
+  ITERATION 2 (V-1 = 2):
+  ══════════════════════════════════════════════════════════
+  
+  Edge [0,1,1]:  -1+1 = 0 &lt; dist[1]=1  → dist[1] = 0
+  Edge [1,2,-3]: 0-3 = -3 &lt; dist[2]=-2 → dist[2] = -3
+  Edge [2,0,1]:  -3+1 = -2 &lt; dist[0]=-1 → dist[0] = -2
+  
+  dist = [-2, 0, -3]
+  
+  Distances keep DECREASING! Each iteration around the cycle
+  reduces cost by 1 (the cycle's net weight).
+  
+  ══════════════════════════════════════════════════════════
+  NEGATIVE CYCLE CHECK (V-th iteration = 3):
+  ══════════════════════════════════════════════════════════
+  
+  Edge [0,1,1]:  -2+1 = -1 &lt; dist[1]=0  → STILL IMPROVING!
+  
+  ★★★ NEGATIVE CYCLE DETECTED! ★★★
+  
+  If distances can STILL be improved after V-1 iterations,
+  there must be a negative cycle that allows infinite improvement.
+  
+  Result: "Negative cycle exists — shortest paths are undefined"</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: Standard Bellman-Ford</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bellman_ford</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Bellman-Ford Algorithm: shortest path with negative weight handling.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    WHEN TO USE (not Dijkstra):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Graph has NEGATIVE edge weights
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Need to DETECT negative cycles
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Don't mind O(V×E) vs Dijkstra's O((V+E)logV)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    HOW IT WORKS:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Relax ALL edges, V-1 times
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → After i iterations: correct shortest paths using ≤ i edges
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → After V-1 iterations: all shortest paths found (if no neg cycle)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → V-th iteration: if any edge still relaxable → negative cycle!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of nodes (0 to n-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [u, v, w] directed weighted edges (w can be negative)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        source: starting node
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        (dist, has_negative_cycle):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">          dist[i] = shortest distance from source to i (or -inf if affected by neg cycle)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">          has_negative_cycle = True if negative cycle is reachable from source
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── INITIALIZE ───</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── V-1 ITERATIONS: Relax all edges ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        updated </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># optimization: early termination</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Can only relax if source node is reachable</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w
+</span><span>                updated </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ OPTIMIZATION: If no updates this iteration, we've converged</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># All future iterations will also have no updates → stop early</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> updated</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">break</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── NEGATIVE CYCLE DETECTION: V-th iteration ───</span><span>
+</span><span>    has_negative_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            has_negative_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">break</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> has_negative_cycle
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 1: No negative cycle ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">8</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>         </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">9</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> bellman_ford</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Test 1 (no neg cycle):"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Distances: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Negative cycle: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">neg_cycle</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Distances: [0, 6, 7, 4, 2], Negative cycle: False</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 2: With negative cycle ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> bellman_ford</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"\nTest 2 (neg cycle):"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Distances: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Negative cycle: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">neg_cycle</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Negative cycle: True</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 3: Negative edges but no negative cycle ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">10</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> bellman_ford</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"\nTest 3 (neg edges, no neg cycle):"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Distances: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Negative cycle: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">neg_cycle</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Distances: [0, 1, 0, 2], Negative cycle: False</span></code></pre></div>
+<hr>
+<h3>Version 2: With Path Reconstruction</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bellman_ford_with_path</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Bellman-Ford with parent tracking for path reconstruction.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same technique as Dijkstra path reconstruction (Problem 23 Version 2).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># V-1 iterations</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        updated </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w
+</span><span>                parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> u          </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ track where we came from</span><span>
+</span><span>                updated </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> updated</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">break</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Negative cycle check</span><span>
+</span><span>    has_negative_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            has_negative_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">break</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Path reconstruction</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">get_path</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>target</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>target</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        path </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> target
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> node </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            path</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        path</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>reverse</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> path
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> has_negative_cycle</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> get_path
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">8</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>         </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">9</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neg_cycle</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> get_path </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> bellman_ford_with_path</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    path </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> get_path</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  0 → </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">i</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: distance = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">i</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">, path = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">path</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  0 → 0: distance = 0, path = [0]
+</span>  0 → 1: distance = 6, path = [0, 1]
+  0 → 2: distance = 7, path = [0, 2]
+  0 → 3: distance = 4, path = [0, 2, 3]
+  0 → 4: distance = 2, path = [0, 1, 4]</code></pre></div>
+<hr>
+<h3>Version 3: Identifying Nodes Affected by Negative Cycle</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bellman_ford_full</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Full Bellman-Ford that identifies WHICH nodes are affected
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    by negative cycles.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    A node is "affected" if it's reachable from a negative cycle.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Its shortest path is -∞ (can be made arbitrarily small).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># V-1 iterations</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># V-th iteration: find nodes that can STILL be improved</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># These nodes are on or reachable from a negative cycle</span><span>
+</span><span>    affected </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            affected</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Propagate: nodes reachable FROM affected nodes are also affected</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Run additional iterations to propagate</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> affected</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                affected</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> affected
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Cycle 0→1→2→0 has cost 1+(-3)+1 = -1 (negative!)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Nodes 0,1,2 are in the cycle → affected</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Node 3 is reachable from node 0 (affected) → also affected</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Node 4 is reachable from node 3 (affected) → also affected</span><span>
+</span>
+<span>dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> affected </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> bellman_ford_full</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Distances:"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Affected by neg cycle:"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> affected</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># All nodes affected because cycle is reachable from source</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># and all other nodes are reachable from cycle</span></code></pre></div>
+<hr>
+<h3>Version 4: Clean Interview Version</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bellman_ford_clean</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Clean, minimal Bellman-Ford for interviews.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns distances and whether negative cycle exists.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Negative cycle check</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># negative cycle exists</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span></code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(V × E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │                                                                 │
+  │  OUTER LOOP: V-1 iterations                        → O(V)      │
+  │  INNER LOOP: relax ALL E edges each iteration      → O(E)      │
+  │  EACH RELAXATION: O(1) comparison and update                    │
+  │                                                                 │
+  │  TOTAL: O(V × E)                                               │
+  │                                                                 │
+  │  NEGATIVE CYCLE CHECK: O(E) (one more pass through all edges)   │
+  │                                                                 │
+  │  GRAND TOTAL: O(V × E) + O(E) = O(V × E)                     │
+  │                                                                 │
+  │  WITH EARLY TERMINATION:                                        │
+  │    → Best case: O(E) if converges in 1 iteration               │
+  │    → Worst case: still O(V × E)                                │
+  │    → Average: depends on graph structure                        │
+  │                                                                 │
+  └─────────────────────────────────────────────────────────────────┘
+  
+  COMPARISON WITH DIJKSTRA:
+  
+    Dijkstra:     O((V + E) log V)  ← faster but no negative weights
+    Bellman-Ford: O(V × E)          ← slower but handles negatives
+    
+    For sparse graphs (E ≈ V):
+      Dijkstra: O(V log V)
+      BF: O(V²)
+      → Dijkstra ~log V times faster
+    
+    For dense graphs (E ≈ V²):
+      Dijkstra: O(V² log V)
+      BF: O(V³)
+      → Dijkstra ~log V times faster
+    
+    BF is always slower, but it's the ONLY option for negative weights.</code></pre></div>
+<h3>Space Complexity: O(V)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  dist array:    O(V)                                           │
+  │  parent array:  O(V) (if path reconstruction needed)           │
+  │                                                                 │
+  │  TOTAL: O(V)                                                   │
+  │                                                                 │
+  │  NOTE: Bellman-Ford uses EDGE LIST directly.                    │
+  │  No adjacency list needed! The input edges IS the data structure.│
+  │  This is simpler than Dijkstra which needs an adjacency list.   │
+  │                                                                 │
+  │  Compare: Dijkstra O(V + E) space (adjacency list + heap)      │
+  │           BF: O(V) space (just dist array!)                    │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 7: HOW THIS CONNECTS TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Problem 9 (BFS Shortest Path):                                  │
+  │    → BFS: process nearest first, all weights = 1                 │
+  │    → BF: process ALL edges, handles any weights                  │
+  │    → BFS is fastest for unweighted, BF is most general           │
+  │                                                                  │
+  │  Problem 23 (Dijkstra):                                          │
+  │    → Dijkstra: greedy, process cheapest, non-negative only       │
+  │    → BF: no greedy, relax everything, any weights                │
+  │    → Dijkstra is faster, BF is more general                      │
+  │                                                                  │
+  │  Problem 25 (Cheapest Flights K Stops):                          │
+  │    → Used LIMITED Bellman-Ford (K+1 iterations)                  │
+  │    → WITH dist copy (to enforce edge count)                      │
+  │    → Problem 26 uses FULL Bellman-Ford (V-1 iterations)          │
+  │    → WITHOUT copy (no edge count constraint)                     │
+  │    → Problem 25 was a PREVIEW of this algorithm!                 │
+  │                                                                  │
+  │  EVOLUTION OF SHORTEST PATH ALGORITHMS:                          │
+  │                                                                  │
+  │    BFS (Prob 9)     → unweighted       → O(V+E)                 │
+  │    Dijkstra (Prob 23)→ non-negative    → O((V+E)logV)           │
+  │    Bellman-Ford (26) → any weights     → O(V×E)                 │
+  │    Floyd-Warshall(33)→ all pairs       → O(V³)                  │
+  │                                                                  │
+  │    Each handles progressively harder constraints                 │
+  │    Each is progressively slower                                  │
+  │    Use the SIMPLEST algorithm that handles your constraints!     │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: WHEN TO USE BELLMAN-FORD VS ALTERNATIVES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────┬──────────────────────────────────────┐
+</span>  │  Algorithm                   │  When to use                         │
+  ├──────────────────────────────┼──────────────────────────────────────┤
+  │  BFS (Problem 9)             │  All weights = 1 (unweighted)        │
+  │                              │  → Fastest: O(V+E)                   │
+  │                              │                                      │
+  │  Dijkstra (Problem 23)       │  All weights ≥ 0                     │
+  │                              │  → Fast: O((V+E)logV)               │
+  │                              │  → DEFAULT for weighted shortest path│
+  │                              │                                      │
+  │  Bellman-Ford (Problem 26)   │  ★ Negative weights present          │
+  │                              │  ★ Need negative cycle detection     │
+  │                              │  ★ Constrained paths (K edges)       │
+  │                              │  → Slower: O(V×E) but more general   │
+  │                              │                                      │
+  │  Floyd-Warshall (Problem 33) │  Need ALL pairs shortest path        │
+  │                              │  → O(V³) but solves all pairs at once│
+  └──────────────────────────────┴──────────────────────────────────────┘
+  
+  DECISION TREE:
+  
+  "I need shortest path..."
+    → Are there negative weights?
+      → YES: Are there negative cycles?
+        → NEED TO CHECK: Bellman-Ford ★
+        → KNOWN NO: Bellman-Ford (or Dijkstra on reweighted graph)
+      → NO: Is graph unweighted?
+        → YES: BFS
+        → NO: Dijkstra
+    → Do I need all pairs?
+      → YES: Floyd-Warshall (or run Dijkstra/BF from every source)</code></pre></div>
+<hr>
+<h2>STEP 9: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Undirected with Negative Weights?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  DANGER: An undirected edge with negative weight = instant negative cycle!
+</span>  
+  Edge A—B with weight -5:
+    → A→B costs -5
+    → B→A costs -5
+    → Cycle A→B→A costs -10 → NEGATIVE CYCLE!
+    
+  ANY undirected negative edge creates a negative cycle.
+  → Bellman-Ford will always detect a negative cycle.
+  → Shortest paths are undefined.
+  
+  In practice: undirected graphs with negative weights are rare.
+  Negative weights usually appear in DIRECTED graphs only.</code></pre></div>
+<h3>What if All Weights Are Non-Negative?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Bellman-Ford still works correctly!
+</span>  → But Dijkstra is FASTER: O((V+E)logV) vs O(V×E)
+  → Use Dijkstra when all weights ≥ 0
+  → Use Bellman-Ford ONLY when negative weights exist
+  
+  INTERVIEW TIP: Always state "Since all weights are non-negative,
+  I'll use Dijkstra for better performance" (shows awareness).</code></pre></div>
+<h3>What if We Only Need Distance to ONE Target?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Bellman-Ford computes distances to ALL nodes (no early exit)
+</span>  → Unlike Dijkstra, can't efficiently stop at one target
+  → Must run all V-1 iterations regardless
+  → For single-target with non-negative weights: Dijkstra with early exit
+  → For single-target with negative weights: Bellman-Ford (full V-1 iterations)</code></pre></div>
+<h3>What if the Graph Is Very Dense (E ≈ V²)?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Bellman-Ford: O(V × E) = O(V × V²) = O(V³)
+</span>  → Same as Floyd-Warshall!
+  → If you need all pairs: use Floyd-Warshall (same time, simpler)
+  → If you need single source: Bellman-Ford still fine at O(V³)</code></pre></div>
+<hr>
+<h2>STEP 10: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Using Dijkstra when negative weights exist           ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  ALWAYS check: "Can edge weights be negative?"                   ║
+  ║  If YES → Dijkstra gives WRONG answers → use Bellman-Ford       ║
+  ║  If NO  → Dijkstra is preferred (faster)                        ║
+  ║                                                                  ║
+  ║  In interviews: ask "Are all weights non-negative?" if unclear   ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Confusing Problem 25 copy with Problem 26            ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Problem 25: MUST copy dist[] each iteration                     ║
+  ║    → Enforces "at most K edges" constraint                       ║
+  ║    → Without copy: chaining finds longer paths → WRONG           ║
+  ║                                                                  ║
+  ║  Problem 26: do NOT need to copy dist[]                          ║
+  ║    → No edge count constraint                                    ║
+  ║    → Chaining is fine and actually helps converge faster          ║
+  ║    → Copying would still be correct but slower                   ║
+  ║                                                                  ║
+  ║  SUMMARY:                                                        ║
+  ║    Constrained (K edges): copy dist[]                            ║
+  ║    Unconstrained (full BF): don't copy (or optionally copy)     ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Relaxing from unreachable nodes                      ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If dist[u] = infinity:                                          ║
+  ║    dist[u] + w = infinity (in Python: float('inf') + w = inf)    ║
+  ║    This won't improve dist[v], so it's harmless.                 ║
+  ║                                                                  ║
+  ║  BUT in some languages, infinity + negative = undefined behavior ║
+  ║  SAFE: add check "if dist[u] != float('inf')"                   ║
+  ║                                                                  ║
+  ║  In Python: not strictly necessary, but good practice.           ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Negative cycle not reachable from source             ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  A negative cycle might exist but not be reachable from source.  ║
+  ║                                                                  ║
+  ║  Example:                                                        ║
+  ║    Source = 0                                                     ║
+  ║    0 → 1 (weight 5)                                              ║
+  ║    2 → 3 (weight -5)                                             ║
+  ║    3 → 2 (weight 1)    ← negative cycle: 2→3→2, cost -4         ║
+  ║                                                                  ║
+  ║  But 0 can't reach 2 or 3!                                       ║
+  ║  → dist[2] = dist[3] = infinity                                  ║
+  ║  → Relaxation: dist[2]+(-5) = inf → no update                   ║
+  ║  → Negative cycle NOT detected (correctly!)                      ║
+  ║                                                                  ║
+  ║  The "if dist[u] != inf" check handles this:                     ║
+  ║    → Only relax edges from REACHABLE nodes                       ║
+  ║    → Unreachable negative cycles are ignored                     ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Source with no outgoing edges                        ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  → Only source has dist = 0, everything else stays infinity      ║
+  ║  → No edges relaxed (all start from infinity)                    ║
+  ║  → No negative cycle (nothing reachable)                         ║
+  ║  → Correct! ✓                                                    ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Single node                                          ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  n = 1, source = 0, edges = []                                   ║
+  ║  → V-1 = 0 iterations → no relaxation                           ║
+  ║  → dist = [0] → correct ✓                                        ║
+  ║                                                                  ║
+  ║  n = 1, edges = [[0,0,-1]] (self-loop with negative weight)     ║
+  ║  → V-1 = 0 iterations → no relaxation                           ║
+  ║  → V-th check: dist[0]+(-1) = -1 &lt; dist[0]=0 → NEGATIVE CYCLE! ║
+  ║  → Correct! Self-loop with negative weight IS a negative cycle   ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 11: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Shortest path" + "negative weights"                    │
+  │         → Dijkstra won't work → Bellman-Ford                       │
+  │                                                                    │
+  │  SIGNAL 2: "Detect negative cycle" / "arbitrage"                   │
+  │         → Bellman-Ford with V-th iteration check                   │
+  │                                                                    │
+  │  SIGNAL 3: "Currency exchange" / "arbitrage detection"             │
+  │         → Model as graph with log(exchange_rate) weights           │
+  │         → Negative cycle = arbitrage opportunity                   │
+  │         → Bellman-Ford                                             │
+  │                                                                    │
+  │  SIGNAL 4: "Weights can be negative" (mentioned in constraints)    │
+  │         → Can't use Dijkstra → Bellman-Ford                        │
+  │                                                                    │
+  │  THINKING CHAIN:                                                   │
+  │  "Shortest path with possible negative weights"                    │
+  │     → negative weights → Dijkstra fails                            │
+  │        → Bellman-Ford: relax all edges V-1 times                   │
+  │           → V-th iteration for negative cycle detection            │
+  │              → O(V×E) time, O(V) space                             │
+  │                                                                    │
+  │  INTERVIEW FLOW (what to say):                                     │
+  │  1. "Since weights can be negative, Dijkstra won't work."         │
+  │  2. "I'll use Bellman-Ford: relax all edges V-1 times."           │
+  │  3. "Then one more pass to check for negative cycles."            │
+  │  4. "Time: O(V×E), Space: O(V)."                                  │
+  │  5. "If no negative weights, I'd use Dijkstra for O((V+E)logV)." │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: THE COMPLETE SHORTEST PATH FAMILY — Where We Stand</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  SHORTEST PATH ALGORITHMS MASTERED SO FAR:                       │
+  │                                                                  │
+  │  ✓ Problem 9:  BFS                                               │
+  │      → Unweighted graphs                                        │
+  │      → O(V + E)                                                  │
+  │      → Queue (FIFO)                                              │
+  │                                                                  │
+  │  ✓ Problem 23: Dijkstra                                          │
+  │      → Non-negative weights                                      │
+  │      → O((V+E) log V)                                           │
+  │      → Priority queue (min-heap)                                 │
+  │                                                                  │
+  │  ✓ Problem 25: Modified Bellman-Ford                              │
+  │      → Constrained path length (K stops)                         │
+  │      → O(K × E)                                                  │
+  │      → Edge list + dist copy                                     │
+  │                                                                  │
+  │  ★ Problem 26: Full Bellman-Ford                                  │
+  │      → Negative weights + negative cycle detection               │
+  │      → O(V × E)                                                  │
+  │      → Edge list (simplest data structure)                       │
+  │                                                                  │
+  │  → Problem 33: Floyd-Warshall                                    │
+  │      → All pairs shortest path                                   │
+  │      → O(V³)                                                     │
+  │      → Adjacency matrix                                          │
+  │                                                                  │
+  │  SELECTION GUIDE:                                                │
+  │                                                                  │
+  │    Unweighted?           → BFS                                   │
+  │    Non-negative weights? → Dijkstra                              │
+  │    Negative weights?     → Bellman-Ford                          │
+  │    K-edge constraint?    → Modified Bellman-Ford (K+1 iters)     │
+  │    All pairs needed?     → Floyd-Warshall (or repeated Dijkstra) │
+  │    Weights 0 or 1?       → 0-1 BFS (Problem 39)                 │
+  │    Known target + heuristic? → A* (Problem 48)                   │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>BELLMAN-FORD TEMPLATE — Quick Reference</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────┐
+</span>  │  BELLMAN-FORD TEMPLATE (memorize this):                   │
+  │                                                          │
+  │  def bellman_ford(n, edges, src):                        │
+  │      dist = [float('inf')] * n                           │
+  │      dist[src] = 0                                       │
+  │                                                          │
+  │      for _ in range(n - 1):                              │
+  │          for u, v, w in edges:                           │
+  │              if dist[u] + w &lt; dist[v]:                   │
+  │                  dist[v] = dist[u] + w                   │
+  │                                                          │
+  │      # Negative cycle check                              │
+  │      for u, v, w in edges:                               │
+  │          if dist[u] + w &lt; dist[v]:                       │
+  │              return dist, True  # neg cycle!             │
+  │                                                          │
+  │      return dist, False                                  │
+  │                                                          │
+  │  10 lines. Simpler than Dijkstra!                        │
+  │  No heap, no adjacency list, just edge list.             │
+  └──────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: BELLMAN-FORD ALGORITHM                     ║
+  ║                                                                    ║
+  ║   → Handles NEGATIVE edge weights (Dijkstra can't)               ║
+  ║   → Detects NEGATIVE CYCLES (infinite cost reduction)             ║
+  ║   → Simple: relax ALL edges V-1 times                            ║
+  ║   → V-th iteration: if still improving → negative cycle!         ║
+  ║                                                                    ║
+  ║   → WHY V-1 iterations: shortest simple path uses ≤ V-1 edges   ║
+  ║     After i iterations: correct for paths with ≤ i edges         ║
+  ║     After V-1: all shortest simple paths found                   ║
+  ║                                                                    ║
+  ║   → DIFFERENCE FROM PROBLEM 25:                                   ║
+  ║     Problem 25: K+1 iterations + COPY dist (edge count constraint)║
+  ║     Problem 26: V-1 iterations + NO copy (no constraint)         ║
+  ║                                                                    ║
+  ║   → WHEN TO USE:                                                   ║
+  ║     "Are there negative weights?" → YES → Bellman-Ford            ║
+  ║     "Are all weights ≥ 0?" → YES → Dijkstra (faster)             ║
+  ║                                                                    ║
+  ║   → Time: O(V × E)  — slower than Dijkstra but more general      ║
+  ║     Space: O(V)      — simpler than Dijkstra (no heap/adj list)  ║
+  ║                                                                    ║
+  ║   → COMPLETES the single-source shortest path family:             ║
+  ║     BFS → Dijkstra → Bellman-Ford                                ║
+  ║     (unweighted → non-negative → any weights)                    ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h3>CONNECTION TO NEXT PROBLEM</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 26 → Bellman-Ford (single-source, negative weights)
+</span>  Problem 27 → Union-Find / Disjoint Set Union (dynamic connectivity)
+  
+  MAJOR TOPIC SHIFT:
+  
+  Problems 9-26: SHORTEST PATH algorithms
+    → BFS, Dijkstra, Bellman-Ford
+    → All about finding cheapest/shortest paths
+    
+  Problems 27-29: UNION-FIND (Disjoint Set Union)
+    → Completely different algorithm family
+    → About CONNECTIVITY: "Are X and Y in the same group?"
+    → Dynamic: groups merge over time
+    → Foundation for MST algorithms (Kruskal's, Problem 30)
+    
+  Problem 27 introduces the Union-Find data structure:
+    → find(x): which group does x belong to?
+    → union(x, y): merge x's group and y's group
+    → Nearly O(1) per operation with optimizations
+    → Used for: connected components, cycle detection, MST
+    
+  Union-Find is one of the most elegant data structures in CS.
+  It appears in many interview problems that don't obviously
+  look like graph problems!</code></pre></div>
+<hr>
+<p><strong>Problem 26 Complete.</strong><br>
+<strong>Ready for Problem 27: Union-Find / Disjoint Set Union (DSU)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="31" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-25.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 26 of 50</span>
+            </div>
+            <a href="problem-27.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

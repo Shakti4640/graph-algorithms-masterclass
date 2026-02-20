@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 9: Problem 9: Shortest Path in Unweighted Graph — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="19">
+<div class="px-2"><h1>Problem 9: Shortest Path in Unweighted Graph</h1>
+<h2>[Algorithm Family: BFS — Shortest Path]</h2>
+<h2>[Phase 2: Core Patterns — "I know WHICH traversal and WHY"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are navigating a maze-like building. Given N rooms 
+</span>(numbered 0 to N-1) and corridors connecting them, find the 
+MINIMUM number of corridors you must walk through to get from
+room SOURCE to room DESTINATION.
+
+Every corridor takes exactly 1 minute to traverse.
+
+If destination is unreachable, return -1.
+
+Input:
+  n = 8  (rooms: 0, 1, 2, 3, 4, 5, 6, 7)
+  edges = [[0,1], [0,2], [1,3], [1,4], [2,5], [3,6], [4,6], [5,7], [6,7]]
+  source = 0
+  destination = 7
+
+Output:
+  3  (shortest path: 0 → 2 → 5 → 7, using 3 corridors)
+
+  Other paths exist:
+    0 → 1 → 3 → 6 → 7  (4 corridors — longer!)
+    0 → 1 → 4 → 6 → 7  (4 corridors — longer!)
+    
+  Minimum is 3.</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>              0
+</span>             / \
+            /   \
+           1     2
+          / \     \
+         3   4     5
+          \ /      |
+           6       |
+            \     /
+             \   /
+              7
+
+  Edge List:
+    0 — 1,  0 — 2
+    1 — 3,  1 — 4
+    2 — 5
+    3 — 6,  4 — 6
+    5 — 7,  6 — 7</code></pre></div>
+<h3>All Paths from 0 to 7</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Path 1: 0 → 1 → 3 → 6 → 7    length = 4
+</span>  Path 2: 0 → 1 → 4 → 6 → 7    length = 4
+  Path 3: 0 → 2 → 5 → 7         length = 3  ★ SHORTEST ★
+
+  Why is path 3 shortest?
+    → 0 to 7 via the RIGHT side of the graph has fewer hops
+    → BFS will NATURALLY discover this because it explores
+      level-by-level (nearest first)</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════╗
+</span>  ║  Property        │  Answer          │  Why it matters      ║
+  ╠══════════════════╪══════════════════╪══════════════════════╣
+  ║  NODES           │  Rooms 0-7       │  Each room = node    ║
+  ║  EDGES           │  Corridors       │  Each corridor = edge║
+  ║  Directed?       │  NO              │  Walk both ways      ║
+  ║  ★ Weighted? ★  │  ★ NO ★         │  All corridors = 1   ║
+  ║                  │                  │  minute              ║
+  ║  Connected?      │  YES             │  All rooms reachable ║
+  ║  Question        │  Shortest path   │  Minimum hops        ║
+  ╚══════════════════╧══════════════════╧══════════════════════╝
+
+  THE CRITICAL PROPERTY: UNWEIGHTED
+  → All edges cost the same (1 unit)
+  → This is what makes BFS work for shortest path
+  → If edges had DIFFERENT costs → need Dijkstra (Problem 23)</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Naive idea: "Find ALL possible paths from source to destination,
+</span>               then pick the shortest one"
+  
+  How to find all paths:
+    → DFS with backtracking — explore every possible route
+    → Track current path, when destination reached, record length
+    → Compare all lengths, return minimum
+  
+  Problem:
+    → Number of paths can be EXPONENTIAL
+    → Complete graph with V nodes: up to (V-1)! paths
+    → Even for moderate graphs: millions of paths
+    → Time: O(V!) in worst case → IMPOSSIBLY SLOW
+    
+  Example: grid graph 10×10 = 100 nodes
+    → Paths from corner to corner: astronomical number
+    → Brute force would take longer than the age of the universe</code></pre></div>
+<h3>Why DFS Fails for Shortest Path</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  DFS finds A path, not necessarily the SHORTEST path.
+</span>  
+  In our graph, DFS from 0 might explore:
+    0 → 1 → 3 → 6 → 7    (found path of length 4)
+    
+  DFS doesn't know that 0 → 2 → 5 → 7 (length 3) exists
+  unless it tries ALL paths and compares.
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │  DFS explores ONE path deeply before trying alternatives     │
+  │  → May find a LONG path first                                │
+  │  → Must explore ALL paths to guarantee shortest              │
+  │  → Exponential time!                                         │
+  │                                                              │
+  │  BFS explores ALL paths of length 1, then length 2, etc.    │
+  │  → The FIRST time it reaches destination = shortest path     │
+  │  → No need to explore further!                               │
+  │  → O(V + E) time!                                            │
+  └──────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<h3>The KEY Insight: BFS Level = Distance</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  Remember Problem 3 (BFS)?                                     │
+  │    → BFS explores level-by-level                               │
+  │    → Level 0: source (distance 0)                              │
+  │    → Level 1: direct neighbors (distance 1)                    │
+  │    → Level 2: neighbors of neighbors (distance 2)              │
+  │    → Level k: all nodes at distance k                          │
+  │                                                                │
+  │  THE GUARANTEE:                                                │
+  │    In an UNWEIGHTED graph, the FIRST time BFS reaches a node,  │
+  │    that's via the SHORTEST path.                               │
+  │                                                                │
+  │  WHY?                                                          │
+  │    → BFS processes all distance-1 nodes before distance-2      │
+  │    → Processes all distance-2 before distance-3                │
+  │    → So the FIRST time a node is discovered, it's at the      │
+  │      MINIMUM possible distance from source                     │
+  │    → No shorter path can exist (all shorter distances already  │
+  │      fully explored)                                           │
+  │                                                                │
+  │  THIS IS THE MOST IMPORTANT PROPERTY OF BFS.                  │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Proof by Contradiction (Intuitive)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Suppose BFS first reaches node X at distance d.
+</span>  Could there be a shorter path of distance d' &lt; d?
+  
+  → If such a path existed, it would go through nodes at 
+    distances 1, 2, ..., d'-1
+  → BFS already processed ALL nodes at distances 1 through d-1
+  → So it would have discovered X at distance d' &lt; d
+  → But we said BFS first reached X at distance d
+  → CONTRADICTION!
+  
+  Therefore: BFS distance = shortest distance. ∎
+  
+  THIS ONLY WORKS FOR UNWEIGHTED GRAPHS!
+  
+  Why it breaks with weights:
+    Edge 0→1 costs 10, edge 0→2 costs 1, edge 2→1 costs 1
+    BFS reaches 1 first via 0→1 (1 hop) with cost 10
+    But 0→2→1 (2 hops) costs only 2 — SHORTER by cost!
+    BFS doesn't know about costs — it only counts hops.
+    
+  For weighted graphs → Dijkstra (Problem 23)</code></pre></div>
+<h3>What Changes from Problem 3's BFS?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 3 BFS:
+</span>    → Visit all reachable nodes
+    → Record visit order
+    
+  Problem 9 BFS:
+    → Visit all reachable nodes
+    → Track DISTANCE from source for each node     ★ NEW ★
+    → Stop when destination reached (early termination from Problem 8)
+    → Return distance to destination
+
+  The code is almost IDENTICAL to Problem 3.
+  We just add a DISTANCE ARRAY.</code></pre></div>
+<h3>Distance Array: The New Data Structure</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  dist[node] = shortest distance from source to node
+</span>  
+  Initialize:
+    dist[source] = 0                    (distance to self = 0)
+    dist[everything else] = -1 or ∞     (not yet reached)
+  
+  During BFS, when we discover a neighbor:
+    dist[neighbor] = dist[current] + 1   (one hop further)
+  
+  This works because BFS guarantees:
+    → current is at its SHORTEST distance
+    → neighbor is discovered at current's distance + 1
+    → this is neighbor's SHORTEST distance (first discovery)</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — Step by Step</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Graph:
+</span>              0
+             / \
+            1   2
+           / \   \
+          3   4   5
+           \ /    |
+            6     |
+             \   /
+              7
+
+  Adjacency List:
+    0: [1, 2]
+    1: [0, 3, 4]
+    2: [0, 5]
+    3: [1, 6]
+    4: [1, 6]
+    5: [2, 7]
+    6: [3, 4, 7]
+    7: [5, 6]
+
+  source = 0, destination = 7</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════════╗
+</span>  ║  INITIALIZATION                                                       ║
+  ╠═══════════════════════════════════════════════════════════════════════╣
+  ║                                                                       ║
+  ║  Queue:    [0]                                                        ║
+  ║  Visited:  {0}                                                        ║
+  ║  Distance: {0: 0}          ← source is at distance 0                 ║
+  ║                                                                       ║
+  ║  Level picture:                                                       ║
+  ║    Level 0:  {0}                                                      ║
+  ║    Level 1:  ?                                                        ║
+  ║    Level 2:  ?                                                        ║
+  ║    Level 3:  ?                                                        ║
+  ╚═══════════════════════════════════════════════════════════════════════╝
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 1: Dequeue 0 (distance 0)                                      │
+  │                                                                     │
+  │   Is 0 == 7 (destination)? NO                                       │
+  │                                                                     │
+  │   Neighbors of 0: [1, 2]                                            │
+  │                                                                     │
+  │     1: not visited                                                  │
+  │        → visited.add(1)                                             │
+  │        → dist[1] = dist[0] + 1 = 0 + 1 = 1                        │
+  │        → queue.append(1)                                            │
+  │                                                                     │
+  │     2: not visited                                                  │
+  │        → visited.add(2)                                             │
+  │        → dist[2] = dist[0] + 1 = 0 + 1 = 1                        │
+  │        → queue.append(2)                                            │
+  │                                                                     │
+  │   Queue:    [1, 2]                                                  │
+  │   Visited:  {0, 1, 2}                                               │
+  │   Distance: {0:0, 1:1, 2:1}                                        │
+  │                                                                     │
+  │   Level picture:                                                    │
+  │     Level 0:  {0}           ← processed                            │
+  │     Level 1:  {1, 2}        ← just discovered!                     │
+  │                                                                     │
+  │   Visual:                                                           │
+  │              [0] d=0                                                │
+  │              / \                                                     │
+  │         (1)   (2)    d=1   ( ) = in queue                          │
+  │         / \     \                                                    │
+  │        3   4     5   d=?   unknown yet                              │
+  │         \ /      |                                                   │
+  │          6       |   d=?                                             │
+  │           \     /                                                    │
+  │            7         d=?   ← destination, not reached yet           │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 2: Dequeue 1 (distance 1)                                      │
+  │                                                                     │
+  │   Is 1 == 7? NO                                                     │
+  │                                                                     │
+  │   Neighbors of 1: [0, 3, 4]                                         │
+  │                                                                     │
+  │     0: visited → skip                                               │
+  │                                                                     │
+  │     3: not visited                                                  │
+  │        → dist[3] = dist[1] + 1 = 1 + 1 = 2                        │
+  │        → queue.append(3)                                            │
+  │                                                                     │
+  │     4: not visited                                                  │
+  │        → dist[4] = dist[1] + 1 = 1 + 1 = 2                        │
+  │        → queue.append(4)                                            │
+  │                                                                     │
+  │   Queue:    [2, 3, 4]                                               │
+  │   Visited:  {0, 1, 2, 3, 4}                                        │
+  │   Distance: {0:0, 1:1, 2:1, 3:2, 4:2}                              │
+  │                                                                     │
+  │   Visual:                                                           │
+  │              [0] d=0                                                │
+  │              / \                                                     │
+  │          [1]  (2)    d=1                                            │
+  │          / \     \                                                   │
+  │        (3) (4)    5   d=2 for 3,4; unknown for 5                    │
+  │          \ /      |                                                  │
+  │           6       |   d=?                                            │
+  │            \     /                                                   │
+  │             7         d=?                                            │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 3: Dequeue 2 (distance 1)                                      │
+  │                                                                     │
+  │   Is 2 == 7? NO                                                     │
+  │                                                                     │
+  │   Neighbors of 2: [0, 5]                                            │
+  │                                                                     │
+  │     0: visited → skip                                               │
+  │                                                                     │
+  │     5: not visited                                                  │
+  │        → dist[5] = dist[2] + 1 = 1 + 1 = 2                        │
+  │        → queue.append(5)                                            │
+  │                                                                     │
+  │   Queue:    [3, 4, 5]                                               │
+  │   Visited:  {0, 1, 2, 3, 4, 5}                                     │
+  │   Distance: {0:0, 1:1, 2:1, 3:2, 4:2, 5:2}                        │
+  │                                                                     │
+  │   ★ NOTICE: All level-1 nodes (1, 2) now fully processed!          │
+  │     Queue contains ONLY level-2 nodes: [3, 4, 5]                   │
+  │     This is the BFS guarantee from Problem 3.                       │
+  │                                                                     │
+  │   Visual:                                                           │
+  │              [0] d=0                                                │
+  │              / \                                                     │
+  │          [1]  [2]    d=1   both processed                           │
+  │          / \     \                                                   │
+  │        (3) (4)  (5)  d=2   all at distance 2                       │
+  │          \ /      |                                                  │
+  │           6       |   d=?                                            │
+  │            \     /                                                   │
+  │             7         d=?                                            │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 4: Dequeue 3 (distance 2)                                      │
+  │                                                                     │
+  │   Is 3 == 7? NO                                                     │
+  │                                                                     │
+  │   Neighbors of 3: [1, 6]                                            │
+  │                                                                     │
+  │     1: visited → skip                                               │
+  │                                                                     │
+  │     6: not visited                                                  │
+  │        → dist[6] = dist[3] + 1 = 2 + 1 = 3                        │
+  │        → queue.append(6)                                            │
+  │                                                                     │
+  │   Queue:    [4, 5, 6]                                               │
+  │   Visited:  {0, 1, 2, 3, 4, 5, 6}                                  │
+  │   Distance: {0:0, 1:1, 2:1, 3:2, 4:2, 5:2, 6:3}                   │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 5: Dequeue 4 (distance 2)                                      │
+  │                                                                     │
+  │   Is 4 == 7? NO                                                     │
+  │                                                                     │
+  │   Neighbors of 4: [1, 6]                                            │
+  │                                                                     │
+  │     1: visited → skip                                               │
+  │     6: visited → skip   ← already discovered at dist 3 via node 3  │
+  │                                                                     │
+  │   ★ IMPORTANT: Node 6 was already reached via 0→1→3→6 (dist=3)    │
+  │     Could we have reached it via 0→1→4→6? Also dist=3!            │
+  │     BFS correctly assigned dist[6]=3 the FIRST time.               │
+  │     The second path (via 4) would give the SAME distance.          │
+  │     We skip it because 6 is already visited — no harm done.        │
+  │                                                                     │
+  │   Queue:    [5, 6]                                                  │
+  │   Distance: unchanged                                               │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 6: Dequeue 5 (distance 2)                                      │
+  │                                                                     │
+  │   Is 5 == 7? NO                                                     │
+  │                                                                     │
+  │   Neighbors of 5: [2, 7]                                            │
+  │                                                                     │
+  │     2: visited → skip                                               │
+  │                                                                     │
+  │     7: not visited                                                  │
+  │        → dist[7] = dist[5] + 1 = 2 + 1 = 3                        │
+  │                                                                     │
+  │   ★★★ DESTINATION 7 FOUND! Distance = 3 ★★★                       │
+  │                                                                     │
+  │   Return 3 immediately! (early termination from Problem 8)          │
+  │                                                                     │
+  │   We don't need to process node 6 or anything else.                 │
+  │                                                                     │
+  │   Final Distance Map:                                               │
+  │     {0:0, 1:1, 2:1, 3:2, 4:2, 5:2, 6:3, 7:3}                     │
+  │                                                                     │
+  │   Visual:                                                           │
+  │              [0] d=0                                                │
+  │              / \                                                     │
+  │          [1]  [2]    d=1                                            │
+  │          / \     \                                                   │
+  │        [3] [4]  [5]  d=2                                            │
+  │          \ /      |                                                  │
+  │          (6)      |   d=3                                            │
+  │            \     /                                                   │
+  │            ★7★        d=3  ← FOUND! Shortest path = 3              │
+  └─────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Verifying the Shortest Path</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ═══════════════════════════════════════════════════════════════════
+</span>  
+  Distance from 0 to 7: 3
+  
+  How did we get there?
+    → dist[7] = dist[5] + 1 = 3    (reached from node 5)
+    → dist[5] = dist[2] + 1 = 2    (reached from node 2)
+    → dist[2] = dist[0] + 1 = 1    (reached from node 0)
+    → dist[0] = 0                   (source)
+    
+  Shortest path: 0 → 2 → 5 → 7  (3 edges) ✓
+
+  Other paths:
+    0 → 1 → 3 → 6 → 7  = 4 edges (longer)
+    0 → 1 → 4 → 6 → 7  = 4 edges (longer)
+    
+  BFS found the shortest one FIRST because it explored
+  all distance-2 nodes (including 5) BEFORE distance-3 nodes.
+  Node 7 was discovered from distance-2 node 5, giving distance 3.
+  
+  ═══════════════════════════════════════════════════════════════════</code></pre></div>
+<h3>Summary: Distance Discovery Table</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────┬─────────┬──────────────┬──────────┬────────────────────────┐
+</span>  │ Step │ Dequeue │ dist[current]│ Discover │ dist assigned          │
+  ├──────┼─────────┼──────────────┼──────────┼────────────────────────┤
+  │  1   │  0      │  0           │  1, 2    │ dist[1]=1, dist[2]=1   │
+  │  2   │  1      │  1           │  3, 4    │ dist[3]=2, dist[4]=2   │
+  │  3   │  2      │  1           │  5       │ dist[5]=2              │
+  │  4   │  3      │  2           │  6       │ dist[6]=3              │
+  │  5   │  4      │  2           │  (none)  │                        │
+  │  6   │  5      │  2           │  ★7★     │ dist[7]=3 ★FOUND!★    │
+  └──────┴─────────┴──────────────┴──────────┴────────────────────────┘
+
+  OBSERVE: distances are MONOTONICALLY NON-DECREASING
+    0, 1, 1, 2, 2, 2, ...
+  BFS always processes lower distances first. ALWAYS.</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: Shortest Distance Only</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">shortest_path_unweighted</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> destination</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find shortest path distance from source to destination
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    in an UNWEIGHTED graph using BFS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    WHY BFS works for shortest path (unweighted):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → BFS explores nodes in order of DISTANCE from source
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → First time a node is reached = shortest distance
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → This is the level-order property from Problem 3
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    WHY NOT DFS:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → DFS explores one path deeply — may find a LONG path first
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Must explore ALL paths to find shortest — exponential!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → BFS finds shortest in O(V + E) — polynomial!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of nodes
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [u, v] pairs (undirected, unweighted)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        source: starting node
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        destination: target node
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Shortest distance (number of edges), or -1 if unreachable
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> source </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> destination</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD GRAPH (Problem 1) ───</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BFS WITH DISTANCE TRACKING ───</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ distance array — THE key addition</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ one step further</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Early termination (Problem 8 optimization)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> destination</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>                
+<span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Destination never reached</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TESTS ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">8</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>shortest_path_unweighted</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 3</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>shortest_path_unweighted</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 3</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>shortest_path_unweighted</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 0</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>shortest_path_unweighted</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 3</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Disconnected graph test</span><span>
+</span><span>edges2 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>shortest_path_unweighted</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># -1 (unreachable)</span></code></pre></div>
+<hr>
+<h3>Version 2: Shortest Distance to ALL Nodes (Single Source All Destinations)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">shortest_distances_all</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find shortest distance from source to EVERY other node.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is "Single Source Shortest Path" (SSSP) for unweighted graphs.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        dist: dictionary mapping each reachable node to its distance
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">              unreachable nodes have distance -1
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is the BFS version of what Dijkstra (Problem 23) does 
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    for weighted graphs.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Build graph (Problem 1)</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># BFS (Problem 3) with distance tracking</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># initialize all as unreachable</span><span>
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">8</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> shortest_distances_all</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Shortest distances from node 0:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: distance = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Shortest distances from node 0:
+</span>  Node 0: distance = 0
+  Node 1: distance = 1
+  Node 2: distance = 1
+  Node 3: distance = 2
+  Node 4: distance = 2
+  Node 5: distance = 2
+  Node 6: distance = 3
+  Node 7: distance = 3</code></pre></div>
+<h3>Verify Against Graph Visualization</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>              0  d=0
+</span>             / \
+            1   2    d=1   ✓ both at distance 1 from 0
+           / \   \
+          3   4   5  d=2   ✓ all at distance 2 from 0
+           \ /    |
+            6     |  d=3   ✓ reachable via 3 or 4 (both d=2) + 1
+             \   /
+              7  d=3       ✓ reachable via 5 (d=2) + 1 or 6 (d=3) + 1
+                              but BFS found it via 5 first (d=3)</code></pre></div>
+<hr>
+<h3>Version 3: Shortest Path WITH Path Reconstruction</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">shortest_path_with_route</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> destination</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find shortest path AND the actual route.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Uses PARENT TRACKING (previewed in Problem 8):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → For each discovered node, record WHO discovered it
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Trace back from destination to source via parents
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Reverse to get source-to-destination path
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        (distance, path) or (-1, []) if unreachable
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> source </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> destination</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Build graph</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># BFS with parent tracking</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span><span>    parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ who discovered each node?</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>                parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> current        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ record parent</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> destination</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── RECONSTRUCT PATH ───</span><span>
+</span><span>                    path </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>                    node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> destination
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">is</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        path</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                        node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>                    path</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>reverse</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>destination</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> path</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">8</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>distance</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> path </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> shortest_path_with_route</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Shortest distance: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">distance</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Shortest path: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation" style="color: rgb(163, 21, 21);">' → '</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">join</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation builtin">map</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation builtin">str</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> path</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span>distance</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> path </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> shortest_path_with_route</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\nShortest distance 1→7: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">distance</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Shortest path: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation" style="color: rgb(163, 21, 21);">' → '</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">.</span><span class="token string-interpolation interpolation">join</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation builtin">map</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation builtin">str</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> path</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Shortest distance: 3
+</span>Shortest path: 0 → 2 → 5 → 7
+
+Shortest distance 1→7: 3
+Shortest path: 1 → 3 → 6 → 7</code></pre></div>
+<h3>How Path Reconstruction Works</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  During BFS from 0:
+</span>    parent[0] = None  (source)
+    parent[1] = 0     (discovered from 0)
+    parent[2] = 0     (discovered from 0)
+    parent[3] = 1     (discovered from 1)
+    parent[4] = 1     (discovered from 1)
+    parent[5] = 2     (discovered from 2)
+    parent[6] = 3     (discovered from 3)
+    parent[7] = 5     (discovered from 5)
+
+  Trace back from 7:
+    7 → parent[7] = 5
+    5 → parent[5] = 2
+    2 → parent[2] = 0
+    0 → parent[0] = None → STOP
+
+  Backward chain: 7 ← 5 ← 2 ← 0
+  Reverse:        0 → 2 → 5 → 7  ✓
+
+  ┌──────────────────────────────────────────────────────────┐
+  │  Parent tracking gives us the BFS TREE:                   │
+  │                                                           │
+  │              0 (root)                                     │
+  │             / \                                           │
+  │            1   2                                          │
+  │           / \   \                                         │
+  │          3   4   5                                        │
+  │          |       |                                        │
+  │          6       7                                        │
+  │                                                           │
+  │  Following parent pointers from any node back to root     │
+  │  gives the SHORTEST PATH to that node.                    │
+  └──────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h3>Version 4: Shortest Path on a GRID</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">shortest_path_grid</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Shortest path on a grid from (sr,sc) to (dr,dc).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Combines:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Problem 6: grid as graph
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Problem 9: BFS for shortest path
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Grid: 1 = open, 0 = wall
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns: shortest distance, or -1 if unreachable
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>sc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>dr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>dc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> sr </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> dr </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> sc </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> dc</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    rows</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (row, col, distance)</span><span>
+</span><span>    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> d </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> delta_r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> delta_c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> delta_r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> delta_c
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols 
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited 
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> dr </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> dc</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> d </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># found destination!</span><span>
+</span>                
+<span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> d </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>grid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> shortest_path_grid</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Shortest distance: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Path must go around the walls</span></code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(V + E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  IDENTICAL to BFS from Problem 3!
+</span>
+  WHY?
+    → We added ONE extra operation per node: dist[neighbor] = dist[current] + 1
+    → This is O(1) per neighbor — doesn't change overall complexity
+    → Each node still enqueued/dequeued once: O(V)
+    → Each edge still checked once: O(E)
+    → Total: O(V + E)
+
+  With early termination:
+    → Best case: O(1) if source == destination
+    → Average: O(V + E) / 2 if destination is "halfway"
+    → Worst case: O(V + E) if destination unreachable
+    → Still O(V + E) asymptotically
+
+  For grid: V = R × C, E ≈ 2 × R × C → O(R × C)</code></pre></div>
+<h3>Space Complexity: O(V)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  1. Adjacency list: O(V + E)    (input)
+</span>  2. Visited set: O(V)
+  3. Queue: O(V)
+  4. Distance dict: O(V)          ★ new — but still O(V)
+  5. Parent dict: O(V)            (if path reconstruction needed)
+  
+  Extra space beyond input: O(V)</code></pre></div>
+<h3>Comparison with Brute Force (DFS All Paths)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────┬──────────────┬──────────────────────┐
+</span>  │  Approach            │  Time         │  Correct?            │
+  ├──────────────────────┼──────────────┼──────────────────────┤
+  │  BFS                 │  O(V + E)     │  YES (guaranteed)    │
+  │  DFS (find any path) │  O(V + E)     │  NO (not shortest)   │
+  │  DFS (all paths)     │  O(V!)        │  YES (but too slow)  │
+  └──────────────────────┴──────────────┴──────────────────────┘
+
+  BFS is the ONLY efficient algorithm for shortest path 
+  in unweighted graphs.</code></pre></div>
+<hr>
+<h2>STEP 7: WHY DFS FAILS — Concrete Proof</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Graph:
+</span>      0 --- 1 --- 2
+      |           |
+      |           |
+      5 --- 4 --- 3
+
+  Shortest path from 0 to 3: 0 → 1 → 2 → 3 (distance 3)
+
+  DFS from 0 (neighbors in order [1, 5]):
+    DFS(0) → DFS(5) → DFS(4) → DFS(3) → FOUND!
+    Path: 0 → 5 → 4 → 3  (distance 3)
+    
+  Lucky! Same distance here. But consider:
+
+      0 --- 1 --- 2 --- 3
+      |                  |
+      5 --- 6 --- 7 --- 8
+
+  Shortest: 0 → 1 → 2 → 3 (distance 3)
+
+  DFS from 0 (neighbors in order [1, 5]):
+    DFS(0) → DFS(1) → DFS(2) → DFS(3) → FOUND!
+    Path: 0 → 1 → 2 → 3 (distance 3) — lucky again!
+
+  BUT if neighbors are ordered differently: [5, 1]:
+    DFS(0) → DFS(5) → DFS(6) → DFS(7) → DFS(8) → DFS(3) → FOUND!
+    Path: 0 → 5 → 6 → 7 → 8 → 3 (distance 5) — WRONG!
+    
+  DFS path depends on neighbor ORDER, not on DISTANCE.
+  BFS path depends on DISTANCE, regardless of neighbor order.
+  
+  ┌──────────────────────────────────────────────────────────────┐
+  │  BFS GUARANTEE:                                              │
+  │    First discovery of a node = shortest distance             │
+  │    Regardless of graph structure or neighbor ordering         │
+  │                                                              │
+  │  DFS NON-GUARANTEE:                                          │
+  │    First discovery of a node = some distance                 │
+  │    Could be shortest, could be longest, depends on luck      │
+  └──────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Directed?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  BFS still works for directed graphs!
+</span>  
+  Just build directed adjacency list:
+    graph[u].append(v)    ← only u→v, not v→u
+  
+  BFS explores only reachable nodes following edge directions.
+  Distance is still shortest in terms of hops.
+  
+  Example:
+    0 → 1 → 2 → 3
+    0 → 3              (direct edge)
+  
+  BFS from 0:
+    Level 0: {0}
+    Level 1: {1, 3}     ← 3 reached directly!
+    
+  dist[3] = 1 (via direct edge 0→3)
+  Even though 0→1→2→3 exists (distance 3), BFS finds the shorter one.</code></pre></div>
+<h3>What if Weighted?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ★ BFS DOES NOT WORK FOR WEIGHTED SHORTEST PATH! ★
+</span>  
+  Example:
+      0 ---(1)--- 1 ---(1)--- 2
+      |                        |
+      +-------(10)-------------+
+
+  Edge costs in parentheses.
+  
+  BFS (counting hops):
+    Level 0: {0}
+    Level 1: {1, 2}     ← 2 reached via direct edge (cost 10)
+    dist[2] = 1 hop
+    
+  But actual shortest PATH BY COST:
+    0 → 1 → 2 = cost 1 + 1 = 2
+    0 → 2     = cost 10
+    
+  Shortest by cost is 0→1→2 (cost 2), but BFS said 0→2 (1 hop).
+  BFS is right about HOPS but wrong about COST!
+
+  For weighted shortest path → Dijkstra's algorithm (Problem 23)
+  
+  ┌──────────────────────────────────────────────────────────────┐
+  │  BFS = shortest path when all edges have SAME cost           │
+  │  Dijkstra = shortest path when edges have DIFFERENT costs    │
+  │  Bellman-Ford = shortest path even with NEGATIVE costs       │
+  │                                                              │
+  │  This is the algorithm selection hierarchy for shortest path.│
+  │  BFS is the simplest case (cost = 1 for all edges).         │
+  └──────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>What if We Need ALL Shortest Paths (Not Just One)?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Multiple shortest paths might exist:
+</span>    0 → 1 → 3 → 6 → 7  (distance 4)
+    0 → 1 → 4 → 6 → 7  (distance 4)
+    
+  Both have distance 4 — both are shortest from 0 to 7 via 6.
+  
+  To find ALL shortest paths:
+    → Don't stop at first discovery
+    → Allow multiple parents per node (if same distance)
+    → parent becomes a LIST: parent[node] = [all nodes that discovered it at min dist]
+    → Reconstruct all paths using backtracking on parent lists
+    
+  This is more advanced — for now, one shortest path suffices.</code></pre></div>
+<hr>
+<h2>STEP 9: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Using DFS for shortest path                      ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  DFS does NOT guarantee shortest path.                       ║
+  ║  This is the #1 mistake for this problem.                    ║
+  ║                                                              ║
+  ║  ALWAYS use BFS for shortest path in unweighted graphs.      ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Using BFS for WEIGHTED shortest path             ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  BFS only works when ALL edges have the same weight.         ║
+  ║  For weighted graphs → Dijkstra (Problem 23)                 ║
+  ║  For negative weights → Bellman-Ford (Problem 26)            ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Forgetting -1 for unreachable destination        ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  If graph is disconnected and destination is in different     ║
+  ║  component → BFS finishes without finding it.                ║
+  ║  Must return -1 (or infinity), not 0 or crash.               ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Updating distance of already-visited node        ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Once a node is visited in BFS, its distance is FINAL.       ║
+  ║  Never update dist[node] after it's set.                     ║
+  ║  The visited check prevents this — but be careful            ║
+  ║  if you modify the standard pattern.                         ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Source == Destination                            ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Distance = 0 (zero edges needed)                            ║
+  ║  Handle before BFS: if source == destination: return 0       ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: No edges at all                                  ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Every node is isolated.                                     ║
+  ║  If source ≠ destination → return -1                         ║
+  ║  If source == destination → return 0                         ║
+  ╚══════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 10: THE SHORTEST PATH ALGORITHM HIERARCHY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  WHICH SHORTEST PATH ALGORITHM DO I USE?                          │
+  │                                                                    │
+  │  ┌─────────────────────────────────────────────────┐              │
+  │  │  Are all edge weights equal (or unweighted)?     │              │
+  │  │                                                   │              │
+  │  │  YES → BFS  ★ Problem 9 (this problem) ★        │              │
+  │  │         O(V + E)                                  │              │
+  │  │                                                   │              │
+  │  │  NO → Are there negative weights?                 │              │
+  │  │       │                                           │              │
+  │  │       ├── NO → Dijkstra (Problem 23)              │              │
+  │  │       │        O((V + E) log V)                   │              │
+  │  │       │                                           │              │
+  │  │       └── YES → Bellman-Ford (Problem 26)         │              │
+  │  │                  O(V × E)                          │              │
+  │  │                                                   │              │
+  │  │  Need ALL pairs? → Floyd-Warshall (Problem 33)    │              │
+  │  │                     O(V³)                          │              │
+  │  └─────────────────────────────────────────────────┘              │
+  │                                                                    │
+  │  BFS is the SIMPLEST and FASTEST shortest path algorithm.         │
+  │  It works for the SIMPLEST case: all edges equal weight.          │
+  │  Each subsequent algorithm handles MORE general cases              │
+  │  at the cost of more complexity.                                   │
+  │                                                                    │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 11: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  SIGNAL 1: "Minimum number of steps/moves/hops"                │
+  │    → SHORTEST PATH                                             │
+  │    → Each step = 1 unit → unweighted → BFS                    │
+  │                                                                │
+  │  SIGNAL 2: "Shortest path" + all edges same cost               │
+  │    → BFS (not Dijkstra!)                                       │
+  │    → Simpler and faster than Dijkstra for this case            │
+  │                                                                │
+  │  SIGNAL 3: "Minimum transformations/changes"                   │
+  │    → Often an implicit graph problem                           │
+  │    → Each transformation = one edge → BFS                      │
+  │    → Example: Word Ladder (Problem 15)                         │
+  │                                                                │
+  │  SIGNAL 4: Grid + "shortest path" + no weights                 │
+  │    → BFS on grid (Version 4)                                   │
+  │    → Each cell transition = 1 step                             │
+  │                                                                │
+  │  THINKING PROCESS:                                             │
+  │    "I see 'shortest/minimum' + equal costs"                    │
+  │    → "BFS explores nearest first"                              │
+  │    → "First discovery = shortest distance"                     │
+  │    → "Use BFS with distance array"                             │
+  │    → "If I also need the path: add parent tracking"            │
+  │                                                                │
+  │  RED FLAGS (don't use BFS):                                    │
+  │    "Edges have different weights" → Dijkstra (Problem 23)      │
+  │    "Negative edge weights" → Bellman-Ford (Problem 26)         │
+  │    "All pairs shortest" → Floyd-Warshall (Problem 33)          │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: BFS = SHORTEST PATH (UNWEIGHTED)          ║
+  ║                                                                    ║
+  ║   1. BFS explores nodes in ORDER OF DISTANCE from source          ║
+  ║      → First discovery = shortest distance (GUARANTEED)           ║
+  ║      → This is THE most important property of BFS                 ║
+  ║                                                                    ║
+  ║   2. DISTANCE ARRAY: dist[node] = dist[parent] + 1               ║
+  ║      → The ONLY addition to basic BFS (Problem 3)                 ║
+  ║      → Tracks shortest distance to every reachable node           ║
+  ║                                                                    ║
+  ║   3. PATH RECONSTRUCTION: parent tracking + trace back            ║
+  ║      → Record who discovered each node                            ║
+  ║      → Follow parents from destination back to source             ║
+  ║      → Reverse to get source → destination path                   ║
+  ║                                                                    ║
+  ║   4. DFS CANNOT find shortest path efficiently                    ║
+  ║      → DFS explores deep, not nearest-first                       ║
+  ║      → Would need to try ALL paths → exponential                  ║
+  ║                                                                    ║
+  ║   5. BFS only works for UNWEIGHTED (or equal-weight) graphs      ║
+  ║      → Different weights → Dijkstra (Problem 23)                  ║
+  ║      → This is the first step in the shortest path hierarchy      ║
+  ║                                                                    ║
+  ║   MENTAL MODEL:                                                    ║
+  ║   "BFS is like a stone dropped in water —                         ║
+  ║    the ripple reaches distance-1 before distance-2.               ║
+  ║    The first time the ripple touches a point =                     ║
+  ║    the shortest distance to that point."                          ║
+  ║                                                                    ║
+  ║   DECISION RULE:                                                   ║
+  ║   ┌──────────────────────────────────────────────────────────┐     ║
+  ║   │  "Shortest path" + "unweighted" = BFS with dist array   │     ║
+  ║   │  "Shortest path" + "weighted"   = Dijkstra (Problem 23) │     ║
+  ║   │  "Any path" (not shortest)      = DFS or BFS            │     ║
+  ║   └──────────────────────────────────────────────────────────┘     ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CONNECTION MAP</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  PHASE 1 (COMPLETE):
+</span>    P1-P2 (Graph Building) → P3 (BFS) → P9 (Shortest Path) ◄── HERE
+    
+  P9 connects to:
+    │
+    ├──→ P13 (Rotten Oranges) — multi-source BFS + distance = "time"
+    │     "How many minutes until all oranges rot?"
+    │     = multi-source shortest distance
+    │
+    ├──→ P14 (01 Matrix) — multi-source BFS + distance to nearest 0
+    │     = reverse thinking + BFS shortest path
+    │
+    ├──→ P15 (Word Ladder) — BFS shortest path on IMPLICIT graph
+    │     "Minimum transformations" = shortest path
+    │
+    ├──→ P23 (Dijkstra) — "what if edges have DIFFERENT weights?"
+    │     BFS generalized with priority queue
+    │
+    └──→ P42 (Bidirectional BFS) — BFS from BOTH ends
+          Optimization for shortest path
+
+  NEXT: P10 (Cycle Detection Undirected)
+    → Uses DFS (Problem 4), NOT BFS
+    → "I visited a neighbor that's already visited AND not my parent → CYCLE"
+    → First problem where BFS vs DFS MATTERS for the algorithm choice</code></pre></div>
+<hr>
+<p><strong>Problem 9 Complete.</strong><br>
+<strong>Ready for Problem 10: Detect Cycle in Undirected Graph?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="21" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-8.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 9 of 50</span>
+            </div>
+            <a href="problem-10.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

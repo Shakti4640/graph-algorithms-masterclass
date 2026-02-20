@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 44: Problem 44: Bipartite Maximum Matching — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="27">
+<div class="px-2"><h1>Problem 44: Bipartite Maximum Matching</h1>
+<h2>[Algorithm Family: Bipartite Matching — Flow Reduction &amp; Hungarian Method]</h2>
+<h2>[Phase 5: Expert — "I can design solutions for novel graph problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are organizing a coding competition. There are N programmers
+</span>and M computers. Each programmer can only use certain computers
+(based on OS preference, keyboard layout, etc.).
+
+Assign programmers to computers such that:
+  → Each programmer gets AT MOST one computer
+  → Each computer is used by AT MOST one programmer
+  → MAXIMUM number of programmers get a computer
+
+Input:
+  programmers = 4  (P0, P1, P2, P3)
+  computers   = 4  (C0, C1, C2, C3)
+  preferences = [
+    [0, 1],   # P0 can use C0 or C1
+    [0, 2],   # P0 can also use C2
+    [1, 0],   # P1 can use C0
+    [1, 3],   # P1 can use C3
+    [2, 1],   # P2 can use C1
+    [2, 2],   # P2 can use C2
+    [3, 2],   # P3 can use C2
+    [3, 3],   # P3 can use C3
+  ]
+
+Output: 4
+
+Explanation:
+  P0 → C0
+  P1 → C3
+  P2 → C1
+  P3 → C2
+  All 4 programmers get a computer!
+  
+  (Note: P0→C1, P1→C0, P2→C2, P3→C3 also works)</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Bipartite Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  BIPARTITE = two groups of nodes, edges only BETWEEN groups
+</span>
+  LEFT side          RIGHT side
+  (Programmers)      (Computers)
+
+     P0 ─────────── C0
+      │╲              │
+      │  ╲            │
+      │    ──────── C1
+      │               │
+      └──────────── C2
+                      │╲
+     P1 ─────────── C0  ╲
+      │                    ╲
+      └──────────── C3     │
+                    │      │
+     P2 ─────────── C1    │
+      │                    │
+      └──────────── C2 ───┘
+                    │
+     P3 ─────────── C2
+      │
+      └──────────── C3
+
+  Cleaner view:
+
+     P0 ──── C0
+     P0 ──── C1
+     P0 ──── C2
+     P1 ──── C0
+     P1 ──── C3
+     P2 ──── C1
+     P2 ──── C2
+     P3 ──── C2
+     P3 ──── C3
+
+  ASCII bipartite layout:
+
+     P0 ────┬──── C0
+      │     │      
+      ├─────┼──── C1
+      │     │      │
+      └─────┼──── C2 ────┐
+            │      │     │
+     P1 ────┘      │     │
+      │            │     │
+      └─────────── C3    │
+               │         │
+     P2 ───── C1         │
+      │                  │
+      └──────── C2 ──────┤
+                │        │
+     P3 ──────── C2      │
+      │                  │
+      └──────── C3 ──────┘</code></pre></div>
+<h3>Adjacency View</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  P0 can use: {C0, C1, C2}
+</span>  P1 can use: {C0, C3}
+  P2 can use: {C1, C2}
+  P3 can use: {C2, C3}</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║  Property        │  Answer                  │  Why?               ║
+  ╠══════════════════╪══════════════════════════╪═════════════════════╣
+  ║  NODES           │  Programmers + Computers │  Two distinct groups║
+  ║  EDGES           │  "Can use" relationships │  Preferences        ║
+  ║  Directed?       │  NO (assignment is mutual)│  Bidirectional     ║
+  ║  Weighted?       │  NO                      │  Just compatibility ║
+  ║  Bipartite?      │  YES                     │  Two groups, edges  ║
+  ║                  │                          │  only between groups║
+  ║  What we seek?   │  Maximum MATCHING        │  Most assignments   ║
+  ╚══════════════════╧══════════════════════════╧═════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 2: WHAT IS A MATCHING?</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  MATCHING: A set of edges where no two edges share a node.        ║
+  ║                                                                    ║
+  ║  In other words:                                                   ║
+  ║    → Each programmer assigned to AT MOST one computer              ║
+  ║    → Each computer assigned to AT MOST one programmer              ║
+  ║    → Some programmers/computers may be unassigned                  ║
+  ║                                                                    ║
+  ║  MAXIMUM MATCHING: Matching with the most edges possible.          ║
+  ║    → Assign as many programmers as possible                        ║
+  ║                                                                    ║
+  ║  PERFECT MATCHING: Every node is matched.                          ║
+  ║    → Every programmer gets a computer AND every computer is used   ║
+  ║    → Only possible if |left| = |right| and matching size = |left| ║
+  ║                                                                    ║
+  ╠════════════════════════════════════════════════════════════════════╣
+  ║                                                                    ║
+  ║  Example matchings for our problem:                                ║
+  ║                                                                    ║
+  ║  Matching 1 (size 3):                                              ║
+  ║    P0→C0, P2→C1, P3→C2                                           ║
+  ║    P1 unassigned (C0 taken, C3 available but not tried yet)       ║
+  ║    NOT maximum — P1 could get C3!                                  ║
+  ║                                                                    ║
+  ║  Matching 2 (size 4) — MAXIMUM:                                    ║
+  ║    P0→C0, P1→C3, P2→C1, P3→C2                                   ║
+  ║    All programmers assigned! This is also PERFECT.                 ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 3: BRUTE FORCE FIRST</h2>
+<h3>Naive Approach: Try All Possible Assignments</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → For each programmer, try each compatible computer
+</span>  → Check if assignment is valid (no conflicts)
+  → Track maximum number of assignments
+
+  For N programmers, each with up to M choices:
+    → Worst case: M^N possible assignments
+    → N=20, M=20: 20^20 ≈ 10^26 → IMPOSSIBLE
+
+  Even with backtracking and pruning: exponential worst case.</code></pre></div>
+<h3>Greedy Approach: Assign First Available</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → For each programmer in order, assign first available computer
+</span>  
+  Example (WRONG):
+    P0: try C0 → available → assign P0→C0
+    P1: try C0 → TAKEN → try C3 → available → assign P1→C3
+    P2: try C1 → available → assign P2→C1
+    P3: try C2 → available → assign P3→C2
+    Result: 4 (lucky! got optimal)
+
+  But greedy can FAIL:
+    Consider: P0 can use {C0}, P1 can use {C0, C1}
+    
+    Greedy: P0→C0, P1→C0 TAKEN, try C1→assign P1→C1. Size=2 ✓
+    But what if: P0 can use {C0}, P1 can use {C0}?
+    Greedy: P0→C0, P1→C0 TAKEN, no more options. Size=1
+    Optimal is still 1 here, but in general greedy misses rearrangements.
+
+  Another failure case:
+    P0: {C0, C1}
+    P1: {C0}
+    P2: {C1}
+    
+    Greedy: P0→C0, P1→C0 TAKEN (no alternative), P2→C1. Size=2
+    Optimal: P0→C1, P1→C0, P2→... C1 TAKEN. Size=2. Same here.
+    
+    But: P0→C0, P1 stuck. 
+    If we REASSIGN P0→C1 to free C0 for P1: P0→C1, P1→C0, P2→... stuck.
+    
+    The KEY insight: we need to be able to REARRANGE existing assignments
+    to make room for new ones. This is exactly what AUGMENTING PATHS do.</code></pre></div>
+<hr>
+<h2>STEP 4: IDENTIFYING THE GRAPH PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  THINKING PROCESS:
+</span>
+  "Assign items from group A to group B, maximize assignments"
+    → BIPARTITE MATCHING
+
+  "Two approaches exist":
+    1. REDUCE TO MAX FLOW (from Problem 43)
+    2. HUNGARIAN METHOD / AUGMENTING PATHS (direct approach)
+
+  Both give optimal answers. Let's learn BOTH.
+
+  ┌────────────────────────────────────────────────────────────────┐
+  │  Approach          │  Time              │  Complexity          │
+  ├────────────────────┼────────────────────┼──────────────────────┤
+  │  Max Flow Reduction│  O(V × E²)        │  Edmonds-Karp        │
+  │  (Problem 43)      │  (but E ≤ N+M+E'  │  from Problem 43     │
+  │                    │   and V = N+M+2)   │                      │
+  │                    │                    │                      │
+  │  Hungarian /       │  O(V × E)          │  Simpler, faster     │
+  │  Hopcroft-Karp     │  or O(E × √V)    │  for bipartite       │
+  │                    │                    │                      │
+  │  Augmenting Paths  │  O(V × E)          │  Simplest to code    │
+  │  (Kuhn's algorithm)│                    │  What we'll focus on │
+  └────────────────────┴────────────────────┴──────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 5: APPROACH 1 — MAX FLOW REDUCTION</h2>
+<h3>How to Model as Max Flow (From Problem 43)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Create a flow network:
+</span>
+  1. Super-source S connects to all programmers (capacity 1 each)
+  2. All computers connect to super-sink T (capacity 1 each)
+  3. Programmer→Computer edges have capacity 1
+
+         ┌→ P0 ──→ C0 ──┐
+         │   │╲     ↑    │
+         │   │  ──→ C1 ──┤
+    S ───┤   └──→ C2 ──┤──→ T
+         │              │
+         ├→ P1 ──→ C0 ──┤
+         │   └──→ C3 ──┤
+         │              │
+         ├→ P2 ──→ C1 ──┤
+         │   └──→ C2 ──┤
+         │              │
+         └→ P3 ──→ C2 ──┤
+              └──→ C3 ──┘
+
+  All edges have capacity = 1.
+  
+  Max flow from S to T = maximum matching!
+
+  WHY?
+    → Capacity 1 on S→Pi: each programmer used at most once
+    → Capacity 1 on Cj→T: each computer used at most once
+    → Capacity 1 on Pi→Cj: each assignment used at most once
+    → Max flow = max number of source-to-sink paths = max assignments</code></pre></div>
+<h3>Code: Max Flow Reduction</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">max_matching_via_flow</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_left</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n_right</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Maximum bipartite matching via reduction to max flow.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Directly uses Edmonds-Karp from Problem 43.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Node numbering:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      0 = super-source
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      1..n_left = left nodes (programmers)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      n_left+1..n_left+n_right = right nodes (computers)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      n_left+n_right+1 = super-sink
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n_left: number of left nodes
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n_right: number of right nodes
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [left_idx, right_idx] (0-indexed within each side)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Maximum matching size.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    total_nodes </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> n_left </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> n_right </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># source + left + right + sink</span><span>
+</span><span>    source </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    sink </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> total_nodes </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    flow_edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Source → each left node, capacity 1</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_left</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        flow_edges</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Each right node → sink, capacity 1</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_right</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        flow_edges</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> n_left </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sink</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Left → right edges, capacity 1</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> left_idx</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> right_idx </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> left_idx              </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># left node</span><span>
+</span><span>        v </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> n_left </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> right_idx    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># right node</span><span>
+</span><span>        flow_edges</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Run Edmonds-Karp from Problem 43</span><span>
+</span><span>    residual </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> total_nodes </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>total_nodes</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cap </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> flow_edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        residual</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> cap
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> total_nodes
+</span><span>        visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> total_nodes
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>        queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>total_nodes</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> residual</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                    parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> u
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> v </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> sink</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> parent
+</span><span>                    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span>
+</span>    
+<span>    total_flow </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> parent </span><span class="token" style="color: rgb(0, 0, 255);">is</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">None</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">break</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># All capacities are 1, so bottleneck is always 1</span><span>
+</span><span>        v </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> sink
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> v </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>            residual</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>            residual</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>            v </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> u
+</span><span>        total_flow </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> total_flow
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Max matching (flow): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">max_matching_via_flow</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">4</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">4</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> edges</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 4</span></code></pre></div>
+<h3>Why This Works But Isn't Ideal</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  Max flow reduction WORKS but:                                     │
+  │                                                                    │
+  │  → Creates extra nodes (source, sink)                              │
+  │  → Uses full Edmonds-Karp machinery (O(V×E²))                    │
+  │  → For bipartite matching specifically, SIMPLER algorithms exist   │
+  │  → Kuhn's algorithm: O(V×E) — same result, less overhead         │
+  │  → Hopcroft-Karp: O(E×√V) — even faster                         │
+  │                                                                    │
+  │  Flow reduction is POWERFUL for showing problems are solvable,     │
+  │  but specialized algorithms are often more efficient.              │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 6: APPROACH 2 — KUHN'S ALGORITHM (Augmenting Paths)</h2>
+<h3>The Key Insight: Augmenting Paths in Matching</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  An AUGMENTING PATH in matching is:                                ║
+  ║    → A path that ALTERNATES between unmatched and matched edges    ║
+  ║    → Starts at an UNMATCHED left node                              ║
+  ║    → Ends at an UNMATCHED right node                               ║
+  ║    → By "flipping" all edges on this path:                         ║
+  ║      matched → unmatched, unmatched → matched                     ║
+  ║      we INCREASE the matching size by 1                            ║
+  ║                                                                    ║
+  ║  BERGE'S THEOREM:                                                  ║
+  ║    A matching is maximum ⟺ no augmenting path exists              ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<h3>Visual: Augmenting Path Example</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Current matching (size 2):
+</span>    P0 ═══ C0    (matched)
+    P1 ═══ C3    (matched)
+    P2 ─── C1    (unmatched edge)
+    P2 ─── C2    (unmatched edge)
+    P3 ─── C2    (unmatched edge)
+    P3 ─── C3    (unmatched edge)
+
+  P2 is UNMATCHED. Can we find an augmenting path from P2?
+
+  Augmenting path:
+    P2 ─── C1 (unmatched edge, C1 is FREE!)
+    
+  SIMPLE! Just assign P2→C1. Matching size increases to 3.
+
+  New matching (size 3):
+    P0 ═══ C0
+    P1 ═══ C3
+    P2 ═══ C1    (newly matched)
+
+  Now P3 is UNMATCHED. Can we find an augmenting path from P3?
+
+  P3 can use C2 or C3.
+    → C2: FREE! Assign P3→C2. 
+
+  Matching size = 4 (MAXIMUM!)
+    P0 ═══ C0
+    P1 ═══ C3
+    P2 ═══ C1
+    P3 ═══ C2</code></pre></div>
+<h3>When Augmenting Requires Rearrangement</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Different scenario:
+</span>
+  Current matching (size 2):
+    P0 ═══ C0
+    P1 ═══ C0  ← WAIT, can't both use C0!
+
+  Let me set up a case where rearrangement is needed:
+
+    P0 can use: {C0}
+    P1 can use: {C0, C1}
+    P2 can use: {C1}
+
+  Greedy:
+    P0 → C0 (only option)
+    P1 → C0 TAKEN, try C1 → assign P1→C1
+    P2 → C1 TAKEN, no more options. Size = 2.
+
+  But is 3 possible? No — P0 and P2 both need their only option,
+  and P1 bridges them. Max matching = 2.
+
+  Now consider:
+    P0 can use: {C0, C1}
+    P1 can use: {C0}
+    P2 can use: {C1}
+
+  Greedy:
+    P0 → C0
+    P1 → C0 TAKEN, no more options. STUCK at size 1!
+
+  BUT with augmenting paths:
+    P1 unmatched, tries C0
+    C0 is matched to P0
+    Can P0 find ALTERNATIVE? P0 can also use C1
+    C1 is FREE!
+    
+    AUGMENTING PATH: P1 ─── C0 ═══ P0 ─── C1
+                     (new)  (old match) (rearrange)
+    
+    FLIP: P1 ═══ C0, P0 ═══ C1
+    
+    Now try P2:
+    P2 tries C1 → TAKEN by P0
+    Can P0 find alternative? Already reassigned, check...
+    P0 is at C1, can use C0 → TAKEN by P1
+    Can P1 find alternative? Only C0 → stuck.
+    
+    P2 cannot be matched. Size = 2.
+    
+  THIS IS THE POWER OF AUGMENTING PATHS:
+    → "If my target is taken, ask the current occupant to MOVE"
+    → "They try to find an alternative recursively"
+    → "If they can move → I take their spot → matching grows"
+    → "If nobody can move → this left node stays unmatched"</code></pre></div>
+<h3>Kuhn's Algorithm — Step by Step</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  FOR each unmatched left node:
+</span>    Try to find an augmenting path using DFS:
+      → Try each compatible right node
+      → If right node is FREE: match them! (augmenting path of length 1)
+      → If right node is TAKEN by someone else:
+          → Recursively ask that "someone else" to find alternative
+          → If they succeed: take this right node! 
+          → If they fail: try next right node
+    If augmenting path found: matching size += 1
+    If not: this left node stays unmatched</code></pre></div>
+<hr>
+<h2>STEP 7: ALGORITHM WALKTHROUGH</h2>
+<h3>Step-by-Step Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Programmers: P0, P1, P2, P3
+</span>  Computers:   C0, C1, C2, C3
+
+  Adjacency:
+    P0: [C0, C1, C2]
+    P1: [C0, C3]
+    P2: [C1, C2]
+    P3: [C2, C3]
+
+  match_right = [-1, -1, -1, -1]  (which left node each right node is matched to)
+  match_right[j] = i means computer j is assigned to programmer i
+  -1 means unmatched</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │  Processing P0 (try to match P0):                                  │
+  │                                                                    │
+  │  visited = {} (fresh for each left node attempt)                   │
+  │                                                                    │
+  │  P0 tries C0:                                                      │
+  │    match_right[0] = -1 → C0 is FREE!                              │
+  │    → match_right[0] = 0 (P0 gets C0)                              │
+  │    → RETURN TRUE                                                   │
+  │                                                                    │
+  │  match_right = [0, -1, -1, -1]                                    │
+  │  Matching: P0═══C0                                                │
+  │  Matching size: 1                                                  │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Processing P1 (try to match P1):                                  │
+  │                                                                    │
+  │  visited = {}                                                      │
+  │                                                                    │
+  │  P1 tries C0:                                                      │
+  │    match_right[0] = 0 → C0 is taken by P0                        │
+  │    Mark C0 as visited                                              │
+  │    Can P0 find alternative? (recursive call)                       │
+  │                                                                    │
+  │    ┌── Recursive: try to rematch P0 ──┐                           │
+  │    │  P0 tries C0: visited → SKIP      │                          │
+  │    │  P0 tries C1:                      │                          │
+  │    │    match_right[1] = -1 → FREE!    │                          │
+  │    │    → match_right[1] = 0 (P0→C1)  │                          │
+  │    │    → RETURN TRUE                   │                          │
+  │    └────────────────────────────────────┘                          │
+  │                                                                    │
+  │  P0 moved to C1! C0 is now free for P1.                           │
+  │  → match_right[0] = 1 (P1 gets C0)                               │
+  │  → RETURN TRUE                                                    │
+  │                                                                    │
+  │  match_right = [1, 0, -1, -1]                                    │
+  │  Matching: P0═══C1, P1═══C0                                      │
+  │  Matching size: 2                                                  │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Processing P2 (try to match P2):                                  │
+  │                                                                    │
+  │  visited = {}                                                      │
+  │                                                                    │
+  │  P2 tries C1:                                                      │
+  │    match_right[1] = 0 → C1 is taken by P0                        │
+  │    Mark C1 as visited                                              │
+  │    Can P0 find alternative?                                        │
+  │                                                                    │
+  │    ┌── Recursive: try to rematch P0 ──┐                           │
+  │    │  P0 tries C0:                      │                          │
+  │    │    match_right[0] = 1 → taken by P1│                         │
+  │    │    Mark C0 visited                  │                         │
+  │    │    Can P1 find alternative?         │                         │
+  │    │                                     │                         │
+  │    │    ┌── Recursive: rematch P1 ──┐   │                         │
+  │    │    │  P1 tries C0: visited→SKIP│   │                         │
+  │    │    │  P1 tries C3:             │   │                         │
+  │    │    │    match_right[3]=-1→FREE!│   │                         │
+  │    │    │    match_right[3]=1       │   │                         │
+  │    │    │    → RETURN TRUE          │   │                         │
+  │    │    └───────────────────────────┘   │                         │
+  │    │                                     │                         │
+  │    │  P1 moved to C3! C0 free for P0.   │                         │
+  │    │  match_right[0] = 0 (P0→C0)        │                         │
+  │    │  → RETURN TRUE                      │                         │
+  │    └─────────────────────────────────────┘                         │
+  │                                                                    │
+  │  P0 moved to C0, P1 moved to C3! C1 free for P2.                 │
+  │  → match_right[1] = 2 (P2 gets C1)                               │
+  │  → RETURN TRUE                                                    │
+  │                                                                    │
+  │  match_right = [0, 2, -1, 1]                                     │
+  │  Matching: P0═══C0, P1═══C3, P2═══C1                             │
+  │  Matching size: 3                                                  │
+  │                                                                    │
+  │  CHAIN OF REARRANGEMENTS:                                          │
+  │    P2 wanted C1 → kicked P0 to C0 → kicked P1 to C3              │
+  │    This is the AUGMENTING PATH:                                    │
+  │    P2 ─── C1 ═══ P0 ─── C0 ═══ P1 ─── C3                       │
+  │    (new) (old)  (rearr) (old) (rearr) (new)                      │
+  │    Flip: P2═══C1, P0═══C0, P1═══C3                               │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Processing P3 (try to match P3):                                  │
+  │                                                                    │
+  │  visited = {}                                                      │
+  │                                                                    │
+  │  P3 tries C2:                                                      │
+  │    match_right[2] = -1 → C2 is FREE!                              │
+  │    → match_right[2] = 3 (P3 gets C2)                              │
+  │    → RETURN TRUE                                                   │
+  │                                                                    │
+  │  match_right = [0, 2, 3, 1]                                      │
+  │  Matching: P0═══C0, P1═══C3, P2═══C1, P3═══C2                   │
+  │  Matching size: 4                                                  │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ═══════════════════════════════════════════════════════════════════
+  FINAL MATCHING (size 4):
+    P0 → C0
+    P1 → C3
+    P2 → C1
+    P3 → C2
+  
+  MAXIMUM MATCHING = 4 (all programmers assigned!) ✓
+  ═══════════════════════════════════════════════════════════════════</code></pre></div>
+<h3>Why the Visited Set Is Critical</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  The visited set prevents INFINITE LOOPS in recursive rematching.  │
+  │                                                                    │
+  │  Without visited:                                                  │
+  │    P2 tries C1 → kicks P0 → P0 tries C1 → kicks P2 → ...        │
+  │    INFINITE LOOP!                                                  │
+  │                                                                    │
+  │  With visited:                                                     │
+  │    P2 tries C1 → marks C1 visited → kicks P0                     │
+  │    P0 tries C1 → C1 VISITED → SKIP → try C0 instead             │
+  │    No loop!                                                        │
+  │                                                                    │
+  │  IMPORTANT: visited is reset for EACH new left node attempt.       │
+  │  It tracks "which right nodes have been considered in THIS         │
+  │  augmenting path search" — not globally across all searches.       │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: COMPLETE CODE</h2>
+<h3>Kuhn's Algorithm (Primary — Simplest)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">max_bipartite_matching</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_left</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n_right</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> adj</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Maximum bipartite matching using Kuhn's algorithm
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    (augmenting paths via DFS).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Key idea:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      For each unmatched left node, try to find an augmenting path.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Augmenting path = alternating path from unmatched left to 
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      unmatched right, flipping matched/unmatched edges increases
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      matching by 1.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    The DFS recursively asks: "Can the current occupant move elsewhere?"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    If yes → take their spot. If no → try next option.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n_left: number of left nodes (0 to n_left-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n_right: number of right nodes (0 to n_right-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        adj: adj[i] = list of right nodes that left node i can match with
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        (matching_size, match_left, match_right)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        match_left[i] = right node matched to left node i (-1 if unmatched)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        match_right[j] = left node matched to right node j (-1 if unmatched)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># match_right[j] = which left node is matched to right node j</span><span>
+</span><span>    match_right </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n_right
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>left_node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Try to find augmenting path starting from left_node.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        visited: set of right nodes already tried in THIS search
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">                 (prevents infinite loops)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Returns True if augmenting path found (matching improved).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> right_node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> adj</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>left_node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> right_node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># already tried this right node in this search</span><span>
+</span>            
+<span>            visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>right_node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Case 1: right_node is FREE → match directly!</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Case 2: right_node is taken, but current occupant can MOVE</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>match_right</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>right_node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> 
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>match_right</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>right_node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Either free, or occupant found alternative</span><span>
+</span><span>                match_right</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>right_node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> left_node
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># no augmenting path from this left node</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Try to match each left node</span><span>
+</span><span>    matching_size </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> left_node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_left</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># FRESH visited for each left node attempt</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>left_node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            matching_size </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Build match_left from match_right</span><span>
+</span><span>    match_left </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n_left
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_right</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> match_right</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            match_left</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>match_right</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> j
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> matching_size</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> match_left</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> match_right
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST CASES ───</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 1: Main example</span><span>
+</span><span>adj1 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># P0 can use C0, C1, C2</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># P1 can use C0, C3</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># P2 can use C1, C2</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># P3 can use C2, C3</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>size</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ml</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> mr </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> max_bipartite_matching</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> adj1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 1: matching size = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">size</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Left matches:  </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">ml</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Right matches: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">mr</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: size=4, all matched</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 2: Not everyone can be matched</span><span>
+</span><span>adj2 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># P0 can only use C0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># P1 can only use C0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># P2 can only use C0</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>size</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ml</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> mr </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> max_bipartite_matching</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> adj2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\nTest 2: matching size = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">size</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Left matches:  </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">ml</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: size=1 (only one computer!)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 3: Perfect matching exists</span><span>
+</span><span>adj3 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># P0 → C0 or C1</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># P1 → C0 or C1</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>size</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ml</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> mr </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> max_bipartite_matching</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> adj3</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\nTest 3: matching size = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">size</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Left matches:  </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">ml</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: size=2</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 4: Empty graph (no edges)</span><span>
+</span><span>adj4 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>size</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ml</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> mr </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> max_bipartite_matching</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> adj4</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\nTest 4: matching size = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">size</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: size=0</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 5: Single node each side</span><span>
+</span><span>adj5 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>size</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ml</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> mr </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> max_bipartite_matching</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> adj5</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\nTest 5: matching size = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">size</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: size=1</span></code></pre></div>
+<hr>
+<h3>Version with Debug Output</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">max_matching_debug</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_left</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n_right</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> adj</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Kuhn's algorithm with detailed trace."""</span><span>
+</span>    
+<span>    match_right </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n_right
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>left_node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> depth</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        indent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"    "</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> depth
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> right_node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> adj</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>left_node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> right_node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>            visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>right_node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            occupant </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> match_right</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>right_node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> occupant </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">indent</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">P</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">left_node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> → C</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">right_node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: FREE! Match!"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                match_right</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>right_node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> left_node
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">indent</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">P</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">left_node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> → C</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">right_node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: taken by P</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">occupant</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">, trying to move P</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">occupant</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">..."</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>occupant</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> depth </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">indent</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">P</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">occupant</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> moved! P</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">left_node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> takes C</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">right_node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                    match_right</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>right_node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> left_node
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">indent</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">P</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">occupant</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> can't move. Try next option for P</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">left_node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation" style="color: rgb(163, 21, 21);">'    '</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">*</span><span class="token string-interpolation interpolation"> depth</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">P</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">left_node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: no options left. FAIL."</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>    
+<span>    total </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_left</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\n--- Matching P</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">i</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> (options: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation" style="color: rgb(163, 21, 21);">'C'</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">+</span><span class="token string-interpolation interpolation builtin">str</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">c</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(0, 0, 255);">for</span><span class="token string-interpolation interpolation"> c </span><span class="token string-interpolation interpolation" style="color: rgb(0, 0, 255);">in</span><span class="token string-interpolation interpolation"> adj</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">i</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">) ---"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            total </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Current matching: "</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> end</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(163, 21, 21);">""</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_right</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> match_right</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"P</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">match_right</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">j</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">→C</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">j</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">  "</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> end</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(163, 21, 21);">""</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\n</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation" style="color: rgb(163, 21, 21);">'='</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">*</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">50</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"MAXIMUM MATCHING = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">total</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> total
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Run debug</span><span>
+</span><span>adj </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>max_matching_debug</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> adj</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Debug Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>--- Matching P0 (options: ['C0', 'C1', 'C2']) ---
+</span>P0 → C0: FREE! Match!
+  Current matching: P0→C0  
+
+--- Matching P1 (options: ['C0', 'C3']) ---
+P1 → C0: taken by P0, trying to move P0...
+    P0 → C1: FREE! Match!
+P0 moved! P1 takes C0
+  Current matching: P1→C0  P0→C1  
+
+--- Matching P2 (options: ['C1', 'C2']) ---
+P2 → C1: taken by P0, trying to move P0...
+    P0 → C0: taken by P1, trying to move P1...
+        P1 → C3: FREE! Match!
+    P1 moved! P0 takes C0
+P0 moved! P2 takes C1
+  Current matching: P0→C0  P2→C1  P1→C3  
+
+--- Matching P3 (options: ['C2', 'C3']) ---
+P3 → C2: FREE! Match!
+  Current matching: P0→C0  P2→C1  P3→C2  P1→C3  
+
+==================================================
+MAXIMUM MATCHING = 4</code></pre></div>
+<hr>
+<h2>STEP 9: COMPLEXITY ANALYSIS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │  KUHN'S ALGORITHM:                                               │
+  │                                                                  │
+  │  Let L = left nodes, R = right nodes, E = edges                 │
+  │                                                                  │
+  │  TIME: O(L × E)                                                 │
+  │                                                                  │
+  │  WHY?                                                            │
+  │    → We try to match each of L left nodes                        │
+  │    → Each attempt runs a DFS                                     │
+  │    → DFS visits each right node at most once (visited set)       │
+  │    → Each right node has at most deg(right) edges to check       │
+  │    → Total edges checked per DFS ≤ E (in worst case)            │
+  │    → L attempts × O(E) per attempt = O(L × E)                  │
+  │                                                                  │
+  │  In practice: often much faster because DFS terminates early     │
+  │                                                                  │
+  │  SPACE: O(L + R + E)                                             │
+  │    → Adjacency list: O(L + E)                                   │
+  │    → match_right: O(R)                                           │
+  │    → visited set: O(R) per DFS call                             │
+  │    → Recursion stack: O(R) depth in worst case                  │
+  │                                                                  │
+  ├──────────────────────────────────────────────────────────────────┤
+  │                                                                  │
+  │  COMPARISON OF BIPARTITE MATCHING ALGORITHMS:                    │
+  │                                                                  │
+  │  Algorithm         │  Time           │  Notes                   │
+  │  ──────────────────┼─────────────────┼───────────────────────── │
+  │  Kuhn's (this)     │  O(V × E)       │  Simplest to implement  │
+  │                    │                 │  Good for interviews     │
+  │                    │                 │                          │
+  │  Hopcroft-Karp     │  O(E × √V)    │  Faster for large graphs │
+  │                    │                 │  Uses BFS + DFS combined │
+  │                    │                 │                          │
+  │  Max Flow          │  O(V × E²)     │  Most general            │
+  │  (Edmonds-Karp)    │                 │  Works for weighted too  │
+  │                    │                 │                          │
+  │  Hungarian         │  O(V³)          │  For WEIGHTED matching   │
+  │                    │                 │  Minimum cost assignment  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 10: REAL-WORLD APPLICATIONS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  WHERE BIPARTITE MATCHING APPEARS:                                 ║
+  ║                                                                    ║
+  ║  1. JOB ASSIGNMENT                                                 ║
+  ║     → Workers to tasks, students to projects                       ║
+  ║     → Each worker qualified for certain tasks                      ║
+  ║     → Maximize assignments                                         ║
+  ║                                                                    ║
+  ║  2. STABLE MATCHING (related but different)                        ║
+  ║     → Hospital-resident matching (NRMP algorithm)                  ║
+  ║     → Gale-Shapley algorithm (Nobel Prize in Economics 2012)       ║
+  ║                                                                    ║
+  ║  3. SCHEDULING                                                     ║
+  ║     → Time slots to events                                         ║
+  ║     → Machines to jobs in manufacturing                            ║
+  ║                                                                    ║
+  ║  4. NETWORK DESIGN                                                 ║
+  ║     → Servers to clients                                           ║
+  ║     → Channels to users in communication                           ║
+  ║                                                                    ║
+  ║  5. PATTERN RECOGNITION                                            ║
+  ║     → Feature matching between images                              ║
+  ║     → Point cloud registration                                     ║
+  ║                                                                    ║
+  ║  6. VERTEX COVER / INDEPENDENT SET (König's theorem)              ║
+  ║     → Min vertex cover = max matching in bipartite graphs          ║
+  ║     → Max independent set = V - max matching in bipartite graphs   ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 11: RELATED THEOREM — KÖNIG'S THEOREM</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  KÖNIG'S THEOREM (for bipartite graphs only):                     ║
+  ║                                                                    ║
+  ║  Maximum Matching = Minimum Vertex Cover                           ║
+  ║                                                                    ║
+  ║  VERTEX COVER: minimum set of nodes such that every edge           ║
+  ║  has at least one endpoint in the set.                             ║
+  ║                                                                    ║
+  ║  INDEPENDENT SET: maximum set of nodes with no edges between them. ║
+  ║                                                                    ║
+  ║  RELATIONSHIPS:                                                    ║
+  ║    Max Matching = Min Vertex Cover                                 ║
+  ║    Max Independent Set = |V| - Min Vertex Cover                    ║
+  ║                        = |V| - Max Matching                        ║
+  ║                                                                    ║
+  ║  These equalities hold ONLY in bipartite graphs!                   ║
+  ║  In general graphs, matching ≤ vertex cover.                      ║
+  ║                                                                    ║
+  ║  INTERVIEW TIP: If asked about min vertex cover in bipartite      ║
+  ║  graph → find max matching → that's your answer!                  ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Not resetting visited set for each left node         ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG:                                                          ║
+  ║    visited = set()        ← created ONCE                        ║
+  ║    for left_node in range(n_left):                               ║
+  ║        dfs(left_node, visited)  ← same visited for all!         ║
+  ║                                                                  ║
+  ║  RIGHT:                                                          ║
+  ║    for left_node in range(n_left):                               ║
+  ║        visited = set()    ← FRESH for each left node            ║
+  ║        dfs(left_node, visited)                                   ║
+  ║                                                                  ║
+  ║  Each left node's augmenting path search is INDEPENDENT.         ║
+  ║  Using shared visited blocks valid rearrangements.               ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Checking left node visited instead of right node     ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  We visit RIGHT nodes (computers), not left nodes (programmers). ║
+  ║  The visited set prevents revisiting the same right node         ║
+  ║  in one augmenting path search.                                  ║
+  ║                                                                  ║
+  ║  If we tracked left nodes instead:                               ║
+  ║    → Could miss valid augmenting paths                           ║
+  ║    → Different nodes, different semantics                        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Modifying match during failed DFS                    ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  The code sets match_right[right_node] = left_node ONLY when    ║
+  ║  the recursive call succeeds. If the recursive call FAILS,      ║
+  ║  match_right is NOT modified — the old matching is preserved.   ║
+  ║                                                                  ║
+  ║  This happens naturally in our code because we only update       ║
+  ║  match_right AFTER confirming the DFS returned True.             ║
+  ║                                                                  ║
+  ║  BUT: in some implementations, people update match_right         ║
+  ║  BEFORE the recursive call and forget to undo on failure.        ║
+  ║  → WRONG! Must update only on success.                           ║
+  ║                                                                  ║
+  ║  Actually, looking carefully at Kuhn's: the standard             ║
+  ║  implementation DOES update inside the if-block, which only      ║
+  ║  executes on success. The recursive calls modify match_right     ║
+  ║  for OTHER nodes (the ones being rearranged), and these          ║
+  ║  modifications are correct because they form the augmenting path.║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: More left nodes than right nodes                     ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  10 programmers, 3 computers → at most 3 can be matched         ║
+  ║  Algorithm handles correctly: most DFS calls return False        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Disconnected nodes (no edges)                        ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  adj[i] = [] → DFS returns False immediately                    ║
+  ║  → Left node stays unmatched → correct                          ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Complete bipartite graph (all connected to all)      ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Every left can match with every right.                          ║
+  ║  Matching size = min(n_left, n_right)                            ║
+  ║  Algorithm finds this in O(min(L,R) × E) time.                  ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 13: CONNECTION TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 1  → Adjacency list (how we store bipartite graph)
+</span>  Problem 4  → DFS (Kuhn's algorithm uses DFS for augmenting paths)
+  Problem 12 → Bipartite check (verify graph IS bipartite before matching)
+  Problem 43 → Max Flow (bipartite matching reduces to max flow)
+
+  EVOLUTION:
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │  Problem 12: "IS this graph bipartite?"                             │
+  │    → 2-coloring BFS/DFS                                             │
+  │    → Just CHECKING a property                                       │
+  │                                                                      │
+  │  Problem 44: "Given a bipartite graph, find MAXIMUM MATCHING"       │
+  │    → Kuhn's algorithm (augmenting paths DFS)                        │
+  │    → Or max flow reduction (Problem 43)                             │
+  │    → OPTIMIZING over the bipartite structure                        │
+  │                                                                      │
+  │  Problem 43 → 44 connection:                                         │
+  │    → Max flow is a GENERAL tool                                     │
+  │    → Bipartite matching is a SPECIFIC application                   │
+  │    → Kuhn's is a SPECIALIZED algorithm (simpler, often faster)      │
+  │    → Shows the power of REDUCTION: "solve new problem using known"  │
+  └──────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 14: WHEN TO USE THIS VS ALTERNATIVES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  "Maximum matching in BIPARTITE graph (unweighted)"               │
+  │    → Kuhn's algorithm: O(V×E) — simplest, great for interviews   │
+  │    → Hopcroft-Karp: O(E√V) — faster for large graphs             │
+  │    → Max flow reduction: O(V×E²) — overkill but works            │
+  │                                                                    │
+  │  "Maximum matching in GENERAL graph (non-bipartite)"              │
+  │    → Edmonds' blossom algorithm — much more complex               │
+  │    → O(V³) — rarely asked in interviews                          │
+  │    → Know it EXISTS but don't need to implement                   │
+  │                                                                    │
+  │  "Maximum WEIGHTED matching (assignment problem)"                  │
+  │    → Hungarian algorithm: O(V³)                                   │
+  │    → Min-cost max-flow: also works                                │
+  │    → "Minimize total cost of assignments"                          │
+  │                                                                    │
+  │  "Stable matching (preferences on both sides)"                     │
+  │    → Gale-Shapley algorithm: O(V²)                               │
+  │    → Different problem: stability, not maximality                  │
+  │                                                                    │
+  │  INTERVIEW RECOMMENDATION:                                        │
+  │    → Know Kuhn's algorithm (this problem)                          │
+  │    → Know max flow reduction (Problem 43)                          │
+  │    → Mention Hopcroft-Karp as optimization if asked               │
+  │    → Mention Hungarian for weighted version if asked               │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 15: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Two groups, assign items between them"                 │
+  │    → Workers to jobs, students to projects, drivers to rides       │
+  │    → Each item in group A compatible with some in group B          │
+  │    → Maximize number of assignments                                │
+  │    → BIPARTITE MATCHING                                            │
+  │                                                                    │
+  │  SIGNAL 2: "Each X gets at most one Y, each Y used by at most one"│
+  │    → One-to-one constraint = matching                              │
+  │    → Two distinct types = bipartite                                │
+  │                                                                    │
+  │  SIGNAL 3: "Maximum number of non-conflicting pairs"               │
+  │    → Pairs = edges in matching                                     │
+  │    → Non-conflicting = no shared endpoints                         │
+  │                                                                    │
+  │  SIGNAL 4: Problem can be modeled with two "sides"                 │
+  │    → Even if not obvious: rows/columns, time slots/events,        │
+  │      left/right positions                                          │
+  │                                                                    │
+  │  MY THOUGHT PROCESS:                                               │
+  │                                                                    │
+  │    "Assign programmers to computers, maximize assignments"          │
+  │      → Two groups: programmers and computers                       │
+  │      → Edges: compatibility                                        │
+  │      → One-to-one: matching                                        │
+  │      → Maximize: maximum matching                                  │
+  │      → BIPARTITE MATCHING → Kuhn's algorithm                      │
+  │                                                                    │
+  │    "Can I model this as max flow?"                                 │
+  │      → Yes: super source → left → right → super sink              │
+  │      → All capacities 1                                            │
+  │      → Max flow = max matching                                     │
+  │      → But Kuhn's is simpler and faster here                      │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 16: BONUS — PRACTICAL PROBLEM: TASK SCHEDULING</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">max_tasks_scheduled</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_tasks</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n_slots</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> compatible</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Schedule maximum tasks into time slots.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Each task can go in certain slots only.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Each slot holds at most one task.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This IS bipartite matching:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Left = tasks, Right = time slots
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Edge = task compatible with slot
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Example:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Task 0: slots [0, 1]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Task 1: slots [1, 2]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Task 2: slots [0, 2]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Maximum: 3 (all tasks scheduled)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Task 0 → Slot 0
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Task 1 → Slot 2 (or Slot 1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Task 2 → Slot 2 (or Slot 0)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Wait: Task 1→Slot 1, Task 0→Slot 0, Task 2→Slot 2 works!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    match_slot </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n_slots
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>task</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> slot </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> compatible</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>task</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> slot </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>            visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>slot</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> match_slot</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>slot</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>match_slot</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>slot</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                match_slot</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>slot</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> task
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>    
+<span>    count </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> task </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_tasks</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>task</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            count </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Build schedule</span><span>
+</span><span>    schedule </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> slot </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_slots</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> match_slot</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>slot</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            schedule</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Task </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">match_slot</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">slot</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Slot </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">slot</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> count</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> schedule
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test</span><span>
+</span><span>compatible </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Task 0 can go in slot 0 or 1</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Task 1 can go in slot 1 or 2</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Task 2 can go in slot 0 or 2</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>count</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> schedule </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> max_tasks_scheduled</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> compatible</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Tasks scheduled: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">count</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> task</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> slot </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> schedule</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>items</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">task</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> → </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">slot</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPTS LEARNED:                                            ║
+  ║                                                                    ║
+  ║   1. BIPARTITE MATCHING:                                           ║
+  ║      → Two groups, edges only between groups                       ║
+  ║      → Matching = set of edges with no shared endpoints            ║
+  ║      → Maximum matching = most edges possible                      ║
+  ║                                                                    ║
+  ║   2. KUHN'S ALGORITHM (Augmenting Paths):                         ║
+  ║      → For each unmatched left node: DFS to find augmenting path  ║
+  ║      → "Can the current occupant move elsewhere?"                  ║
+  ║      → If yes: rearrange and match new node                       ║
+  ║      → If no: node stays unmatched                                ║
+  ║      → O(V × E) — simple and efficient                           ║
+  ║                                                                    ║
+  ║   3. AUGMENTING PATH IN MATCHING:                                  ║
+  ║      → Alternating path: unmatched → matched → unmatched → ...   ║
+  ║      → Starts at unmatched left, ends at unmatched right           ║
+  ║      → Flipping all edges increases matching by 1                  ║
+  ║      → No augmenting path exists ⟺ matching is maximum           ║
+  ║                                                                    ║
+  ║   4. REDUCTION TO MAX FLOW:                                        ║
+  ║      → Add super-source → left nodes (cap 1)                      ║
+  ║      → Add right nodes → super-sink (cap 1)                       ║
+  ║      → Left → right edges (cap 1)                                 ║
+  ║      → Max flow = max matching                                     ║
+  ║      → Shows POWER of reduction: solve new problem via known one  ║
+  ║      → But specialized Kuhn's is simpler and faster here          ║
+  ║                                                                    ║
+  ║   5. KÖNIG'S THEOREM (bipartite only):                            ║
+  ║      → Max Matching = Min Vertex Cover                             ║
+  ║      → Max Independent Set = |V| - Max Matching                   ║
+  ║      → Powerful tool: solve three problems with one algorithm     ║
+  ║                                                                    ║
+  ║   6. THE VISITED SET TRICK:                                        ║
+  ║      → Fresh visited set for EACH left node attempt               ║
+  ║      → Prevents infinite loops in recursive rematching             ║
+  ║      → Tracks "which right nodes tried in THIS search"            ║
+  ║                                                                    ║
+  ║   MANTRA:                                                          ║
+  ║   "Two groups, one-to-one assignment, maximize count               ║
+  ║    → Bipartite matching → Kuhn's algorithm →                      ║
+  ║    For each unmatched: DFS to find augmenting path."               ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 17: THE MATCHING ALGORITHM FAMILY — COMPLETE MAP</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                        ║
+  ║  MATCHING PROBLEMS — DECISION TREE                                     ║
+  ║                                                                        ║
+  ║  "I need to pair/assign items optimally"                               ║
+  ║       │                                                                ║
+  ║       ├── Is the graph BIPARTITE?                                      ║
+  ║       │     │                                                          ║
+  ║       │     ├── YES, UNWEIGHTED (maximize count)                       ║
+  ║       │     │     → Kuhn's algorithm: O(V×E)  [THIS problem]         ║
+  ║       │     │     → Hopcroft-Karp: O(E√V) [faster]                   ║
+  ║       │     │     → Max flow reduction: O(V×E²) [general]            ║
+  ║       │     │                                                          ║
+  ║       │     ├── YES, WEIGHTED (minimize cost)                          ║
+  ║       │     │     → Hungarian algorithm: O(V³)                        ║
+  ║       │     │     → Min-cost max-flow                                  ║
+  ║       │     │     → "Assignment problem"                               ║
+  ║       │     │                                                          ║
+  ║       │     └── YES, with PREFERENCES (stability)                      ║
+  ║       │           → Gale-Shapley: O(V²)                              ║
+  ║       │           → "Stable matching"                                  ║
+  ║       │                                                                ║
+  ║       └── NO (general graph)                                           ║
+  ║             │                                                          ║
+  ║             ├── UNWEIGHTED                                             ║
+  ║             │     → Edmonds' Blossom algorithm: O(V³)                 ║
+  ║             │     → Complex — rarely in interviews                    ║
+  ║             │                                                          ║
+  ║             └── WEIGHTED                                               ║
+  ║                   → Weighted Blossom: O(V³)                           ║
+  ║                   → Very complex — competition level only             ║
+  ║                                                                        ║
+  ╠════════════════════════════════════════════════════════════════════════╣
+  ║                                                                        ║
+  ║  INTERVIEW PRIORITY:                                                   ║
+  ║    1. Kuhn's (bipartite, unweighted) — MUST KNOW                      ║
+  ║    2. Max flow reduction — MUST KNOW (from Problem 43)                ║
+  ║    3. Hungarian (weighted) — GOOD TO KNOW concept                     ║
+  ║    4. Hopcroft-Karp — MENTION as optimization                         ║
+  ║    5. Blossom — MENTION exists, don't need to implement               ║
+  ║                                                                        ║
+  ╚════════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 18: KUHN'S ALGORITHM — QUICK REFERENCE TEMPLATE</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">kuhn_template</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_left</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n_right</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> adj</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    ┌──────────────────────────────────────────────────────┐
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    │  KUHN'S ALGORITHM — COPY-PASTE TEMPLATE              │
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    │                                                      │
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    │  Input:                                              │
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    │    n_left: number of left nodes                      │
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    │    n_right: number of right nodes                    │
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    │    adj[i]: list of right nodes left node i connects  │
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    │                                                      │
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    │  Output:                                             │
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    │    Maximum matching size                              │
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    │    match_right[j] = which left node matched to j     │
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    └──────────────────────────────────────────────────────┘
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    match_right </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n_right
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> adj</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> match_right</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>match_right</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    match_right</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> u
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>    
+<span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n_left</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            result </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> match_right</span></code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  MEMORIZATION CHECKLIST (5 lines of core logic):
+</span>
+  1. match_right = [-1] * n_right          ← track who owns each right node
+  2. for v in adj[u]:                       ← try each compatible right node  
+  3. if v not in visited:                   ← skip if already tried this search
+  4. if match_right[v]==-1 or dfs(...)      ← free OR occupant can move
+  5. match_right[v] = u; return True        ← take the spot!
+
+  That's the ENTIRE algorithm. 5 lines of logic.
+  Everything else is setup and iteration.</code></pre></div>
+<hr>
+<h2>STEP 19: WHAT IF THE GRAPH WERE...</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │  "What if the graph were NOT bipartite?"                           │
+  │                                                                    │
+  │  → Kuhn's algorithm ONLY works for bipartite graphs               │
+  │  → For general graphs: Edmonds' blossom algorithm                  │
+  │  → Key issue: "odd cycles" create "blossoms" that must be         │
+  │    contracted (shrunk to single nodes) for augmenting paths        │
+  │  → Much more complex — O(V³)                                     │
+  │  → Know it exists but rarely implement in interviews              │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  "What if edges had WEIGHTS (cost of assignment)?"                 │
+  │                                                                    │
+  │  → "Minimize total cost while maximizing matching"                 │
+  │  → Hungarian algorithm: O(V³)                                     │
+  │  → Also called "assignment problem"                                │
+  │  → OR: min-cost max-flow (Bellman-Ford + flow from Problem 43)    │
+  │                                                                    │
+  │  Example: assign workers to tasks with different costs             │
+  │    Worker 0 → Task 0 costs 5, Task 1 costs 3                     │
+  │    Worker 1 → Task 0 costs 2, Task 1 costs 7                     │
+  │    Optimal: Worker 0→Task 1 (3), Worker 1→Task 0 (2) = total 5  │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  "What if each left node could match with MULTIPLE right nodes?"  │
+  │                                                                    │
+  │  → Not a matching anymore — it's a flow problem!                  │
+  │  → Source → left (capacity = max matches per left node)           │
+  │  → Right → sink (capacity = max matches per right node)           │
+  │  → Solve with max flow (Problem 43)                                │
+  │                                                                    │
+  │  Example: each programmer can use UP TO 2 computers               │
+  │  → Source → Pi with capacity 2                                     │
+  │  → Still Cj → Sink with capacity 1                                │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  "What if we needed to check if PERFECT matching exists?"          │
+  │                                                                    │
+  │  → Run max matching, check if size = min(n_left, n_right)         │
+  │  → Hall's theorem: perfect matching exists iff for every          │
+  │    subset S of left nodes, |N(S)| ≥ |S| where N(S) is the       │
+  │    set of neighbors of S                                           │
+  │  → Don't need to check Hall's condition directly —                │
+  │    just run Kuhn's and see if matching is perfect                  │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 20: CONNECTION TO PROBLEM 43 (MAX FLOW) — DEEP COMPARISON</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  PROBLEM 43 (Max Flow) vs PROBLEM 44 (Bipartite Matching):        │
+  │                                                                    │
+  │  Similarities:                                                     │
+  │    → Both find "maximum" of something in a graph                   │
+  │    → Both use augmenting paths as core technique                   │
+  │    → Matching REDUCES to flow (special case)                       │
+  │    → Both proved optimal by augmenting path exhaustion             │
+  │                                                                    │
+  │  Differences:                                                      │
+  │    → Flow: arbitrary capacities, general directed graph            │
+  │    → Matching: all capacities 1, bipartite structure               │
+  │    → Flow needs residual graph with backward edges                 │
+  │    → Matching: backward edges = "rematching" (simpler)            │
+  │    → Flow: BFS for shortest augmenting path (Edmonds-Karp)        │
+  │    → Matching: DFS for any augmenting path (Kuhn's)               │
+  │                                                                    │
+  │  KEY INSIGHT:                                                      │
+  │    Kuhn's DFS is essentially Ford-Fulkerson on a bipartite        │
+  │    flow network with unit capacities, but SIMPLIFIED:              │
+  │    → No explicit residual graph needed                             │
+  │    → match_right array implicitly encodes the flow                │
+  │    → "Can occupant move?" = finding augmenting path in residual   │
+  │    → Much cleaner code for this special case                       │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>FINAL SUMMARY: Problems 43-44 Together</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  PROBLEM 43: Maximum Flow (Edmonds-Karp)                           ║
+  ║    → GENERAL tool for network optimization                         ║
+  ║    → Residual graph + BFS augmenting paths                        ║
+  ║    → O(V × E²)                                                   ║
+  ║    → Backward edges allow "undoing" bad decisions                 ║
+  ║                                                                    ║
+  ║  PROBLEM 44: Bipartite Matching (Kuhn's)                          ║
+  ║    → SPECIALIZED tool for assignment problems                      ║
+  ║    → DFS augmenting paths on bipartite graph                      ║
+  ║    → O(V × E) — faster for this special case                     ║
+  ║    → "Can the occupant move?" recursive rematching                ║
+  ║                                                                    ║
+  ║  RELATIONSHIP:                                                     ║
+  ║    44 is a SPECIAL CASE of 43                                      ║
+  ║    43 is the GENERAL framework                                     ║
+  ║    Knowing both: understand WHEN to use which                      ║
+  ║                                                                    ║
+  ║  PATTERN:                                                          ║
+  ║    General algorithm (max flow) vs specialized algorithm (Kuhn's) ║
+  ║    = the recurring theme in algorithm design                       ║
+  ║    "Use the most specific tool that fits your problem"             ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<p><strong>Problem 44 Complete.</strong><br>
+<strong>Ready for Problem 45: Lowest Common Ancestor (Binary Lifting)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+
+
+<!-- ========== data-index="5" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-43.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 44 of 50</span>
+            </div>
+            <a href="problem-45.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

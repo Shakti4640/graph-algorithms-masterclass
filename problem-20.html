@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 20: Problem 20: Topological Sort (DFS Approach) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="15">
+<div class="px-2"><h1>Problem 20: Topological Sort (DFS Approach)</h1>
+<h2>[Algorithm Family: Topological Sort — DFS Reverse Post-Order]</h2>
+<h2>[Phase 3: Standard Interview — "I can solve real interview problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Same setup as Problem 19:
+</span>
+You have N tasks (labeled 0 to N-1) with dependencies.
+Given a list of directed edges [A, B] meaning "A must come before B",
+find a valid ordering of all tasks.
+
+But this time, solve it using DFS instead of BFS.
+
+Example:
+  n = 6
+  edges = [[0,1], [0,2], [1,3], [2,3], [3,4], [1,5]]
+
+  Valid order: [0, 2, 1, 5, 3, 4]  (or any valid topological order)</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Same Graph as Problem 19</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  THE DIRECTED GRAPH (same as Problem 19):
+</span>  
+       0
+      / \
+     ↓   ↓
+     1    2
+    / \   |
+   ↓   ↓  ↓
+   5    3←─┘
+        |
+        ↓
+        4
+
+  ADJACENCY LIST:
+    0 → [1, 2]
+    1 → [3, 5]
+    2 → [3]
+    3 → [4]
+    4 → []
+    5 → []
+
+  Graph properties: same as Problem 19 (directed, acyclic, unweighted)
+  
+  The question: can we find topological order using DFS instead of BFS?</code></pre></div>
+<hr>
+<h2>STEP 2: THE KEY INSIGHT — Post-Order Reversal</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  KAHN'S (Problem 19): "Process nodes with no remaining deps"     │
+  │    → Forward thinking: who's READY now?                          │
+  │    → Uses IN-DEGREE as the guide                                 │
+  │                                                                  │
+  │  DFS APPROACH: "Process nodes AFTER all descendants are done"    │
+  │    → Backward thinking: who FINISHES last?                       │
+  │    → Uses POST-ORDER as the guide                                │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘
+
+  WHAT IS POST-ORDER?
+  
+  When DFS visits a node, there are two timestamps:
+    → DISCOVERY TIME: when we FIRST visit the node (going deeper)
+    → FINISH TIME: when we're DONE with the node (backtracking)
+  
+  POST-ORDER = the order in which nodes FINISH
+  
+  DFS from node 0:
+    Visit 0 (discover)
+      Visit 1 (discover)
+        Visit 3 (discover)
+          Visit 4 (discover)
+          Finish 4 ← post-order: 4         (leaf — finishes first)
+        Finish 3 ← post-order: 4, 3
+        Visit 5 (discover)
+        Finish 5 ← post-order: 4, 3, 5
+      Finish 1 ← post-order: 4, 3, 5, 1
+      Visit 2 (discover)
+        3 already visited → skip
+      Finish 2 ← post-order: 4, 3, 5, 1, 2
+    Finish 0 ← post-order: 4, 3, 5, 1, 2, 0
+  
+  Post-order:    [4, 3, 5, 1, 2, 0]
+  REVERSED:      [0, 2, 1, 5, 3, 4]  ← THIS IS A VALID TOPOLOGICAL ORDER!</code></pre></div>
+<h3>WHY Does Reversing Post-Order Work?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  CLAIM: If edge A → B exists, then A finishes AFTER B in DFS.   │
+  │                                                                  │
+  │  WHY?                                                            │
+  │                                                                  │
+  │  Case 1: DFS visits A first, then explores A's neighbors         │
+  │    → B is A's neighbor → DFS visits B during A's exploration     │
+  │    → B finishes before DFS returns to A                          │
+  │    → B finishes BEFORE A  ✓                                      │
+  │                                                                  │
+  │  Case 2: DFS visits B first (before A)                           │
+  │    → B's DFS doesn't reach A (edge is A→B, not B→A)             │
+  │    → B finishes                                                  │
+  │    → Later, DFS visits A                                         │
+  │    → A finishes after B  ✓                                       │
+  │                                                                  │
+  │  In BOTH cases: finish(B) &lt; finish(A)                            │
+  │                                                                  │
+  │  Post-order:  [..., B, ..., A, ...]   (B finishes before A)     │
+  │  Reversed:    [..., A, ..., B, ...]   (A appears before B)      │
+  │                                                                  │
+  │  This is EXACTLY what topological sort requires:                 │
+  │  "For every edge A → B, A appears before B"  ✓                  │
+  │                                                                  │
+  │  CRITICAL: This only works on DAGs!                              │
+  │  If there's a cycle A → B → A:                                   │
+  │    → Both "A finishes after B" AND "B finishes after A"          │
+  │    → CONTRADICTION → detected as back edge in DFS                │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Visual: Post-Order = "Deepest Nodes Finish First"</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>       0              Finish order (post-order):
+</span>      / \             
+     ↓   ↓            4 finishes first  (deepest leaf)
+     1    2            3 finishes second (parent of 4)
+    / \   |            5 finishes third  (another leaf from 1)
+   ↓   ↓  ↓           1 finishes fourth (parent of 3,5 — both done)
+   5    3←─┘           2 finishes fifth  (3 already done)
+        |              0 finishes last   (parent of everything)
+        ↓
+        4              Post-order:  [4, 3, 5, 1, 2, 0]
+                       REVERSED:    [0, 2, 1, 5, 3, 4]  ← topo order!
+
+  INTUITION: 
+    → Nodes with NO outgoing edges (leaves) finish FIRST
+    → Nodes that depend on others finish AFTER their dependents
+    → Root (no incoming edges) finishes LAST
+    → REVERSING gives: root first, leaves last = topological order!</code></pre></div>
+<hr>
+<h2>STEP 3: COMPARING KAHN'S vs DFS — Side by Side</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────┬─────────────────────────────────────┐
+</span>  │  KAHN'S (Problem 19)    │  DFS (this problem)                 │
+  ├─────────────────────────┼─────────────────────────────────────┤
+  │  Uses IN-DEGREE array    │  Uses VISITED set + STACK/list      │
+  │  BFS: queue of ready     │  DFS: recursion/stack               │
+  │  nodes                   │                                     │
+  │                          │                                     │
+  │  Forward: "who's ready?" │  Backward: "who finishes last?"     │
+  │                          │                                     │
+  │  Builds result FRONT     │  Builds result BACK to FRONT        │
+  │  to BACK                 │  (reverse post-order)               │
+  │                          │                                     │
+  │  Cycle: len(result) &lt; n  │  Cycle: back edge detected          │
+  │  (nodes never reach 0)   │  (visit in-progress node)           │
+  │                          │                                     │
+  │  Gives LAYERS naturally  │  No natural layering                │
+  │  (parallel scheduling)   │                                     │
+  │                          │                                     │
+  │  Iterative (no recursion │  Recursive (recursion limit risk)   │
+  │  limit)                  │  or iterative with explicit stack   │
+  │                          │                                     │
+  │  BOTH: O(V + E) time     │  BOTH: O(V + E) time               │
+  │  BOTH: O(V + E) space    │  BOTH: O(V + E) space              │
+  └─────────────────────────┴─────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — DFS Approach</h2>
+<h3>Three-State DFS (from Problem 11)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  We need THREE states per node (same as cycle detection in Problem 11):
+</span>  
+    WHITE (0) = UNVISITED    → haven't touched this node yet
+    GRAY  (1) = IN-PROGRESS  → currently in this node's DFS subtree
+    BLACK (2) = COMPLETED    → fully processed, added to post-order
+  
+  WHY three states?
+    → WHITE: needs to be visited
+    → GRAY: currently being explored (on the recursion stack)
+    → BLACK: done — all descendants explored and recorded
+    
+  CYCLE DETECTION:
+    → If we encounter a GRAY node → back edge → CYCLE!
+    → Same as Problem 11 (directed cycle detection)
+    → "I'm visiting a node that's still on my current path = loop"</code></pre></div>
+<h3>Step-by-Step Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  n = 6
+</span>  Graph:
+    0 → [1, 2]
+    1 → [3, 5]
+    2 → [3]
+    3 → [4]
+    4 → []
+    5 → []
+  
+  state = [WHITE, WHITE, WHITE, WHITE, WHITE, WHITE]
+  post_order = []    ← nodes added here when they FINISH
+  
+  ══════════════════════════════════════════════════════════
+  Start DFS from node 0 (first unvisited node)
+  ══════════════════════════════════════════════════════════
+  
+  dfs(0):
+    state[0] = GRAY  ← "I'm exploring node 0 now"
+    
+    Neighbor 1: state[1] = WHITE → recurse
+    ┌── dfs(1):
+    │     state[1] = GRAY
+    │     
+    │     Neighbor 3: state[3] = WHITE → recurse
+    │     ┌── dfs(3):
+    │     │     state[3] = GRAY
+    │     │     
+    │     │     Neighbor 4: state[4] = WHITE → recurse
+    │     │     ┌── dfs(4):
+    │     │     │     state[4] = GRAY
+    │     │     │     
+    │     │     │     No neighbors → done with 4
+    │     │     │     
+    │     │     │     state[4] = BLACK  ← "Node 4 fully explored"
+    │     │     │     post_order.append(4)
+    │     │     │     post_order = [4]
+    │     │     └── return
+    │     │     
+    │     │     No more neighbors of 3 → done with 3
+    │     │     
+    │     │     state[3] = BLACK
+    │     │     post_order.append(3)
+    │     │     post_order = [4, 3]
+    │     └── return
+    │     
+    │     Neighbor 5: state[5] = WHITE → recurse
+    │     ┌── dfs(5):
+    │     │     state[5] = GRAY
+    │     │     
+    │     │     No neighbors → done with 5
+    │     │     
+    │     │     state[5] = BLACK
+    │     │     post_order.append(5)
+    │     │     post_order = [4, 3, 5]
+    │     └── return
+    │     
+    │     No more neighbors of 1 → done with 1
+    │     
+    │     state[1] = BLACK
+    │     post_order.append(1)
+    │     post_order = [4, 3, 5, 1]
+    └── return
+    
+    Neighbor 2: state[2] = WHITE → recurse
+    ┌── dfs(2):
+    │     state[2] = GRAY
+    │     
+    │     Neighbor 3: state[3] = BLACK → already completed → SKIP
+    │     
+    │     (Not GRAY — so no cycle. Just already done.)
+    │     
+    │     No more neighbors of 2 → done with 2
+    │     
+    │     state[2] = BLACK
+    │     post_order.append(2)
+    │     post_order = [4, 3, 5, 1, 2]
+    └── return
+    
+    No more neighbors of 0 → done with 0
+    
+    state[0] = BLACK
+    post_order.append(0)
+    post_order = [4, 3, 5, 1, 2, 0]
+  
+  ══════════════════════════════════════════════════════════
+  All nodes visited (check: any remaining WHITE nodes?)
+  ══════════════════════════════════════════════════════════
+  
+  state = [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]
+  All visited → no more DFS calls needed
+  
+  ══════════════════════════════════════════════════════════
+  COMPUTE TOPOLOGICAL ORDER
+  ══════════════════════════════════════════════════════════
+  
+  post_order = [4, 3, 5, 1, 2, 0]
+  
+  REVERSE:   [0, 2, 1, 5, 3, 4]
+  
+  ══════════════════════════════════════════════════════════
+  VERIFICATION
+  ══════════════════════════════════════════════════════════
+  
+  Check all edges (A must appear before B):
+    [0,1]: 0 at idx 0, 1 at idx 2 → 0 before 1 ✓
+    [0,2]: 0 at idx 0, 2 at idx 1 → 0 before 2 ✓
+    [1,3]: 1 at idx 2, 3 at idx 4 → 1 before 3 ✓
+    [2,3]: 2 at idx 1, 3 at idx 4 → 2 before 3 ✓
+    [3,4]: 3 at idx 4, 4 at idx 5 → 3 before 4 ✓
+    [1,5]: 1 at idx 2, 5 at idx 3 → 1 before 5 ✓
+  
+  ALL constraints satisfied! ✓
+  ANSWER: [0, 2, 1, 5, 3, 4]</code></pre></div>
+<h3>Trace: What Happens With a CYCLE?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  n = 3, edges = [[0,1], [1,2], [2,0]]
+</span>  
+  Graph:
+    0 → [1]
+    1 → [2]
+    2 → [0]    ← creates cycle: 0 → 1 → 2 → 0
+  
+  state = [WHITE, WHITE, WHITE]
+  
+  dfs(0):
+    state[0] = GRAY
+    
+    Neighbor 1: WHITE → recurse
+    ┌── dfs(1):
+    │     state[1] = GRAY
+    │     
+    │     Neighbor 2: WHITE → recurse
+    │     ┌── dfs(2):
+    │     │     state[2] = GRAY
+    │     │     
+    │     │     Neighbor 0: state[0] = GRAY!!!
+    │     │     
+    │     │     ★★★ GRAY NODE ENCOUNTERED = BACK EDGE = CYCLE! ★★★
+    │     │     
+    │     │     → Return "CYCLE DETECTED"
+    │     │     → Propagate up: entire DFS returns failure
+    │     └── CYCLE
+    │   CYCLE
+    └── CYCLE
+  
+  Result: CYCLE DETECTED → return []
+  
+  THE GRAY CHECK:
+    WHITE → "unvisited, go ahead and visit"
+    GRAY  → "this node is my ANCESTOR on current path = CYCLE!"
+    BLACK → "fully done, skip (not a cycle, just cross/forward edge)"</code></pre></div>
+<h3>Why BLACK is Not a Cycle</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  In the original example (no cycle):
+</span>  
+  dfs(2):
+    Neighbor 3: state[3] = BLACK
+    
+    This means node 3 was ALREADY fully explored (by the path 0→1→3).
+    Node 2 also points to 3, but 3 is DONE — not on current path.
+    This is a "cross edge" (or "forward edge"), NOT a back edge.
+    
+    ┌────────────────────────────────────────────────────┐
+    │  GRAY  = "on my current DFS path" → CYCLE          │
+    │  BLACK = "was explored by a DIFFERENT path" → OK    │
+    │  WHITE = "not yet explored" → explore it            │
+    └────────────────────────────────────────────────────┘
+    
+    This three-state logic is IDENTICAL to Problem 11
+    (directed cycle detection). We just ADD post-order tracking.</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: DFS Recursive with Cycle Detection</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">topological_sort_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Topological sort using DFS reverse post-order.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    STRATEGY:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → DFS through entire graph
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → When a node FINISHES (all descendants explored), add to post_order
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → REVERSE post_order = topological order
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Detect cycles using three-state coloring (Problem 11)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of nodes (0 to n-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [a, b] meaning a must come before b
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        list: valid topological order, or [] if cycle exists
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD GRAPH ───</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> a</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> b </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>a</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>b</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── THREE STATES ───</span><span>
+</span><span>    WHITE</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> GRAY</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> BLACK </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span>
+</span><span>    state </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>WHITE</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── POST-ORDER LIST ───</span><span>
+</span><span>    post_order </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    has_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">nonlocal</span><span> has_cycle
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If cycle already found, stop everything</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> has_cycle</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span>        
+<span>        state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> GRAY  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># mark as "in progress"</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> GRAY</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ BACK EDGE: neighbor is on current DFS path → CYCLE!</span><span>
+</span><span>                has_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> WHITE</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Unvisited → explore deeper</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> has_cycle</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># propagate cycle detection upward</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># BLACK → already completed → skip (not a cycle)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ All neighbors explored → this node FINISHES</span><span>
+</span><span>        state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> BLACK
+</span><span>        post_order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── RUN DFS FROM EVERY UNVISITED NODE ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Why from every node? Graph might be disconnected!</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (Some nodes might not be reachable from node 0)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> WHITE</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> has_cycle</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── REVERSE POST-ORDER = TOPOLOGICAL ORDER ───</span><span>
+</span><span>    post_order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>reverse</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> post_order
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 1: Valid DAG ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Test 1:"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> topological_sort_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [0, 2, 1, 5, 3, 4]  (or another valid order)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 2: Cycle ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Test 2:"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> topological_sort_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: []</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 3: No edges ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Test 3:"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> topological_sort_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [3, 2, 1, 0]  (or any order — all independent)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 4: Linear chain ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Test 4:"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> topological_sort_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [0, 1, 2, 3]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 5: Disconnected components ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Test 5:"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> topological_sort_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [4, 5, 2, 3, 0, 1]  (components in reverse DFS start order)</span></code></pre></div>
+<hr>
+<h3>Version 2: Using Stack Instead of Reverse</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">topological_sort_dfs_stack</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Instead of collecting post_order and reversing,
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    we can append to front (or use a stack/deque).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Slight optimization: avoid the final reverse() call.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Uses deque.appendleft() to build result in correct order.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>    
+<span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> a</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> b </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>a</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>b</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    WHITE</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> GRAY</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> BLACK </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span>
+</span><span>    state </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>WHITE</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ← using deque to prepend efficiently</span><span>
+</span><span>    has_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">nonlocal</span><span> has_cycle
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> has_cycle</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span>        
+<span>        state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> GRAY
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> GRAY</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                has_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> WHITE</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> has_cycle</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span>        
+<span>        state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> BLACK
+</span><span>        result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>appendleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ prepend instead of append + reverse</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> WHITE</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> has_cycle</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>result</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<hr>
+<h3>Version 3: DFS Iterative (No Recursion Limit)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">topological_sort_dfs_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Iterative DFS for topological sort.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Avoids recursion limit for large graphs.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    TRICKY PART: Simulating post-order with an explicit stack.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    The trick: push a node TWICE onto the stack.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      First push: "explore this node's neighbors"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Second push (marked): "I've finished exploring — add to post-order"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    We use (node, is_processed) tuples:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      (node, False) → need to explore neighbors
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      (node, True)  → all neighbors explored, add to result
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> a</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> b </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>a</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>b</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    WHITE</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> GRAY</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> BLACK </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span>
+</span><span>    state </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>WHITE</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    post_order </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> start </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> WHITE</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>        
+<span>        stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> processed </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> processed</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ Second time seeing this node → it's FINISHING</span><span>
+</span><span>                state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> BLACK
+</span><span>                post_order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> GRAY</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Already in progress (pushed by another path) → skip</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> BLACK</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Already completed → skip</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Mark as in-progress</span><span>
+</span><span>            state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> GRAY
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Push FINISH marker (will be processed after all neighbors)</span><span>
+</span><span>            stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Push neighbors (will be explored before finish marker)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> GRAY</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Back edge → CYCLE!</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> state</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> WHITE</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    post_order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>reverse</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> post_order
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>topological_sort_dfs_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: valid topological order</span></code></pre></div>
+<h3>How the Iterative Version Simulates Recursion</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Recursive DFS has two moments per node:
+</span>    1. ENTER: state = GRAY, explore neighbors
+    2. EXIT:  state = BLACK, add to post-order
+  
+  The iterative version uses (node, processed) to distinguish:
+    (node, False) → "ENTER" moment: mark gray, push neighbors
+    (node, True)  → "EXIT" moment: mark black, add to post-order
+  
+  Stack trace for our example:
+  
+  Stack: [(0, False)]
+  
+  Pop (0, False) → ENTER 0
+    state[0] = GRAY
+    Push (0, True)         ← "finish 0 later"
+    Push (2, False)        ← explore neighbor 2
+    Push (1, False)        ← explore neighbor 1
+  
+  Stack: [(0,True), (2,False), (1,False)]
+  
+  Pop (1, False) → ENTER 1
+    state[1] = GRAY
+    Push (1, True)
+    Push (5, False)
+    Push (3, False)
+  
+  Stack: [(0,True), (2,False), (1,True), (5,False), (3,False)]
+  
+  Pop (3, False) → ENTER 3
+    state[3] = GRAY
+    Push (3, True)
+    Push (4, False)
+  
+  Pop (4, False) → ENTER 4
+    state[4] = GRAY
+    Push (4, True)
+    No neighbors
+  
+  Pop (4, True) → EXIT 4
+    state[4] = BLACK
+    post_order = [4]
+  
+  Pop (3, True) → EXIT 3
+    state[3] = BLACK
+    post_order = [4, 3]
+  
+  Pop (5, False) → ENTER 5
+    Push (5, True)
+    No neighbors
+  
+  Pop (5, True) → EXIT 5
+    post_order = [4, 3, 5]
+  
+  Pop (1, True) → EXIT 1
+    post_order = [4, 3, 5, 1]
+  
+  Pop (2, False) → ENTER 2
+    Push (2, True)
+    Neighbor 3: state = BLACK → skip
+  
+  Pop (2, True) → EXIT 2
+    post_order = [4, 3, 5, 1, 2]
+  
+  Pop (0, True) → EXIT 0
+    post_order = [4, 3, 5, 1, 2, 0]
+  
+  Reversed: [0, 2, 1, 5, 3, 4]  ✓</code></pre></div>
+<hr>
+<h3>Version 4: Simplified (Visited Set, No Cycle Detection)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">topological_sort_simple</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Simplified DFS topological sort WITHOUT cycle detection.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Use this when you KNOW the graph is a DAG
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    (e.g., problem guarantees no cycles).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Simpler code — just visited set (two states instead of three).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> a</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> b </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>a</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>b</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    post_order </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Node finishes → add to post-order</span><span>
+</span><span>        post_order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Visit all nodes</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Reverse post-order = topological order</span><span>
+</span><span>    post_order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>reverse</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> post_order
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── WHEN TO USE THIS VERSION ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># → Problem GUARANTEES no cycles (e.g., "given a DAG")</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># → Simpler code, fewer states to track</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># → If cycles might exist, use Version 1 or Version 3 instead</span></code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(V + E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  Outer loop: iterate V nodes to find unvisited ones   → O(V)   │
+  │                                                                 │
+  │  DFS from each unvisited node:                                  │
+  │    → Each node visited EXACTLY ONCE (state changes W→G→B)      │
+  │    → Each edge examined EXACTLY ONCE (in neighbor iteration)    │
+  │    → Total: O(V + E)                                           │
+  │                                                                 │
+  │  Reverse post_order list:                                       │
+  │    → O(V)                                                       │
+  │                                                                 │
+  │  TOTAL: O(V) + O(V + E) + O(V) = O(V + E)                    │
+  └─────────────────────────────────────────────────────────────────┘
+  
+  SAME as Kahn's algorithm (Problem 19): O(V + E)
+  
+  WHY same complexity?
+    → Both must examine every node and every edge exactly once
+    → Both do O(1) work per node and per edge
+    → Fundamental lower bound: must look at entire graph → Ω(V + E)</code></pre></div>
+<h3>Space Complexity: O(V + E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  Graph (adjacency list):     O(V + E)                          │
+  │  State array:                O(V)                              │
+  │  Post-order list:            O(V)                              │
+  │  Recursion stack (DFS):      O(V) worst case (long chain)      │
+  │                                                                 │
+  │  TOTAL: O(V + E)                                               │
+  │                                                                 │
+  │  Recursion depth concern:                                       │
+  │    → Worst case: linear chain 0→1→2→...→(V-1)                  │
+  │    → DFS depth = V                                              │
+  │    → Python default recursion limit ≈ 1000                      │
+  │    → For V &gt; 1000, use iterative Version 3                      │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 7: KAHN'S vs DFS — COMPREHENSIVE COMPARISON</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  FEATURE                  │  KAHN'S (Prob 19) │  DFS (Prob 20)  │
+  │  ─────────────────────────┼───────────────────┼─────────────────│
+  │  Approach                 │  BFS (in-degree)  │  DFS (post-order│
+  │                           │                   │  reversal)       │
+  │  Time                     │  O(V + E)         │  O(V + E)       │
+  │  Space                    │  O(V + E)         │  O(V + E)       │
+  │                           │                   │                  │
+  │  Cycle detection          │  len(result) &lt; V  │  Back edge found │
+  │                           │  (nodes stuck)    │  (GRAY → GRAY)   │
+  │                           │                   │                  │
+  │  Gives BFS layers?        │  YES ★            │  NO              │
+  │  (parallel scheduling)    │                   │                  │
+  │                           │                   │                  │
+  │  Iterative?               │  YES (naturally)  │  Need extra work │
+  │  Recursion safe?          │  YES              │  Risk for large V│
+  │                           │                   │                  │
+  │  Identifies cycle nodes?  │  YES (missing     │  NO (just detects│
+  │                           │  from result)     │  existence)      │
+  │                           │                   │                  │
+  │  Combines with other DFS? │  NO (it's BFS)    │  YES ★           │
+  │  (SCC, bridges, etc.)     │                   │                  │
+  │                           │                   │                  │
+  │  Code simplicity          │  Slightly more    │  Slightly simpler│
+  │                           │  (in-degree setup)│  (if no cycles)  │
+  │                           │                   │                  │
+  │  Output order             │  Forward (natural)│  Reversed        │
+  │                           │                   │                  │
+  └──────────────────────────────────────────────────────────────────┘
+  
+  WHEN TO PICK WHICH:
+  
+  Pick KAHN'S when:
+    → Need parallel scheduling (layers/levels)
+    → Need to identify WHICH nodes are in the cycle
+    → Want purely iterative solution
+    → Problem asks for "minimum number of semesters" (BFS layers!)
+  
+  Pick DFS when:
+    → Already doing DFS for another reason (SCC, bridges)
+    → Graph is guaranteed to be a DAG (simpler code)
+    → Prefer recursive style
+    → Need to combine with other DFS-based computations</code></pre></div>
+<hr>
+<h2>STEP 8: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Disconnected?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Graph: 0→1, 2→3, 4→5  (three separate chains)
+</span>  
+  KAHN'S (Problem 19):
+    → in-degree 0 nodes: {0, 2, 4} → all start in queue
+    → Naturally handles disconnected components
+    → Result: [0, 2, 4, 1, 3, 5] (or similar)
+  
+  DFS (this problem):
+    → Outer loop: for node in range(n)
+    → Starts DFS from 0 (visits 0,1), then 2 (visits 2,3), then 4 (visits 4,5)
+    → post_order: [1, 0, 3, 2, 5, 4]
+    → reversed: [4, 5, 2, 3, 0, 1]
+    
+  BOTH handle disconnected graphs correctly!
+  The outer loop in DFS ensures all components are visited.</code></pre></div>
+<h3>What if We Need ALL Topological Orders?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Neither Kahn's nor DFS gives all orders directly.
+</span>  
+  Need backtracking (Version 4 from Problem 19).
+  
+  The number of valid topological orders can be EXPONENTIAL.
+  Example: n independent nodes → n! valid orders.
+  
+  Rarely needed in interviews — usually "any valid order" suffices.</code></pre></div>
+<h3>What if There Are Multiple Valid Answers and We Need a Specific One?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Lexicographically smallest topological order"
+</span>  
+  → Kahn's with min-heap (mentioned in Problem 19)
+  → heapq instead of deque → always pick smallest available node
+  → DFS doesn't naturally give this (would need different approach)
+  
+  This is a case where KAHN'S WINS over DFS.</code></pre></div>
+<hr>
+<h2>STEP 9: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Forgetting to REVERSE the post-order                ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Post-order = [4, 3, 5, 1, 2, 0]                                ║
+  ║  This is NOT the topological order!                              ║
+  ║  It's the REVERSE of topological order!                          ║
+  ║                                                                  ║
+  ║  MUST reverse: [0, 2, 1, 5, 3, 4] ← correct answer             ║
+  ║                                                                  ║
+  ║  Alternative: use deque.appendleft() to avoid explicit reverse   ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Using only TWO states when cycles are possible       ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  With only visited/unvisited:                                    ║
+  ║    → Can't distinguish GRAY (in-progress) from BLACK (done)     ║
+  ║    → Can't detect cycles!                                        ║
+  ║    → A cross edge to a completed node looks like a back edge     ║
+  ║                                                                  ║
+  ║  Example:                                                        ║
+  ║    0 → 1 → 3                                                     ║
+  ║    0 → 2 → 3                                                     ║
+  ║                                                                  ║
+  ║    DFS(0) → DFS(1) → DFS(3) → done                              ║
+  ║    Back to DFS(0) → DFS(2) → neighbor 3 is "visited"            ║
+  ║                                                                  ║
+  ║    With 2 states: "3 visited! Cycle!" → WRONG! (it's BLACK)     ║
+  ║    With 3 states: "3 is BLACK, not GRAY → no cycle" → CORRECT   ║
+  ║                                                                  ║
+  ║  RULE: If cycles possible → MUST use three states                ║
+  ║        If guaranteed DAG → two states suffice (Version 4)        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Not starting DFS from ALL unvisited nodes            ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG:                                                          ║
+  ║    dfs(0)  ← only starts from node 0                             ║
+  ║    → Misses nodes not reachable from 0!                          ║
+  ║                                                                  ║
+  ║  RIGHT:                                                          ║
+  ║    for node in range(n):                                         ║
+  ║        if state[node] == WHITE:                                  ║
+  ║            dfs(node)                                             ║
+  ║    → Covers ALL components, even disconnected ones               ║
+  ║                                                                  ║
+  ║  (Same issue as Problem 5: counting connected components)        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Adding to post-order at wrong time                   ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG: post_order.append(node) BEFORE exploring neighbors       ║
+  ║    → This gives pre-order (discovery order), NOT post-order      ║
+  ║    → Reversed pre-order ≠ topological order!                     ║
+  ║                                                                  ║
+  ║  RIGHT: post_order.append(node) AFTER all neighbors explored     ║
+  ║    → This is post-order (finish order)                           ║
+  ║    → Reversed post-order = topological order ✓                   ║
+  ║                                                                  ║
+  ║  MEMORY AID:                                                     ║
+  ║    Pre-order:  "record when entering"   → append BEFORE recurse  ║
+  ║    Post-order: "record when leaving"    → append AFTER recurse   ║
+  ║    Topo sort needs POST-order, then reverse.                     ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 5: Iterative DFS post-order is HARD to get right        ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Regular iterative DFS (just stack.pop()) gives PRE-ORDER        ║
+  ║  Getting POST-ORDER iteratively needs the (node, processed)      ║
+  ║  trick from Version 3                                            ║
+  ║                                                                  ║
+  ║  Many people mess this up in interviews!                         ║
+  ║                                                                  ║
+  ║  TIP: If unsure, use recursive DFS (simpler)                     ║
+  ║       or use Kahn's BFS (no post-order headaches)                ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 10: DFS TRAVERSAL ORDER TYPES — Complete Reference</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  These concepts come up repeatedly in graph problems:
+</span>  
+  ┌──────────────────────────────────────────────────────────────────┐
+  │                                                                  │
+  │  Graph:  0 → 1 → 3                                              │
+  │          0 → 2 → 3                                              │
+  │                                                                  │
+  │  DFS from 0, visiting left neighbor first:                       │
+  │                                                                  │
+  │  dfs(0):                                                         │
+  │    ENTER 0        ← PRE-ORDER:  record 0                        │
+  │    dfs(1):                                                       │
+  │      ENTER 1      ← PRE-ORDER:  record 1                        │
+  │      dfs(3):                                                     │
+  │        ENTER 3    ← PRE-ORDER:  record 3                        │
+  │        EXIT 3     ← POST-ORDER: record 3                        │
+  │      EXIT 1       ← POST-ORDER: record 1                        │
+  │    dfs(2):                                                       │
+  │      ENTER 2      ← PRE-ORDER:  record 2                        │
+  │      3 visited → skip                                            │
+  │      EXIT 2       ← POST-ORDER: record 2                        │
+  │    EXIT 0         ← POST-ORDER: record 0                        │
+  │                                                                  │
+  │  PRE-ORDER  (entry order):   [0, 1, 3, 2]                       │
+  │  POST-ORDER (finish order):  [3, 1, 2, 0]                       │
+  │                                                                  │
+  │  REVERSED POST-ORDER:        [0, 2, 1, 3]  ← TOPOLOGICAL SORT  │
+  │                                                                  │
+  │  ─────────────────────────────────────────────────────           │
+  │                                                                  │
+  │  USES:                                                           │
+  │    Pre-order:  "Process node BEFORE children"                    │
+  │                → Tree/graph serialization                        │
+  │                → Copy graph (Problem 18)                         │
+  │                                                                  │
+  │    Post-order: "Process node AFTER children"                     │
+  │                → Tree deletion (delete children first)           │
+  │                → Topological sort (reversed)                     │
+  │                → SCC (Problem 36: Kosaraju's finish times)       │
+  │                                                                  │
+  │    Reversed post-order:                                          │
+  │                → Topological sort! ★                              │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 11: HOW THIS CONNECTS TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Problem 4 (DFS Traversal):                                      │
+  │    → Basic DFS with visited set                                  │
+  │    → HERE: same DFS structure, but with THREE states and         │
+  │      post-order tracking                                         │
+  │    → DFS is the BACKBONE; topo sort adds purpose to it           │
+  │                                                                  │
+  │  Problem 11 (Cycle Detection — Directed):                        │
+  │    → Three-state DFS (WHITE/GRAY/BLACK)                          │
+  │    → HERE: EXACT SAME three-state logic                          │
+  │    → We just ADD post_order.append(node) when state → BLACK      │
+  │    → Cycle detection is a BYPRODUCT of DFS topo sort             │
+  │                                                                  │
+  │  Problem 19 (Kahn's Algorithm):                                  │
+  │    → BFS approach to same problem                                │
+  │    → HERE: DFS approach to same problem                          │
+  │    → Both O(V+E), both detect cycles, both valid                 │
+  │    → Now we know TWO ways to topologically sort!                 │
+  │                                                                  │
+  │  BUILDING BLOCKS COMBINED:                                       │
+  │    DFS traversal (Prob 4) + Cycle detection (Prob 11)            │
+  │    + Post-order tracking (NEW) = DFS Topological Sort            │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL: "Order tasks with dependencies"                           │
+  │       → Topological Sort                                           │
+  │       → Pick KAHN'S or DFS based on what else is needed            │
+  │                                                                    │
+  │  PICK DFS TOPO SORT WHEN:                                         │
+  │                                                                    │
+  │    1. Problem says "given a DAG" (no cycle detection needed)       │
+  │       → Simpler DFS version (Version 4) suffices                   │
+  │                                                                    │
+  │    2. You need DFS for OTHER purposes too                          │
+  │       → SCC computation (Problem 36: needs DFS finish order)       │
+  │       → Combining topo sort with DFS-based DP                      │
+  │       → "Two birds with one DFS"                                   │
+  │                                                                    │
+  │    3. You're more comfortable with recursion                       │
+  │       → DFS recursive is fewer lines than Kahn's setup             │
+  │                                                                    │
+  │  PICK KAHN'S WHEN:                                                 │
+  │                                                                    │
+  │    1. Need to process in LAYERS (parallel scheduling)              │
+  │       → "Minimum semesters to complete all courses"                │
+  │       → Each BFS layer = one semester                              │
+  │                                                                    │
+  │    2. Need to identify WHICH nodes form cycles                     │
+  │       → Kahn's: missing nodes = cycle members                      │
+  │                                                                    │
+  │    3. Want guaranteed no recursion limit                            │
+  │       → Kahn's is iterative by nature                              │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: DFS TOPOLOGICAL SORT                       ║
+  ║   (REVERSE POST-ORDER)                                            ║
+  ║                                                                    ║
+  ║   → DFS explores deeply, records nodes when they FINISH           ║
+  ║   → Post-order: deepest nodes (no deps) finish FIRST             ║
+  ║   → Reversed post-order: root nodes (no incoming) come FIRST     ║
+  ║   → This IS a valid topological order!                            ║
+  ║                                                                    ║
+  ║   → WHY it works: for edge A→B, A always finishes AFTER B        ║
+  ║     → In post-order: B before A                                   ║
+  ║     → Reversed: A before B ✓ (topological constraint satisfied)  ║
+  ║                                                                    ║
+  ║   → Cycle detection: same 3-state DFS as Problem 11              ║
+  ║     → GRAY node encountered = back edge = cycle                   ║
+  ║                                                                    ║
+  ║   → Now we know TWO topological sort algorithms:                  ║
+  ║     Kahn's (BFS + in-degree) — Problem 19                        ║
+  ║     DFS (reverse post-order) — Problem 20                        ║
+  ║                                                                    ║
+  ║   → NEW DFS CONCEPT: Post-order vs Pre-order                     ║
+  ║     Pre-order:  record on ENTRY  (used in graph copy, etc.)      ║
+  ║     Post-order: record on EXIT   (used in topo sort, SCC)        ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h3>CONNECTION TO NEXT PROBLEM</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 20 → DFS Topological Sort (second method for topo sort)
+</span>  Problem 21 → Course Schedule I (can you finish all courses?)
+  
+  Problem 21 directly APPLIES what we learned in Problems 19-20:
+    → "Given courses and prerequisites, can ALL courses be completed?"
+    → This is asking: "Is the dependency graph a DAG?"
+    → Which is asking: "Does a valid topological order exist?"
+    → Which is asking: "Are there any cycles?"
+    
+  It's the CLASSIC interview problem that topological sort was born for.
+  We'll see how both Kahn's and DFS approaches solve it,
+  and learn to recognize when a problem is "really just topo sort."</code></pre></div>
+<hr>
+<p><strong>Problem 20 Complete.</strong><br>
+<strong>Ready for Problem 21: Course Schedule I (Can Finish All Courses?)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="17" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-19.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 20 of 50</span>
+            </div>
+            <a href="problem-21.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

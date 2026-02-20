@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 34: Problem 34: Find Bridges in Graph (Tarjan's Algorithm) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="21">
+<div class="px-2"><h1>Problem 34: Find Bridges in Graph (Tarjan's Algorithm)</h1>
+<h2>[Algorithm Family: Tarjan's Algorithm — Bridge Finding]</h2>
+<h2>[Phase 4: Advanced — "I can handle complex multi-concept problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are a network engineer managing a computer network.
+</span>The network has N servers (nodes) connected by cables (edges).
+The network is currently fully connected — every server can
+communicate with every other server.
+
+A "BRIDGE" (or "critical connection") is a cable whose removal
+would DISCONNECT the network — some servers would no longer
+be able to communicate with others.
+
+Find ALL bridges in the network.
+
+Input:
+  n = 6  (servers: 0, 1, 2, 3, 4, 5)
+  edges = [[0,1], [1,2], [2,0], [1,3], [3,4], [4,5], [5,3]]
+
+Output: [[1,3]]
+
+Explanation:
+  If we remove cable [1,3], servers {0,1,2} can no longer
+  communicate with servers {3,4,5}.
+  No other single cable removal disconnects the network.</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Building the graph from edges:
+</span>
+      0 ─── 1 ─── 3
+      |           / \
+      |          /   \
+      2 ────┘  4 ─── 5
+
+  More precisely:
+
+      0 ──── 1 ──── 3
+      │             /│\
+      │            / │ \
+      └── 2 ──┘  4  │  5
+                  └──┘──┘
+                  
+  Wait, let me draw this correctly:
+
+      0 ── 1 ── 3
+      |         |╲
+      |         | ╲
+      2 ───┘    4──5
+
+  Edges:
+    0─1, 1─2, 2─0  → forms a TRIANGLE (cycle)
+    1─3             → single connection between triangle and right group
+    3─4, 4─5, 5─3  → forms a TRIANGLE (cycle)
+
+  Clear drawing:
+
+    ┌─── 0 ───┐
+    │         │
+    2         1 ════ 3
+              │     │╲
+              │     │ ╲
+              └     4──5
+
+  Even clearer:
+
+    Triangle 1          Bridge         Triangle 2
+    ┌────────┐                        ┌────────┐
+    │        │                        │        │
+    │  0──1  │───── edge[1,3] ────── │  3──4  │
+    │  └─2┘  │      ★ BRIDGE ★       │  └─5┘  │
+    │        │                        │        │
+    └────────┘                        └────────┘
+
+  Edge [1,3] is the ONLY bridge:
+    → Remove it → {0,1,2} disconnected from {3,4,5}
+    → No other edge removal disconnects the graph
+    → Edges inside triangles are NOT bridges (cycle provides backup path)</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔═══════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer               │  Why?                     ║
+╠══════════════════╪═══════════════════════╪═══════════════════════════╣
+║  NODES           │  Servers 0-5          │  Each server = node       ║
+║  EDGES           │  Cables (undirected)  │  Cables work both ways    ║
+║  Directed?       │  NO                   │  Communication is mutual  ║
+║  Weighted?       │  NO                   │  Just connected or not    ║
+║  Cyclic?         │  YES                  │  Triangles 0-1-2 and 3-4-5║
+║  Connected?      │  YES                  │  All servers reachable    ║
+║  What we seek    │  BRIDGES — edges whose│  "Remove this cable and   ║
+║                  │  removal disconnects  │   network breaks"         ║
+║                  │  the graph            │                           ║
+╚══════════════════╧═══════════════════════╧═══════════════════════════╝
+
+  KEY INSIGHT: Why are edges INSIDE cycles NOT bridges?
+  
+  Consider triangle 0─1─2:
+    Remove 0─1 → 0 still reaches 1 through 0→2→1
+    Remove 1─2 → 1 still reaches 2 through 1→0→2
+    Remove 0─2 → 0 still reaches 2 through 0→1→2
+    
+  A cycle provides REDUNDANCY — alternative paths exist.
+  A bridge has NO alternative path — it's the ONLY connection.</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<h3>Naive Approach: Remove Each Edge, Check Connectivity</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For each edge e in the graph:
+</span>    1. Remove edge e
+    2. Run BFS/DFS to check if graph is still connected (Problem 5)
+    3. If disconnected → e is a bridge
+    4. Put edge e back
+
+  Example:
+    Remove [0,1]: check connectivity → still connected (0→2→1) → NOT bridge
+    Remove [1,2]: check connectivity → still connected (1→0→2) → NOT bridge
+    Remove [2,0]: check connectivity → still connected (2→1→0) → NOT bridge
+    Remove [1,3]: check connectivity → DISCONNECTED! → ★ BRIDGE ★
+    Remove [3,4]: check connectivity → still connected (3→5→4) → NOT bridge
+    Remove [4,5]: check connectivity → still connected (4→3→5) → NOT bridge
+    Remove [5,3]: check connectivity → still connected (5→4→3) → NOT bridge</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For each of E edges:
+</span>    → Remove it: O(1)
+    → Check connectivity: O(V + E) using BFS/DFS
+    → Put it back: O(1)
+  
+  Total: E × O(V + E) = O(E × (V + E))
+  
+  For V = 100,000 and E = 200,000:
+    → 200,000 × 300,000 = 6 × 10¹⁰ → TOO SLOW
+  
+  We need O(V + E) — find ALL bridges in a single DFS pass.
+  That's what Tarjan's algorithm does.</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<h3>The Thinking Process</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "I need to find edges whose removal disconnects the graph"
+</span>    → BRIDGE finding problem
+
+  "Brute force is O(E × (V+E)) — too slow"
+    → Need single-pass algorithm
+
+  "What makes an edge a bridge?"
+    → It's NOT part of any cycle
+    → If an edge is in a cycle, removing it leaves alternative paths
+    → If an edge is NOT in any cycle, removing it disconnects
+
+  "How do I detect if an edge is part of a cycle during DFS?"
+    → This is where Tarjan's insight comes in
+    → During DFS, track TWO things for each node:
+      1. DISCOVERY TIME: when was this node first visited?
+      2. LOW VALUE: what's the earliest node reachable from this subtree
+         (through back edges)?
+    → A back edge (to an ancestor) indicates a CYCLE
+    → If a subtree has NO back edge to an ancestor → the connecting
+      edge to that subtree is a BRIDGE</code></pre></div>
+<h3>The Two Key Concepts: Discovery Time and Low Value</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                   ║
+  ║  DISCOVERY TIME (disc[v]):                                        ║
+  ║    → The ORDER in which nodes are first visited during DFS        ║
+  ║    → First node visited: disc = 0                                 ║
+  ║    → Second: disc = 1                                             ║
+  ║    → And so on...                                                 ║
+  ║    → This gives a "timestamp" to each node                       ║
+  ║                                                                   ║
+  ║  LOW VALUE (low[v]):                                              ║
+  ║    → The LOWEST discovery time reachable from v's subtree         ║
+  ║    → "What's the EARLIEST ancestor I can reach from v            ║
+  ║       or any descendant of v through back edges?"                ║
+  ║                                                                   ║
+  ║    low[v] = min of:                                               ║
+  ║      1. disc[v]  (v itself)                                       ║
+  ║      2. disc[w]  for any back edge v→w (w is ancestor, not parent)║
+  ║      3. low[c]   for any DFS child c of v                        ║
+  ║                                                                   ║
+  ║  BRIDGE CONDITION:                                                ║
+  ║    Edge (u, v) where u is parent of v in DFS tree:               ║
+  ║    → If low[v] &gt; disc[u]:                                        ║
+  ║      "v's subtree CANNOT reach u or any ancestor of u"           ║
+  ║      "Removing edge (u,v) disconnects v's subtree"               ║
+  ║      → (u, v) IS A BRIDGE                                        ║
+  ║                                                                   ║
+  ║    → If low[v] ≤ disc[u]:                                        ║
+  ║      "v's subtree CAN reach u or some ancestor through a cycle"  ║
+  ║      "Removing edge (u,v) doesn't disconnect — back path exists" ║
+  ║      → (u, v) is NOT a bridge                                    ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<h3>Visual Intuition: Why low[v] &gt; disc[u] Means Bridge</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  DFS Tree:
+</span>                    disc=0
+        u ─────────────────
+        │                  │
+        │ tree edge        │ If low[v] &gt; disc[u]:
+        │ (potential        │   v can't "escape" back
+        │  bridge)         │   to u or above u
+        │                  │   → removing (u,v) traps v
+        v ─────────────────│   → BRIDGE!
+       / \                 │
+      /   \                │ If low[v] ≤ disc[u]:
+     c1    c2              │   v or a descendant has a
+      \     |              │   back edge to u or above
+       \    |              │   → alternative path exists
+        \   |              │   → NOT a bridge
+      back edge to u       │
+      or ancestor          │
+      (low[v] ≤ disc[u])   │</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — Step by Step</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  n = 6
+</span>  edges = [[0,1], [1,2], [2,0], [1,3], [3,4], [4,5], [5,3]]
+
+  Adjacency list:
+    0: [1, 2]
+    1: [0, 2, 3]
+    2: [1, 0]
+    3: [1, 4, 5]
+    4: [3, 5]
+    5: [4, 3]
+
+
+  ═══════════════════════════════════════════════════════════════
+  INITIALIZATION
+  ═══════════════════════════════════════════════════════════════
+
+  disc[]    = [-1, -1, -1, -1, -1, -1]   (unvisited = -1)
+  low[]     = [-1, -1, -1, -1, -1, -1]
+  timer     = 0
+  bridges   = []
+  parent    = [-1, -1, -1, -1, -1, -1]   (no parent initially)
+
+
+  ═══════════════════════════════════════════════════════════════
+  START DFS from node 0
+  ═══════════════════════════════════════════════════════════════
+
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ DFS(0, parent=-1):                                           │
+  │                                                              │
+  │   disc[0] = 0, low[0] = 0, timer = 1                        │
+  │                                                              │
+  │   Neighbors of 0: [1, 2]                                     │
+  │                                                              │
+  │   ┌─ Neighbor 1: disc[1]=-1 → UNVISITED → recurse           │
+  │   │                                                          │
+  │   │  ┌────────────────────────────────────────────────────┐  │
+  │   │  │ DFS(1, parent=0):                                  │  │
+  │   │  │                                                    │  │
+  │   │  │   disc[1] = 1, low[1] = 1, timer = 2              │  │
+  │   │  │                                                    │  │
+  │   │  │   Neighbors of 1: [0, 2, 3]                        │  │
+  │   │  │                                                    │  │
+  │   │  │   ┌─ Neighbor 0: disc[0]=0, IS parent → SKIP      │  │
+  │   │  │   │  (don't go back to parent via same edge)       │  │
+  │   │  │   │                                                │  │
+  │   │  │   ┌─ Neighbor 2: disc[2]=-1 → UNVISITED → recurse │  │
+  │   │  │   │                                                │  │
+  │   │  │   │  ┌──────────────────────────────────────────┐  │  │
+  │   │  │   │  │ DFS(2, parent=1):                        │  │  │
+  │   │  │   │  │                                          │  │  │
+  │   │  │   │  │   disc[2] = 2, low[2] = 2, timer = 3    │  │  │
+  │   │  │   │  │                                          │  │  │
+  │   │  │   │  │   Neighbors of 2: [1, 0]                 │  │  │
+  │   │  │   │  │                                          │  │  │
+  │   │  │   │  │   ┌─ Neighbor 1: IS parent → SKIP        │  │  │
+  │   │  │   │  │   │                                      │  │  │
+  │   │  │   │  │   ┌─ Neighbor 0: disc[0]=0, VISITED      │  │  │
+  │   │  │   │  │   │  and NOT parent                      │  │  │
+  │   │  │   │  │   │  → BACK EDGE to ancestor!            │  │  │
+  │   │  │   │  │   │  → low[2] = min(low[2], disc[0])     │  │  │
+  │   │  │   │  │   │  → low[2] = min(2, 0) = 0            │  │  │
+  │   │  │   │  │   │                                      │  │  │
+  │   │  │   │  │   │  ┌─────────────────────────────────┐ │  │  │
+  │   │  │   │  │   │  │ BACK EDGE 2→0 found!            │ │  │  │
+  │   │  │   │  │   │  │ This means 2 can reach 0        │ │  │  │
+  │   │  │   │  │   │  │ without going through parent 1  │ │  │  │
+  │   │  │   │  │   │  │ → The cycle 0─1─2─0 exists      │ │  │  │
+  │   │  │   │  │   │  └─────────────────────────────────┘ │  │  │
+  │   │  │   │  │   │                                      │  │  │
+  │   │  │   │  │   Return from DFS(2):                    │  │  │
+  │   │  │   │  │   disc[2]=2, low[2]=0                    │  │  │
+  │   │  │   │  └──────────────────────────────────────────┘  │  │
+  │   │  │   │                                                │  │
+  │   │  │   │  Back in DFS(1): child 2 returned             │  │
+  │   │  │   │  low[1] = min(low[1], low[2])                 │  │
+  │   │  │   │  low[1] = min(1, 0) = 0                       │  │
+  │   │  │   │                                                │  │
+  │   │  │   │  Bridge check for edge (1,2):                  │  │
+  │   │  │   │  low[2] = 0 &gt; disc[1] = 1? → 0 &gt; 1? → NO     │  │
+  │   │  │   │  → NOT a bridge ✓                              │  │
+  │   │  │   │  (2 can reach ancestor 0 via back edge)        │  │
+  │   │  │   │                                                │  │
+  │   │  │   ┌─ Neighbor 3: disc[3]=-1 → UNVISITED → recurse │  │
+  │   │  │   │                                                │  │
+  │   │  │   │  ┌──────────────────────────────────────────┐  │  │
+  │   │  │   │  │ DFS(3, parent=1):                        │  │  │
+  │   │  │   │  │                                          │  │  │
+  │   │  │   │  │   disc[3] = 3, low[3] = 3, timer = 4    │  │  │
+  │   │  │   │  │                                          │  │  │
+  │   │  │   │  │   Neighbors of 3: [1, 4, 5]              │  │  │
+  │   │  │   │  │                                          │  │  │
+  │   │  │   │  │   ┌─ Neighbor 1: IS parent → SKIP        │  │  │
+  │   │  │   │  │   │                                      │  │  │
+  │   │  │   │  │   ┌─ Neighbor 4: UNVISITED → recurse     │  │  │
+  │   │  │   │  │   │                                      │  │  │
+  │   │  │   │  │   │  ┌────────────────────────────────┐  │  │  │
+  │   │  │   │  │   │  │ DFS(4, parent=3):              │  │  │  │
+  │   │  │   │  │   │  │                                │  │  │  │
+  │   │  │   │  │   │  │  disc[4]=4, low[4]=4, timer=5  │  │  │  │
+  │   │  │   │  │   │  │                                │  │  │  │
+  │   │  │   │  │   │  │  Neighbors of 4: [3, 5]        │  │  │  │
+  │   │  │   │  │   │  │                                │  │  │  │
+  │   │  │   │  │   │  │  Neighbor 3: IS parent → SKIP  │  │  │  │
+  │   │  │   │  │   │  │                                │  │  │  │
+  │   │  │   │  │   │  │  Neighbor 5: UNVISITED→recurse │  │  │  │
+  │   │  │   │  │   │  │                                │  │  │  │
+  │   │  │   │  │   │  │  ┌──────────────────────────┐  │  │  │  │
+  │   │  │   │  │   │  │  │ DFS(5, parent=4):        │  │  │  │  │
+  │   │  │   │  │   │  │  │                          │  │  │  │  │
+  │   │  │   │  │   │  │  │ disc[5]=5,low[5]=5,t=6   │  │  │  │  │
+  │   │  │   │  │   │  │  │                          │  │  │  │  │
+  │   │  │   │  │   │  │  │ Neighbors of 5: [4, 3]   │  │  │  │  │
+  │   │  │   │  │   │  │  │                          │  │  │  │  │
+  │   │  │   │  │   │  │  │ Neighbor 4: parent→SKIP  │  │  │  │  │
+  │   │  │   │  │   │  │  │                          │  │  │  │  │
+  │   │  │   │  │   │  │  │ Neighbor 3: VISITED,     │  │  │  │  │
+  │   │  │   │  │   │  │  │   NOT parent             │  │  │  │  │
+  │   │  │   │  │   │  │  │   → BACK EDGE 5→3!       │  │  │  │  │
+  │   │  │   │  │   │  │  │   low[5]=min(5,disc[3])  │  │  │  │  │
+  │   │  │   │  │   │  │  │   low[5]=min(5,3)=3      │  │  │  │  │
+  │   │  │   │  │   │  │  │                          │  │  │  │  │
+  │   │  │   │  │   │  │  │ Return: disc[5]=5,low[5]=3│ │  │  │  │
+  │   │  │   │  │   │  │  └──────────────────────────┘  │  │  │  │
+  │   │  │   │  │   │  │                                │  │  │  │
+  │   │  │   │  │   │  │  Back in DFS(4): child 5 ret   │  │  │  │
+  │   │  │   │  │   │  │  low[4]=min(low[4],low[5])     │  │  │  │
+  │   │  │   │  │   │  │  low[4]=min(4, 3) = 3          │  │  │  │
+  │   │  │   │  │   │  │                                │  │  │  │
+  │   │  │   │  │   │  │  Bridge check (4,5):           │  │  │  │
+  │   │  │   │  │   │  │  low[5]=3 &gt; disc[4]=4?         │  │  │  │
+  │   │  │   │  │   │  │  3 &gt; 4? NO → NOT bridge ✓      │  │  │  │
+  │   │  │   │  │   │  │                                │  │  │  │
+  │   │  │   │  │   │  │  Return: disc[4]=4, low[4]=3   │  │  │  │
+  │   │  │   │  │   │  └────────────────────────────────┘  │  │  │
+  │   │  │   │  │   │                                      │  │  │
+  │   │  │   │  │   Back in DFS(3): child 4 returned       │  │  │
+  │   │  │   │  │   low[3] = min(low[3], low[4])           │  │  │
+  │   │  │   │  │   low[3] = min(3, 3) = 3                 │  │  │
+  │   │  │   │  │                                          │  │  │
+  │   │  │   │  │   Bridge check for edge (3,4):           │  │  │
+  │   │  │   │  │   low[4] = 3 &gt; disc[3] = 3?             │  │  │
+  │   │  │   │  │   3 &gt; 3? → NO → NOT bridge ✓             │  │  │
+  │   │  │   │  │   (4's subtree reaches 3 via back edge)  │  │  │
+  │   │  │   │  │                                          │  │  │
+  │   │  │   │  │   ┌─ Neighbor 5: ALREADY VISITED,        │  │  │
+  │   │  │   │  │   │  NOT parent                          │  │  │
+  │   │  │   │  │   │  → BACK EDGE 3→5?                    │  │  │
+  │   │  │   │  │   │  Actually 5 is a descendant, not     │  │  │
+  │   │  │   │  │   │  ancestor. disc[5]=5 &gt; disc[3]=3    │  │  │
+  │   │  │   │  │   │  But we still do:                    │  │  │
+  │   │  │   │  │   │  low[3]=min(low[3],disc[5])          │  │  │
+  │   │  │   │  │   │  low[3]=min(3, 5) = 3 (no change)   │  │  │
+  │   │  │   │  │   │                                      │  │  │
+  │   │  │   │  │   Return: disc[3]=3, low[3]=3            │  │  │
+  │   │  │   │  └──────────────────────────────────────────┘  │  │
+  │   │  │   │                                                │  │
+  │   │  │   Back in DFS(1): child 3 returned                 │  │
+  │   │  │   low[1] = min(low[1], low[3])                     │  │
+  │   │  │   low[1] = min(0, 3) = 0                           │  │
+  │   │  │                                                    │  │
+  │   │  │   ┌─────────────────────────────────────────────┐  │  │
+  │   │  │   │ Bridge check for edge (1,3):                │  │  │
+  │   │  │   │ low[3] = 3 &gt; disc[1] = 1?                  │  │  │
+  │   │  │   │ 3 &gt; 1? → YES! → ★★★ BRIDGE FOUND! ★★★     │  │  │
+  │   │  │   │                                             │  │  │
+  │   │  │   │ WHY? Node 3's subtree (nodes 3,4,5)        │  │  │
+  │   │  │   │ has low[3]=3, meaning the earliest          │  │  │
+  │   │  │   │ ancestor reachable is node with disc=3      │  │  │
+  │   │  │   │ (which is node 3 itself).                   │  │  │
+  │   │  │   │ It CANNOT reach node 1 (disc=1) or above.   │  │  │
+  │   │  │   │ So removing edge (1,3) disconnects {3,4,5}. │  │  │
+  │   │  │   │                                             │  │  │
+  │   │  │   │ bridges = [[1, 3]]                          │  │  │
+  │   │  │   └─────────────────────────────────────────────┘  │  │
+  │   │  │                                                    │  │
+  │   │  │   Return: disc[1]=1, low[1]=0                      │  │
+  │   │  └────────────────────────────────────────────────────┘  │
+  │   │                                                          │
+  │   Back in DFS(0): child 1 returned                           │
+  │   low[0] = min(low[0], low[1])                               │
+  │   low[0] = min(0, 0) = 0                                     │
+  │                                                              │
+  │   Bridge check for edge (0,1):                               │
+  │   low[1] = 0 &gt; disc[0] = 0?                                 │
+  │   0 &gt; 0? → NO → NOT bridge ✓                                 │
+  │   (1's subtree can reach 0 through cycle 0─1─2─0)            │
+  │                                                              │
+  │   ┌─ Neighbor 2: ALREADY VISITED, NOT parent                 │
+  │   │  → BACK EDGE 0→2                                         │
+  │   │  low[0] = min(low[0], disc[2]) = min(0, 2) = 0          │
+  │   │  (no change)                                             │
+  │                                                              │
+  │   Return: disc[0]=0, low[0]=0                                │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  FINAL STATE
+  ═══════════════════════════════════════════════════════════════
+
+  disc[] = [0, 1, 2, 3, 4, 5]
+  low[]  = [0, 0, 0, 3, 3, 3]
+
+  Node:    0  1  2  3  4  5
+  disc:    0  1  2  3  4  5
+  low:     0  0  0  3  3  3
+
+  Bridges found: [[1, 3]]
+
+  Interpretation of low values:
+    low[0]=0: node 0 can reach disc=0 (itself) — it's the root
+    low[1]=0: node 1 can reach disc=0 (node 0) via cycle 1→2→0
+    low[2]=0: node 2 can reach disc=0 (node 0) via back edge 2→0
+    low[3]=3: node 3 can only reach disc=3 (itself) — ISOLATED subtree
+    low[4]=3: node 4 can reach disc=3 (node 3) via cycle 4→5→3
+    low[5]=3: node 5 can reach disc=3 (node 3) via back edge 5→3
+
+  Two groups:
+    {0,1,2}: low values are 0 → all reach the root → tightly connected
+    {3,4,5}: low values are 3 → only reach node 3 → isolated from {0,1,2}
+    
+  The ONLY connection between them: edge (1,3) → BRIDGE!</code></pre></div>
+<hr>
+<h3>Summary: DFS Tree and Edge Classification</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  DFS TREE:
+</span>
+    0 (disc=0, low=0)
+    │
+    └── 1 (disc=1, low=0)
+        │
+        ├── 2 (disc=2, low=0)
+        │   │
+        │   └──→ 0  [BACK EDGE — creates cycle 0-1-2]
+        │
+        └── 3 (disc=3, low=3)     ★ low[3] &gt; disc[1] → BRIDGE (1,3)
+            │
+            └── 4 (disc=4, low=3)
+                │
+                └── 5 (disc=5, low=3)
+                    │
+                    └──→ 3  [BACK EDGE — creates cycle 3-4-5]
+
+
+  EDGE CLASSIFICATION:
+    ┌───────────┬─────────────┬────────────────────────────┐
+    │  Edge     │  Type        │  Meaning                    │
+    ├───────────┼─────────────┼────────────────────────────┤
+    │  0─1      │  Tree edge   │  DFS parent-child           │
+    │  1─2      │  Tree edge   │  DFS parent-child           │
+    │  2→0      │  Back edge   │  Creates cycle 0-1-2        │
+    │  1─3      │  Tree edge   │  ★ BRIDGE (low[3]&gt;disc[1])  │
+    │  3─4      │  Tree edge   │  DFS parent-child           │
+    │  4─5      │  Tree edge   │  DFS parent-child           │
+    │  5→3      │  Back edge   │  Creates cycle 3-4-5        │
+    └───────────┴─────────────┴────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Primary Solution: Tarjan's Bridge Finding</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find_bridges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Tarjan's Algorithm — Find all bridges in an undirected graph.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    A bridge is an edge whose removal disconnects the graph.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Strategy:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      1. Run DFS, tracking discovery time (disc) and low value (low)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      2. disc[v] = when node v was first visited
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      3. low[v] = earliest disc reachable from v's subtree via back edges
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      4. Edge (u,v) is bridge if low[v] &gt; disc[u]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">         (v's subtree can't reach u or above → removing (u,v) disconnects)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of vertices (0 to n-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        edges: list of [u, v] (undirected edges)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        list of bridges, each as [u, v]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Time: O(V + E) — single DFS pass
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Space: O(V + E) — adjacency list + arrays
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Build adjacency list ───</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Initialize arrays ───</span><span>
+</span><span>    disc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n          </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># discovery time (-1 = unvisited)</span><span>
+</span><span>    low </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n           </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># lowest disc reachable from subtree</span><span>
+</span><span>    bridges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>             </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># result: list of bridges</span><span>
+</span><span>    timer </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>              </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># mutable counter (list so inner function can modify)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        DFS from node u, where parent is u's parent in DFS tree.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        For each node u:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">          1. Assign disc[u] and low[u] = current timer
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">          2. For each neighbor v:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">             a. If v is unvisited: recurse, then update low[u] from low[v]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">                → Check bridge condition: low[v] &gt; disc[u]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">             b. If v is visited and v != parent: back edge
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">                → Update low[u] from disc[v]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">             c. If v == parent: skip (don't go back on same edge)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Assign discovery time and initial low value</span><span>
+</span><span>        disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Case 1: v is UNVISITED → tree edge ───</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Recurse into v</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># After returning, v's subtree is fully explored</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Update our low from child's low</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ BRIDGE CHECK ★</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If v's subtree can't reach u or above → bridge!</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    bridges</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> v </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Case 2: v is VISITED and NOT parent → back edge ───</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># v is an ancestor in DFS tree</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># We can reach v from u → update low[u]</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Case 3: v == parent → skip ───</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Don't traverse back on the same edge we came from</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (This is NOT a back edge — it's just the parent edge)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Run DFS from every unvisited node ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (handles disconnected graphs)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> bridges
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">6</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>bridges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> find_bridges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Bridges: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">bridges</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: Bridges: [[1, 3]]</span></code></pre></div>
+<hr>
+<h3>Version 2: Iterative (Avoids Stack Overflow)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find_bridges_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Iterative version of Tarjan's bridge finding.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Why iterative?
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → For V = 100,000+, recursive DFS may hit Python's
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        recursion limit (default 1000)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Iterative avoids stack overflow
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Same logic, just manually managing the DFS stack
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is more complex but necessary for large inputs.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    disc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    low </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    bridges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    timer </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> start </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Stack stores (node, iterator_over_neighbors)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># We simulate DFS by keeping track of which neighbor we're processing</span><span>
+</span><span>        stack </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">iter</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>start</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer
+</span><span>        timer </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbors </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">try</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                v </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">next</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbors</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Unvisited → tree edge → go deeper</span><span>
+</span><span>                    parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> u
+</span><span>                    disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer
+</span><span>                    timer </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>                    stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">iter</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> v </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Back edge → update low</span><span>
+</span><span>                    low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">except</span><span> StopIteration</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># All neighbors of u processed → backtrack</span><span>
+</span><span>                stack</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Update parent's low from u's low</span><span>
+</span><span>                    p </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> stack</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># parent node</span><span>
+</span><span>                    low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>p</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>p</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                    
+<span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Bridge check</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>p</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        bridges</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>p</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> bridges
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>bridges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> find_bridges_iterative</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Bridges (iterative): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">bridges</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: Bridges (iterative): [[1, 3]]</span></code></pre></div>
+<hr>
+<h2>STEP 6: THE PARENT EDGE PROBLEM — A Subtle Issue</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║  WHY DO WE SKIP THE PARENT?                                      ║
+  ╠═══════════════════════════════════════════════════════════════════╣
+  ║                                                                   ║
+  ║  When DFS goes from u to v (tree edge), v's adjacency list       ║
+  ║  includes u (because the graph is undirected).                    ║
+  ║                                                                   ║
+  ║  If we don't skip u:                                              ║
+  ║    → v sees u as "visited ancestor"                               ║
+  ║    → low[v] = min(low[v], disc[u])                               ║
+  ║    → This makes low[v] ≤ disc[u] ALWAYS                         ║
+  ║    → The bridge condition low[v] &gt; disc[u] is NEVER true         ║
+  ║    → We'd find ZERO bridges! (WRONG)                             ║
+  ║                                                                   ║
+  ║  The parent edge u─v is the SAME edge we came from.              ║
+  ║  It's NOT a back edge — it's the tree edge itself.               ║
+  ║  Going back on it doesn't provide an "alternative path."         ║
+  ║                                                                   ║
+  ║  EXCEPTION — Parallel edges:                                      ║
+  ║  If there are TWO edges between u and v:                         ║
+  ║    → One is the tree edge (skip this one)                        ║
+  ║    → The other IS a genuine back edge (don't skip!)              ║
+  ║    → With parallel edges, the connection is NOT a bridge         ║
+  ║      (removing one edge still leaves the other)                  ║
+  ║                                                                   ║
+  ║  SIMPLE PARENT TRACKING (our code):                               ║
+  ║    → "if v != parent: consider it"                                ║
+  ║    → Works when there are NO parallel edges                      ║
+  ║    → Most interview problems don't have parallel edges           ║
+  ║                                                                   ║
+  ║  ROBUST PARALLEL EDGE HANDLING:                                   ║
+  ║    → Track parent by EDGE INDEX, not by node                     ║
+  ║    → Skip only the specific edge used to arrive, not all         ║
+  ║      edges to parent node                                        ║
+  ║    → More complex, needed only if parallel edges exist           ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<h3>Handling Parallel Edges (Advanced)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find_bridges_parallel_safe</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Version that correctly handles parallel (duplicate) edges.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Key change: track edges by INDEX, not by parent node.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Skip only the specific edge we arrived on, not all edges to parent.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> idx</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">enumerate</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> idx</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># store edge index</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> idx</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># same index for reverse</span><span>
+</span>    
+<span>    disc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    low </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    bridges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    timer </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> parent_edge_idx</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edge_idx </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edge_idx</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    bridges</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> edge_idx </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> parent_edge_idx</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Different edge (even if same endpoint) → back edge</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If same edge_idx → skip (this is the tree edge we came from)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> bridges
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST with parallel edges ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Two edges between 0 and 1 → NOT a bridge</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span>
+</span><span>edges_parallel </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_bridges_parallel_safe</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_parallel</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [] (no bridges — parallel edges provide redundancy)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Compare with simple version (which would incorrectly report bridge)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_bridges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_parallel</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [[0,1]] — WRONG! (simple version can't handle parallel edges)</span></code></pre></div>
+<hr>
+<h2>STEP 7: COMPLEXITY ANALYSIS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TIME: O(V + E)                                                    │
+  │                                                                    │
+  │  WHY:                                                              │
+  │    → We run DFS once over the entire graph                         │
+  │    → DFS visits each node once: O(V)                               │
+  │    → DFS traverses each edge once (each direction): O(E)           │
+  │    → Per node: O(1) work (assign disc, update low)                │
+  │    → Per edge: O(1) work (check bridge condition)                 │
+  │    → Total: O(V + E)                                               │
+  │                                                                    │
+  │    Compare with brute force: O(E × (V+E))                         │
+  │    Improvement: from O(E²) to O(E) for sparse graphs!             │
+  │                                                                    │
+  │  SPACE: O(V + E)                                                   │
+  │                                                                    │
+  │  WHY:                                                              │
+  │    → Adjacency list: O(V + E)                                     │
+  │    → disc[] array: O(V)                                            │
+  │    → low[] array: O(V)                                             │
+  │    → Recursion stack: O(V) worst case (long chain)                │
+  │    → Total: O(V + E)                                               │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: ADDITIONAL TEST CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 2: No bridges (fully cyclic) ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges_cycle </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_bridges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_cycle</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: []</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># </span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   0 ── 1</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   |    |</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   3 ── 2</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Every edge is part of the big cycle → no bridges</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 3: All bridges (tree = no cycles) ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges_tree </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_bridges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_tree</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [[2, 3], [1, 2], [0, 1]]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   0 ── 1 ── 2 ── 3</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Every edge is a bridge (removing any disconnects)</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 4: Single bridge in larger graph ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span>
+</span><span>edges_single </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_bridges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_single</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [[2, 3]]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   0──1       3──4</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    \/   ══   |  |</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    2    bridge 6──5</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 5: Multiple bridges ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span>
+</span><span>edges_multi </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_bridges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_multi</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [[5, 6], [4, 5], [3, 4], [2, 3]]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   0──1──2 ══ 3 ══ 4 ══ 5 ══ 6</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   └──┘      (all dashes after 2 are bridges)</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 6: Single edge ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span>
+</span><span>edges_single_edge </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_bridges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_single_edge</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [[0, 1]]</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 7: Disconnected graph ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>edges_disc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>find_bridges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges_disc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [[0, 1], [2, 3]]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Both edges are bridges within their components</span></code></pre></div>
+<hr>
+<h2>STEP 9: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Directed?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Bridges are defined for UNDIRECTED graphs only.
+</span>  
+  For directed graphs, the analogous concept is:
+    → "Bridge" in directed graph = edge whose removal changes
+      reachability between some pair
+    → More complex analysis needed
+    → Related to Strongly Connected Components (Problem 36)
+    → Tarjan's SCC algorithm uses similar disc/low arrays</code></pre></div>
+<h3>What if Weighted?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Weights don't affect bridge-ness.
+</span>  → A bridge is about CONNECTIVITY, not cost
+  → Even a very expensive bridge is still a bridge
+  → The algorithm is identical — ignore weights</code></pre></div>
+<h3>What if Disconnected?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Our code handles this with the outer loop:
+</span>    for i in range(n):
+        if disc[i] == -1:
+            dfs(i, -1)
+  
+  → Each connected component is processed independently
+  → Bridges within each component are found
+  → There's no bridge BETWEEN components (no edge exists)</code></pre></div>
+<hr>
+<h2>STEP 10: BRIDGE vs CYCLE — The Deep Connection</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                   ║
+  ║  FUNDAMENTAL THEOREM:                                             ║
+  ║    An edge is a bridge ⟺ it is NOT part of any cycle              ║
+  ║                                                                   ║
+  ║  WHY?                                                             ║
+  ║    → If edge (u,v) is in a cycle:                                 ║
+  ║      Remove (u,v) → u still reaches v through rest of cycle      ║
+  ║      → NOT a bridge                                               ║
+  ║                                                                   ║
+  ║    → If edge (u,v) is NOT in any cycle:                           ║
+  ║      Remove (u,v) → no alternative path from u to v              ║
+  ║      → IS a bridge                                                ║
+  ║                                                                   ║
+  ║  TARJAN'S INSIGHT:                                                ║
+  ║    → Back edges indicate cycles                                   ║
+  ║    → low[v] tracks how far back (toward root) v's subtree        ║
+  ║      can reach via back edges                                     ║
+  ║    → If v's subtree can reach u or above → cycle exists → no     ║
+  ║      bridge                                                       ║
+  ║    → If v's subtree can't reach u → no cycle → bridge!           ║
+  ║                                                                   ║
+  ║  CONNECTION TO PREVIOUS:                                           ║
+  ║    Problem 10: DFS cycle detection in undirected graph            ║
+  ║      → "Does a cycle exist?"                                      ║
+  ║    Problem 34: Tarjan's bridges                                   ║
+  ║      → "WHICH edges are NOT in any cycle?"                        ║
+  ║      → More refined analysis using disc/low                       ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 11: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Using low[v] ≥ disc[u] instead of low[v] &gt; disc[u] ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  For BRIDGES:    low[v] &gt; disc[u]    (strictly greater)          ║
+  ║  For ARTIC PTS:  low[v] ≥ disc[u]    (greater or equal)         ║
+  ║                                                                  ║
+  ║  Why the difference?                                             ║
+  ║    → Bridge: v's subtree can't reach u AT ALL                    ║
+  ║    → Artic point: v's subtree can't reach ABOVE u               ║
+  ║      (reaching u itself doesn't help — u is the cut point)      ║
+  ║                                                                  ║
+  ║  Getting these confused:                                         ║
+  ║    → Using ≥ for bridges: too many false positives               ║
+  ║    → Using &gt; for artic points: miss some cut vertices            ║
+  ║                                                                  ║
+  ║  MNEMONIC:                                                       ║
+  ║    Bridges: "can't reach u" → strictly greater (&gt;)              ║
+  ║    Artic:   "can't reach above u" → greater or equal (≥)       ║
+  ║    (This distinction is explored in Problem 35)                  ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Not skipping parent in undirected graph              ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  In undirected graph, edge u─v appears in BOTH adjacency lists. ║
+  ║  When DFS goes u→v, v's neighbor list includes u.               ║
+  ║  If we don't skip u (parent), we'd treat u─v as a back edge.   ║
+  ║  This would make low[v] ≤ disc[u] ALWAYS → zero bridges found! ║
+  ║                                                                  ║
+  ║  FIX: "elif v != parent" check in the DFS                       ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Updating low with disc[v] vs low[v] for back edges  ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  For BACK EDGE to visited node v:                                ║
+  ║    low[u] = min(low[u], disc[v])    ← CORRECT                   ║
+  ║    low[u] = min(low[u], low[v])     ← ALSO WORKS for bridges    ║
+  ║                                                                  ║
+  ║  Both work for bridge finding.                                   ║
+  ║  But using disc[v] is "technically correct" per Tarjan's         ║
+  ║  original definition, and is required for some variants.         ║
+  ║                                                                  ║
+  ║  For TREE EDGE returning from child v:                           ║
+  ║    low[u] = min(low[u], low[v])     ← ALWAYS this one           ║
+  ║    (propagate child's reachability up to parent)                 ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Python recursion limit                               ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Python default recursion limit: 1000                            ║
+  ║  If graph has V &gt; 1000 nodes in a chain: CRASH!                  ║
+  ║                                                                  ║
+  ║  FIX A: import sys; sys.setrecursionlimit(200000)               ║
+  ║  FIX B: Use iterative version (Version 2 above)                 ║
+  ║                                                                  ║
+  ║  In interviews: mention this and say you'd use iterative         ║
+  ║  version for production code.                                    ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Graph with no edges                                  ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  n = 3, edges = []                                               ║
+  ║  → No edges → no bridges → return []                            ║
+  ║  → Each node is its own component                                ║
+  ║  → Algorithm works: DFS from each, no neighbors to process       ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Complete graph                                       ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Every pair connected → tons of cycles → ZERO bridges            ║
+  ║  Algorithm correctly returns [] because every subtree has        ║
+  ║  back edges reaching above its parent.                           ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TRIGGER WORDS:                                                    │
+  │    "critical connection"                                           │
+  │    "removing which edge disconnects"                               │
+  │    "bridge"                                                        │
+  │    "single point of failure" (for edges)                           │
+  │    "which cables are critical for the network"                     │
+  │                                                                    │
+  │  MY THINKING:                                                      │
+  │                                                                    │
+  │  1. "Remove an edge and check if graph disconnects"               │
+  │      → BRIDGE finding problem                                     │
+  │                                                                    │
+  │  2. "Brute force: remove each edge, check connectivity"           │
+  │      → O(E × (V+E)) — too slow                                    │
+  │                                                                    │
+  │  3. "Need O(V+E) solution"                                        │
+  │      → Tarjan's algorithm with disc[] and low[]                   │
+  │                                                                    │
+  │  4. "Key condition: low[v] &gt; disc[u] means bridge"               │
+  │      → v's subtree can't reach u or above                        │
+  │      → Removing (u,v) disconnects v's subtree                    │
+  │                                                                    │
+  │  INTERVIEW DIALOGUE:                                               │
+  │    "I'll use Tarjan's bridge-finding algorithm. It runs a single  │
+  │     DFS, tracking discovery time and low values. An edge (u,v)    │
+  │     is a bridge if low[v] &gt; disc[u], meaning v's subtree has no   │
+  │     back edge to u or any ancestor. Time is O(V+E)."             │
+  │                                                                    │
+  │  COMMON FOLLOW-UP: "What about articulation points?"              │
+  │    → "Same algorithm, slightly different condition:                │
+  │       low[v] ≥ disc[u] for non-root nodes."                      │
+  │    → That's Problem 35 (next problem)                             │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 13: CONNECTION TO PREVIOUS AND FUTURE PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────────┐
+</span>  │  BUILDS ON:                                                         │
+  │                                                                     │
+  │  Problem 4  → DFS traversal (foundation of Tarjan's)              │
+  │               → Tarjan's IS a DFS with extra bookkeeping           │
+  │                                                                     │
+  │  Problem 10 → Cycle detection in undirected graph                  │
+  │               → Bridges = edges NOT in any cycle                   │
+  │               → Problem 10 asked "does cycle exist?"               │
+  │               → Problem 34 asks "which edges avoid all cycles?"    │
+  │                                                                     │
+  │  Problem 5  → Connected components                                 │
+  │               → Bridges, when removed, INCREASE component count    │
+  │               → Understanding connectivity is prerequisite         │
+  │                                                                     │
+  │  NEW CONCEPTS INTRODUCED:                                           │
+  │    → Discovery time (disc[])                                       │
+  │    → Low value (low[])                                             │
+  │    → Back edge classification                                      │
+  │    → These SAME concepts are reused in Problems 35 and 36          │
+  │                                                                     │
+  │  LEADS TO:                                                          │
+  │                                                                     │
+  │  Problem 35 → Articulation Points                                  │
+  │               → Same disc[]/low[] framework                        │
+  │               → Different condition: low[v] ≥ disc[u]             │
+  │               → Finds critical NODES instead of critical EDGES     │
+  │                                                                     │
+  │  Problem 36 → Strongly Connected Components (Kosaraju's)          │
+  │               → Related concept: Tarjan's SCC also uses disc/low  │
+  │               → But for DIRECTED graphs                            │
+  │               → SCC groups nodes that form directed cycles         │
+  │                                                                     │
+  │  THE TARJAN FAMILY:                                                 │
+  │                                                                     │
+  │    ┌──────────────┐   ┌──────────────────┐   ┌──────────────────┐  │
+  │    │  P34         │   │  P35             │   │  P36             │  │
+  │    │  Bridges     │ → │  Articulation    │ → │  SCC             │  │
+  │    │  (edges)     │   │  Points (nodes)  │   │  (directed)      │  │
+  │    │  low[v]&gt;disc │   │  low[v]≥disc     │   │  Kosaraju/Tarjan │  │
+  │    └──────────────┘   └──────────────────┘   └──────────────────┘  │
+  │     Same disc/low       Same disc/low          Related concepts    │
+  │     framework            slightly diff          for directed graphs │
+  │                          condition                                  │
+  │                                                                     │
+  └─────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 14: LEETCODE VERSION — Critical Connections in a Network</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">criticalConnections</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> connections</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    LeetCode 1192: Critical Connections in a Network
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Exact same problem as our bridge-finding.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is the clean interview-ready version.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Note: LeetCode guarantees no parallel edges,
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    so simple parent tracking is sufficient.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>    
+<span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> connections</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    disc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    low </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    timer </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> v </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result</span></code></pre></div>
+<hr>
+<h2>STEP 15: VISUALIZING disc[] AND low[] — The Mental Model</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║  THINK OF IT THIS WAY:                                           ║
+  ║                                                                   ║
+  ║  disc[v] = "When did I discover node v?"                         ║
+  ║             → A timestamp / ordering of discovery                ║
+  ║             → Earlier discovery = smaller number                 ║
+  ║             → Root has smallest disc                             ║
+  ║                                                                   ║
+  ║  low[v]  = "How far BACK in time can v's family reach?"         ║
+  ║             → "Family" = v + all descendants in DFS tree         ║
+  ║             → "Reach back" = through back edges (cycles)         ║
+  ║             → Smaller low = can reach further back = more cycles ║
+  ║                                                                   ║
+  ║  BRIDGE:   "v's family is TRAPPED in time"                       ║
+  ║             → low[v] &gt; disc[u] means v's family can't reach      ║
+  ║               back to u's time or earlier                        ║
+  ║             → The edge (u,v) is their ONLY escape route          ║
+  ║             → Remove it → they're cut off → BRIDGE               ║
+  ║                                                                   ║
+  ║  NOT BRIDGE: "v's family has a TIME MACHINE"                     ║
+  ║             → low[v] ≤ disc[u] means v's family can reach        ║
+  ║               back to u's time or earlier via back edge           ║
+  ║             → They have alternative path → NOT a bridge          ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝
+
+  Our example revisited with this mental model:
+
+    Node  disc  low   "Family can reach back to..."
+    ────  ────  ───   ─────────────────────────────
+     0     0     0    time 0 (itself — it's the root)
+     1     1     0    time 0 (through cycle 1→2→0)      → reaches root!
+     2     2     0    time 0 (through back edge 2→0)    → reaches root!
+     3     3     3    time 3 (only itself)               → TRAPPED!
+     4     4     3    time 3 (through cycle 4→5→3)      → reaches 3 only
+     5     5     3    time 3 (through back edge 5→3)    → reaches 3 only
+
+  {0,1,2}: everyone reaches time 0 → tightly connected by cycles
+  {3,4,5}: everyone reaches time 3 → internal cycle, but CAN'T reach {0,1,2}
+  
+  Edge (1,3): low[3]=3 &gt; disc[1]=1 → 3's family trapped → BRIDGE!</code></pre></div>
+<hr>
+<h2>STEP 16: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  NEW CONCEPTS: Discovery Time, Low Value, Bridge Condition         ║
+  ║                                                                    ║
+  ║  TARJAN'S BRIDGE-FINDING ALGORITHM:                                ║
+  ║    1. DFS through the graph                                        ║
+  ║    2. Assign disc[v] = order of discovery                         ║
+  ║    3. Compute low[v] = earliest ancestor reachable from subtree   ║
+  ║    4. Edge (u,v) is BRIDGE if low[v] &gt; disc[u]                   ║
+  ║       "v's subtree has no back edge to u or above"                ║
+  ║                                                                    ║
+  ║  THE CORE INSIGHT:                                                 ║
+  ║    → Back edges create cycles                                      ║
+  ║    → Cycles provide redundancy (alternative paths)                ║
+  ║    → Edges NOT in any cycle = bridges                             ║
+  ║    → low[] tracks how far back edges can reach                    ║
+  ║    → If subtree can't reach above parent → bridge                 ║
+  ║                                                                    ║
+  ║  COMPLEXITY:                                                       ║
+  ║    → Time: O(V + E) — single DFS pass                            ║
+  ║    → Space: O(V + E)                                              ║
+  ║    → vs brute force O(E × (V+E))                                  ║
+  ║                                                                    ║
+  ║  THIS FRAMEWORK (disc/low) IS REUSABLE:                           ║
+  ║    → Problem 34: Bridges       (low[v] &gt; disc[u])   ← HERE       ║
+  ║    → Problem 35: Artic Points  (low[v] ≥ disc[u])   ← NEXT       ║
+  ║    → Problem 36: SCC           (similar idea, directed)           ║
+  ║                                                                    ║
+  ║  MNEMONIC:                                                         ║
+  ║    disc = "WHEN did I arrive?"                                    ║
+  ║    low  = "HOW FAR BACK can my descendants reach?"                ║
+  ║    Bridge = "descendants can't reach back past me"                ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CLEAN INTERVIEW VERSION</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find_bridges</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Tarjan's bridge finding. O(V+E) time.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Bridge (u,v): low[v] &gt; disc[u] — subtree can't reach u or above.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    disc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    low </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    bridges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    timer </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        timer</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>           </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># unvisited → tree edge</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ BRIDGE CONDITION</span><span>
+</span><span>                    bridges</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> v </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> parent</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>           </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># visited, not parent → back edge</span><span>
+</span><span>                low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">min</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>low</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> disc</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> bridges</span></code></pre></div>
+<hr>
+<h2>QUICK REFERENCE CARD</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────┐
+</span>  │  TARJAN'S BRIDGE FINDING                                  │
+  │                                                            │
+  │  disc[v] = discovery timestamp of v                        │
+  │  low[v]  = min disc reachable from v's subtree             │
+  │                                                            │
+  │  low[v] updated from:                                      │
+  │    → disc[v] itself (initial value)                        │
+  │    → low[child] after DFS returns from child               │
+  │    → disc[ancestor] for back edges (not parent)            │
+  │                                                            │
+  │  BRIDGE: edge (u,v) where low[v] &gt; disc[u]                │
+  │    "v's subtree can't reach u or above → disconnects"      │
+  │                                                            │
+  │  NOT BRIDGE: low[v] ≤ disc[u]                              │
+  │    "v's subtree reaches u or above → cycle → redundancy"   │
+  │                                                            │
+  │  Time: O(V+E)    Space: O(V+E)                            │
+  │                                                            │
+  │  COMPARE WITH PROBLEM 35 (Articulation Points):            │
+  │    Bridge:     low[v] &gt;  disc[u]  (strictly greater)       │
+  │    Artic Pt:   low[v] &gt;= disc[u]  (greater or equal)       │
+  └──────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<p><strong>Problem 34 Complete.</strong><br>
+<strong>Ready for Problem 35: Articulation Points (Tarjan's Extension)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="25" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-33.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 34 of 50</span>
+            </div>
+            <a href="problem-35.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 6: Problem 6: Grid as Graph (Flood Fill) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="13">
+<div class="px-2"><h1>Problem 6: Grid as Graph (Flood Fill)</h1>
+<h2>[Algorithm Family: BFS/DFS on Implicit Graphs]</h2>
+<h2>[Phase 1: Fundamentals — "I can represent and traverse any graph"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are building a paint bucket tool (like in MS Paint).
+</span>When a user clicks on a pixel, ALL connected pixels of the 
+SAME COLOR should change to the new color.
+
+"Connected" means: horizontally or vertically adjacent 
+(not diagonal) AND same original color.
+
+Given:
+  → A 2D grid of pixel colors (integers)
+  → A starting pixel position (row, col)
+  → A new color to paint
+
+Change the starting pixel and ALL connected same-color pixels
+to the new color.
+
+Input:
+  image = [
+    [1, 1, 1],
+    [1, 1, 0],
+    [1, 0, 1]
+  ]
+  sr = 1, sc = 1  (starting pixel: row 1, col 1)
+  new_color = 2
+
+Output:
+  [
+    [2, 2, 2],
+    [2, 2, 0],
+    [2, 0, 1]
+  ]
+  
+  All 1s connected to (1,1) changed to 2.
+  The 1 at (2,2) did NOT change — it's blocked by 0s.
+  The 0s did NOT change — different color from start pixel.</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — The Grid IS a Graph</h2>
+<h3>The Grid</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Row\Col   0     1     2
+</span>    0     [ 1 ] [ 1 ] [ 1 ]
+    1     [ 1 ] [ 1 ] [ 0 ]
+    2     [ 1 ] [ 0 ] [ 1 ]
+
+  Starting pixel: (1,1) with color 1
+  New color: 2</code></pre></div>
+<h3>The KEY Insight: Grid = Implicit Graph</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  In Problems 1-5, the graph was EXPLICIT:                      │
+  │    → We were GIVEN nodes and edges                             │
+  │    → We BUILT an adjacency list                                │
+  │                                                                │
+  │  In a GRID, the graph is IMPLICIT:                             │
+  │    → Each CELL is a NODE                                       │
+  │    → Adjacent cells (up/down/left/right) are EDGES             │
+  │    → We DON'T need to build an adjacency list!                 │
+  │    → The grid ITSELF is the graph structure                    │
+  │                                                                │
+  │  THIS IS THE CONCEPTUAL LEAP OF THIS PROBLEM.                 │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Mapping Grid to Graph</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  NODES: Each cell (row, col) is a node
+</span>  
+  (0,0)  (0,1)  (0,2)
+  (1,0)  (1,1)  (1,2)
+  (2,0)  (2,1)  (2,2)
+  
+  Total nodes: rows × cols = 3 × 3 = 9
+
+  EDGES: Each cell connects to its 4 neighbors (up, down, left, right)
+  
+  (0,0) ↔ (0,1), (1,0)              ← corner: 2 neighbors
+  (0,1) ↔ (0,0), (0,2), (1,1)      ← border: 3 neighbors
+  (1,1) ↔ (0,1), (1,0), (1,2), (2,1) ← center: 4 neighbors
+  
+  Maximum edges per node: 4 (up, down, left, right)
+  
+  No need to store edges explicitly!
+  We compute neighbors ON THE FLY using direction vectors.</code></pre></div>
+<h3>The 4-Directional Neighbor Pattern</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For cell (r, c), the 4 neighbors are:
+</span>  
+         (r-1, c)        ← UP
+           ↑
+  (r, c-1) ← (r, c) → (r, c+1)
+           ↓              ← LEFT, RIGHT
+         (r+1, c)        ← DOWN
+
+  In code:
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    #              UP       DOWN     LEFT     RIGHT
+
+    for dr, dc in directions:
+        new_r, new_c = r + dr, c + dc
+        # Check bounds: 0 &lt;= new_r &lt; rows and 0 &lt;= new_c &lt; cols</code></pre></div>
+<h3>The Graph Drawn as ASCII</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  The FULL implicit graph (all possible edges):
+</span>
+  (0,0) --- (0,1) --- (0,2)
+    |          |          |
+    |          |          |
+  (1,0) --- (1,1) --- (1,2)
+    |          |          |
+    |          |          |
+  (2,0) --- (2,1) --- (2,2)
+
+  But for FLOOD FILL, we only traverse edges between SAME-COLOR cells:
+
+  Values:
+    1 --- 1 --- 1
+    |     |      
+    |     |      
+    1 --- 1     0         ← 0 blocks the connection
+    |                 
+    |                 
+    1     0     1         ← (2,2) is isolated from the group
+
+  Connected component of color 1 starting from (1,1):
+    {(0,0), (0,1), (0,2), (1,0), (1,1), (2,0)}
+
+  NOT connected: (1,2)=0, (2,1)=0, (2,2)=1 (blocked by 0s)</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════╗
+</span>  ║  Property        │  Answer           │  Why?              ║
+  ╠══════════════════╪═══════════════════╪════════════════════╣
+  ║  NODES           │  Grid cells       │  Each (r,c) = node ║
+  ║  EDGES           │  Adjacent cells   │  4-directional     ║
+  ║                  │  with same color  │  same-color only   ║
+  ║  Directed?       │  NO               │  Can go both ways  ║
+  ║  Weighted?       │  NO               │  All edges equal   ║
+  ║  Cyclic?         │  YES              │  Grid has cycles   ║
+  ║  Connected?      │  Not necessarily  │  Colors create     ║
+  ║                  │                   │  barriers           ║
+  ║  Implicit?       │  ★ YES ★         │  No edge list given║
+  ║  V               │  rows × cols      │                    ║
+  ║  E               │  ≈ 2 × rows × cols│  ~4 edges/node ÷2 ║
+  ╚══════════════════╧═══════════════════╧════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Naive idea: "Repeatedly scan the entire grid. For each cell with
+</span>               the original color, check if any neighbor is already
+               the new color. If so, change it."
+  
+  Iteration 1: Change (1,1) to 2
+  Iteration 2: Scan grid — (0,1) and (1,0) neighbor a 2-cell → change them
+  Iteration 3: Scan grid — (0,0) and (0,2) neighbor a 2-cell → change them
+  Iteration 4: Scan grid — (2,0) neighbors a 2-cell → change it
+  Iteration 5: Scan grid — no more changes
+  
+  Each iteration: O(rows × cols) to scan
+  Number of iterations: up to O(rows × cols) in worst case
+  Total: O((rows × cols)²)
+  
+  For a 1000×1000 grid: 10⁶ × 10⁶ = 10¹² → TOO SLOW</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Repeated scanning is wasteful.
+</span>  Once we know a cell is the original color AND reachable,
+  we should process it ONCE and move to its neighbors.
+  
+  This is exactly what BFS/DFS does!
+  
+  → BFS/DFS from starting pixel
+  → Only visit same-color neighbors
+  → Change color when visiting
+  → Each cell processed at most once → O(rows × cols)</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │  GRAPH THINKING FRAMEWORK (from Phase 1):                      │
+  │                                                                │
+  │  Step 1: "What are NODES and EDGES?"                           │
+  │    → Nodes: grid cells (row, col)                              │
+  │    → Edges: adjacent cells with same color                     │
+  │                                                                │
+  │  Step 2: "What TYPE of graph?"                                 │
+  │    → Undirected, unweighted, implicit (grid)                   │
+  │                                                                │
+  │  Step 3: "What am I looking for?"                              │
+  │    → Connected component containing starting pixel             │
+  │    → Same as Problem 5 but on a GRID instead of explicit graph │
+  │                                                                │
+  │  Step 4: "What TRAVERSAL?"                                     │
+  │    → BFS or DFS — either works (like Problem 5)                │
+  │    → Visit all connected same-color cells                      │
+  │    → Change their color                                        │
+  │                                                                │
+  │  Step 5: "What DATA STRUCTURES?"                               │
+  │    → Queue (BFS) or Stack/Recursion (DFS)                      │
+  │    → Grid itself serves as visited marker                      │
+  │      (changed color = visited!)                                │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Why No Adjacency List Needed</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  In Problems 1-5, we built adjacency lists:
+</span>    graph[0] = [1, 2]
+    graph[1] = [0, 3]
+    ...
+
+  For grids, neighbors are COMPUTED, not stored:
+    neighbors of (r, c) = (r-1,c), (r+1,c), (r,c-1), (r,c+1)
+    (filtered by bounds and same-color condition)
+
+  WHY is this better?
+    → No memory for adjacency list: saves O(V + E) space
+    → Neighbors computed in O(1) per cell
+    → Grid structure is REGULAR — every interior cell has exactly 4 neighbors
+    → Building an adjacency list would be WASTED WORK
+    
+  ┌──────────────────────────────────────────────────────────────┐
+  │  RULE: When the graph is a GRID, use the grid directly.      │
+  │        Don't build an adjacency list.                        │
+  │        Compute neighbors on the fly using direction vectors.  │
+  └──────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Using Color Change as "Visited" Marker</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  In Problems 3-5, we used a VISITED SET:
+</span>    visited = set()
+    if node not in visited:
+        visited.add(node)
+        process(node)
+  
+  For flood fill, we can be CLEVER:
+    → When we change a cell's color from original to new_color,
+      it's effectively "visited" — it no longer has the original color
+    → So we won't visit it again (because we only visit cells with 
+      the original color)
+    → The grid ITSELF becomes the visited marker!
+    → No extra space needed for visited set!
+
+  EXCEPTION: If new_color == original_color:
+    → Changing color doesn't change anything
+    → Cell still "looks unvisited" → INFINITE LOOP!
+    → Must handle this edge case separately</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — DFS on Grid</h2>
+<h3>Step-by-Step Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Initial Grid:                 Start: (1,1), original_color=1, new_color=2
+</span>    [1, 1, 1]
+    [1, 1, 0]
+    [1, 0, 1]
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 1: DFS(1, 1)                                                  │
+  │                                                                     │
+  │   Cell (1,1) has color 1 (= original_color) → change to 2          │
+  │                                                                     │
+  │   Grid:                                                             │
+  │     [1, 1, 1]                                                       │
+  │     [1, *2*, 0]     ← changed!                                     │
+  │     [1, 0, 1]                                                       │
+  │                                                                     │
+  │   Check 4 neighbors:                                                │
+  │     UP    (0,1): color=1 = original → DFS(0,1)                     │
+  │     DOWN  (2,1): color=0 ≠ original → SKIP                         │
+  │     LEFT  (1,0): color=1 = original → (will visit after UP returns)│
+  │     RIGHT (1,2): color=0 ≠ original → SKIP                         │
+  │                                                                     │
+  │   Go to DFS(0,1) first (depth-first!)                              │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 2: DFS(0, 1) — went UP from (1,1)                            │
+  │                                                                     │
+  │   Cell (0,1) has color 1 → change to 2                              │
+  │                                                                     │
+  │   Grid:                                                             │
+  │     [1, *2*, 1]     ← changed!                                     │
+  │     [1, 2, 0]                                                       │
+  │     [1, 0, 1]                                                       │
+  │                                                                     │
+  │   Check 4 neighbors:                                                │
+  │     UP    (-1,1): OUT OF BOUNDS → SKIP                              │
+  │     DOWN  (1,1):  color=2 ≠ original(1) → SKIP (already painted!)  │
+  │     LEFT  (0,0):  color=1 = original → DFS(0,0)                    │
+  │     RIGHT (0,2):  color=1 = original → (will visit after)          │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 3: DFS(0, 0) — went LEFT from (0,1)                          │
+  │                                                                     │
+  │   Cell (0,0) has color 1 → change to 2                              │
+  │                                                                     │
+  │   Grid:                                                             │
+  │     [*2*, 2, 1]     ← changed!                                     │
+  │     [1, 2, 0]                                                       │
+  │     [1, 0, 1]                                                       │
+  │                                                                     │
+  │   Check 4 neighbors:                                                │
+  │     UP    (-1,0): OUT OF BOUNDS → SKIP                              │
+  │     DOWN  (1,0):  color=1 = original → DFS(1,0)                    │
+  │     LEFT  (0,-1): OUT OF BOUNDS → SKIP                              │
+  │     RIGHT (0,1):  color=2 ≠ original → SKIP (already painted)      │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 4: DFS(1, 0) — went DOWN from (0,0)                          │
+  │                                                                     │
+  │   Cell (1,0) has color 1 → change to 2                              │
+  │                                                                     │
+  │   Grid:                                                             │
+  │     [2, 2, 1]                                                       │
+  │     [*2*, 2, 0]     ← changed!                                     │
+  │     [1, 0, 1]                                                       │
+  │                                                                     │
+  │   Check 4 neighbors:                                                │
+  │     UP    (0,0):  color=2 ≠ original → SKIP                        │
+  │     DOWN  (2,0):  color=1 = original → DFS(2,0)                    │
+  │     LEFT  (1,-1): OUT OF BOUNDS → SKIP                              │
+  │     RIGHT (1,1):  color=2 ≠ original → SKIP                        │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 5: DFS(2, 0) — went DOWN from (1,0)                          │
+  │                                                                     │
+  │   Cell (2,0) has color 1 → change to 2                              │
+  │                                                                     │
+  │   Grid:                                                             │
+  │     [2, 2, 1]                                                       │
+  │     [2, 2, 0]                                                       │
+  │     [*2*, 0, 1]     ← changed!                                     │
+  │                                                                     │
+  │   Check 4 neighbors:                                                │
+  │     UP    (1,0):  color=2 ≠ original → SKIP                        │
+  │     DOWN  (3,0):  OUT OF BOUNDS → SKIP                              │
+  │     LEFT  (2,-1): OUT OF BOUNDS → SKIP                              │
+  │     RIGHT (2,1):  color=0 ≠ original → SKIP                        │
+  │                                                                     │
+  │   All neighbors done → RETURN (backtrack!)                          │
+  │   → Returns to DFS(1,0) → all done → return                        │
+  │   → Returns to DFS(0,0) → all done → return                        │
+  │   → Returns to DFS(0,1) → continue with RIGHT neighbor             │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 6: Back in DFS(0,1) — continue with RIGHT neighbor (0,2)     │
+  │                                                                     │
+  │   DFS(0, 2):                                                        │
+  │   Cell (0,2) has color 1 → change to 2                              │
+  │                                                                     │
+  │   Grid:                                                             │
+  │     [2, 2, *2*]     ← changed!                                     │
+  │     [2, 2, 0]                                                       │
+  │     [2, 0, 1]                                                       │
+  │                                                                     │
+  │   Check 4 neighbors:                                                │
+  │     UP    (-1,2): OUT OF BOUNDS → SKIP                              │
+  │     DOWN  (1,2):  color=0 ≠ original → SKIP                        │
+  │     LEFT  (0,1):  color=2 ≠ original → SKIP                        │
+  │     RIGHT (0,3):  OUT OF BOUNDS → SKIP                              │
+  │                                                                     │
+  │   All done → RETURN                                                 │
+  │   → Returns all the way back to DFS(1,1)                           │
+  │   → DFS(1,1) checks remaining neighbors: DOWN(2,1)=0 skip,         │
+  │     LEFT(1,0)=2 skip, RIGHT(1,2)=0 skip                           │
+  │   → All done → RETURN                                               │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ═══════════════════════════════════════════════════════════════════
+  FINAL GRID:
+    [2, 2, 2]
+    [2, 2, 0]
+    [2, 0, 1]
+  
+  Cells changed: (0,0), (0,1), (0,2), (1,0), (1,1), (2,0) — all 6
+  Cells unchanged: (1,2)=0, (2,1)=0, (2,2)=1 (isolated from start)
+  ═══════════════════════════════════════════════════════════════════</code></pre></div>
+<h3>DFS Path Visualization</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  The order DFS visited cells:
+</span>
+    [3] ← [2] → [6]
+     ↓      ↑
+    [4]    [1]
+     ↓
+    [5]
+
+  DFS path: (1,1) → (0,1) → (0,0) → (1,0) → (2,0) → backtrack → (0,2)
+
+  If we used BFS instead:
+    Level 0: (1,1)
+    Level 1: (0,1), (1,0)
+    Level 2: (0,0), (0,2), (2,0)
+    BFS order: (1,1), (0,1), (1,0), (0,0), (0,2), (2,0)
+    
+  Different ORDER, same RESULT — all 6 cells get painted.</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: DFS Recursive (Most Intuitive)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">flood_fill_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_color</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Flood fill using recursive DFS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        image: 2D grid of pixel colors
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        sr, sc: starting row and column
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        new_color: color to paint
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Modified image with flood fill applied
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Graph mapping:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Nodes: cells (r, c)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Edges: 4-directional neighbors with same color
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Traversal: DFS from (sr, sc)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → "Visit" = change color
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Key trick: changing color serves as "visited" marker
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    original_color </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>sc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># EDGE CASE: if new color == original color, nothing to do!</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Without this check: infinite recursion (cell never "changes")</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> original_color </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> new_color</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> image
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 4-directional movement vectors</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#              UP       DOWN     LEFT      RIGHT</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Paint cell (r,c) and recursively paint same-color neighbors."""</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Paint this cell (also marks it as "visited")</span><span>
+</span><span>        image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_color
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Explore 4 neighbors</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Check bounds AND same original color</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> original_color</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Start flood fill from (sr, sc)</span><span>
+</span><span>    dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> image
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>image </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> flood_fill_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sr</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_color</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"After flood fill:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> row </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> result</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">row</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>After flood fill:
+</span>  [2, 2, 2]
+  [2, 2, 0]
+  [2, 0, 1]</code></pre></div>
+<hr>
+<h3>Version 2: BFS Approach (Iterative, No Recursion Limit)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">flood_fill_bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_color</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Flood fill using BFS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same result as DFS version, different exploration order.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Advantage: no recursion depth limit (safe for large grids).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Uses BFS template from Problem 3,
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    adapted for grid (no explicit adjacency list).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    original_color </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>sc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Edge case: same color → nothing to do</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> original_color </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> new_color</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> image
+</span>    
+<span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># BFS initialization (Problem 3 template)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>sc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_color     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># "visited" = color changed</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> original_color</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_color     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># paint AND mark visited</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> image
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>image </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> flood_fill_bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sr</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_color</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"After flood fill (BFS):"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> row </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> result</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">row</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>After flood fill (BFS):
+</span>  [2, 2, 2]
+  [2, 2, 0]
+  [2, 0, 1]</code></pre></div>
+<hr>
+<h3>Version 3: With Explicit Visited Set (When You Can't Modify the Grid)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">flood_fill_with_visited</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_color</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Flood fill using a SEPARATE visited set.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    When to use this version:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → You can't modify the input grid
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → original_color == new_color (color change can't serve as visited)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → You need to preserve the original grid
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is closer to the standard BFS pattern from Problem 3.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    original_color </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>sc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Standard BFS with visited set (Problem 3 pattern)</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_color       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># paint this cell</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols 
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited 
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> original_color</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span>                
+<span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># mark visited when enqueuing</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> image
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST (works even when new_color == original_color) ───</span><span>
+</span><span>image </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> flood_fill_with_visited</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sr</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_color</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"After flood fill (same color):"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> row </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> result</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">row</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Grid unchanged — but no infinite loop!</span></code></pre></div>
+<hr>
+<h3>Version 4: 8-Directional Flood Fill</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">flood_fill_8dir</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_color</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Flood fill with 8-DIRECTIONAL connectivity (includes diagonals).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    8 directions:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        (-1,-1) (-1,0) (-1,1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        (0,-1)  (r,c)  (0,1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        (1,-1)  (1,0)  (1,1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    When to use 8 vs 4 directions:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Problem specifies "adjacent including diagonals" → 8
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Problem specifies "horizontally or vertically adjacent" → 4
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Default in most problems: 4-directional
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    original_color </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>sc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> original_color </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> new_color</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> image
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 8 directions: up, down, left, right + 4 diagonals</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>        </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>        </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>           </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>        </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>  </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_color
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> image</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> original_color</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>sr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> sc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> image</span></code></pre></div>
+<h3>4-Directional vs 8-Directional Visualization</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  4-DIRECTIONAL:                    8-DIRECTIONAL:
+</span>  Only ←↑→↓                        All 8 surrounding cells
+
+       X                            X  X  X
+    X (r,c) X                       X (r,c) X
+       X                            X  X  X
+
+  Grid:                             Grid:
+    [1, 0, 1]                         [1, 0, 1]
+    [0, 1, 0]                         [0, 1, 0]
+    [1, 0, 1]                         [1, 0, 1]
+
+  4-dir from (1,1):                 8-dir from (1,1):
+    Only (1,1) — isolated!            All 1s connected diagonally!
+    Component: {(1,1)}                Component: {(0,0),(0,2),(1,1),(2,0),(2,2)}
+
+  HUGE difference in connectivity!</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(rows × cols)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  WHY O(rows × cols)?
+</span>
+  → Each cell is visited AT MOST ONCE
+    (once painted, it has new_color ≠ original_color, so it's skipped)
+  → For each visited cell, we check 4 neighbors → O(1) work per cell
+  → Total cells: rows × cols
+  → Total work: O(rows × cols × 4) = O(rows × cols)
+
+  In graph terms:
+    V = rows × cols (number of cells/nodes)
+    E ≈ 2 × rows × cols (each interior cell has ~4 edges, shared)
+    O(V + E) = O(rows × cols)
+
+  For 1000×1000 grid: 10⁶ operations → fast!</code></pre></div>
+<h3>Space Complexity</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  DFS Recursive:
+</span>    → Call stack depth: O(rows × cols) worst case
+       (snake-like path through entire grid)
+    → Can cause stack overflow for large grids!
+    
+    Worst case call stack:
+      ┌─→─→─→─→─┐
+      │           │
+      ↑           ↓
+      │           │
+      └─←─←─←─←─┘
+      All cells connected in a winding path → recursion depth = rows × cols
+
+  BFS:
+    → Queue size: O(rows × cols) worst case
+       (all cells could be in queue simultaneously)
+    → But NO recursion → no stack overflow!
+    
+  Visited set (if used): O(rows × cols) extra
+
+  ┌──────────────────────────────────────────────────────┐
+  │  For large grids (1000×1000+):                        │
+  │    → Prefer BFS (no recursion limit issue)            │
+  │    → Or iterative DFS                                 │
+  │    → Recursive DFS risks stack overflow               │
+  └──────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 7: THE GRID-AS-GRAPH PATTERN — Template for All Grid Problems</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># UNIVERSAL GRID TRAVERSAL TEMPLATE</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Use this for Problems 6, 7, 13, 14, 16, 17, 40, and more</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ═══════════════════════════════════════════════════════════════</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">grid_bfs_template</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Template for BFS on a 2D grid.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Modify the CONDITION to match your specific problem.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 4-directional movement</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># BFS setup</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start_r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start_r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ╔════════════════════════════════╗</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ║  PROCESS cell (r, c) here      ║</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ╚════════════════════════════════╝</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Bounds check</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Not visited</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ╔════════════════════════════════════╗</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ║  CONDITION: should we visit (nr,nc)?║</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ║  Customize per problem              ║</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ╚════════════════════════════════════╝</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ← replace with your condition</span><span>
+</span><span>                        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                        queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">grid_dfs_template</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Template for DFS on a 2D grid.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ╔════════════════════════════════╗</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ║  PROCESS cell (r, c) here      ║</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ╚════════════════════════════════╝</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols 
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ╔════════════════════════════════════╗</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ║  CONDITION check here               ║</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ╚════════════════════════════════════╝</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ← replace with your condition</span><span>
+</span><span>                    dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start_r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_c</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<h3>What Changes Between Problems</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────┬─────────────────────────────────────┐
+</span>  │  Problem              │  CONDITION for visiting neighbor     │
+  ├──────────────────────┼─────────────────────────────────────┤
+  │  Flood Fill (Prob 6)  │  grid[nr][nc] == original_color     │
+  │  Islands (Prob 7)     │  grid[nr][nc] == 1 (is land)        │
+  │  Rotten Oranges (13)  │  grid[nr][nc] == 1 (fresh orange)   │
+  │  01 Matrix (Prob 14)  │  grid[nr][nc] == 1 (non-zero)       │
+  │  Surrounded (Prob 16) │  grid[nr][nc] == 'O'                │
+  │  Water Flow (Prob 17) │  grid[nr][nc] &gt;= grid[r][c]         │
+  └──────────────────────┴─────────────────────────────────────┘
+  
+  The TEMPLATE stays the same — only the CONDITION changes!
+  This is why learning the grid-as-graph pattern once
+  unlocks many problems.</code></pre></div>
+<hr>
+<h2>STEP 8: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Directed Grid?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Some problems have directed movement on grids:
+</span>    → "Water flows downhill" (can only move to lower cells)
+    → "Can only move right or down"
+  
+  In these cases, the edge from (r,c) to (nr,nc) exists
+  but NOT from (nr,nc) to (r,c).
+  
+  Example (Problem 17 preview):
+    Water flows from HIGH to LOW:
+      [4, 3, 2]
+      [3, 2, 1]
+    
+    (0,0)=4 → can flow to (0,1)=3 and (1,0)=3
+    (0,1)=3 → CANNOT flow back to (0,0)=4 (uphill!)
+    
+  The grid becomes a DIRECTED implicit graph.
+  Still use BFS/DFS, just modify the condition.</code></pre></div>
+<h3>What if Weighted Grid?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Some problems assign costs to cells:
+</span>    → "Each cell has a cost to enter"
+    → "Find minimum cost path from top-left to bottom-right"
+  
+  Grid becomes a WEIGHTED implicit graph.
+    → BFS won't find shortest (weighted) path
+    → Need Dijkstra on grid (Problem 40: Swim in Rising Water)
+    → Or 0-1 BFS if weights are only 0 and 1 (Problem 39)
+  
+  For now (flood fill): unweighted, so BFS/DFS both work.</code></pre></div>
+<h3>What if 3D Grid?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Some problems use 3D grids:
+</span>    → Each cell is (layer, row, col)
+    → 6 directions: up, down, left, right, forward, backward
+  
+  directions = [(-1,0,0), (1,0,0), (0,-1,0), (0,1,0), (0,0,-1), (0,0,1)]
+  
+  Same pattern, just one more dimension!</code></pre></div>
+<hr>
+<h2>STEP 9: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: new_color == original_color → infinite loop!     ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  If we use color change as "visited" marker:                 ║
+  ║    → Cell painted from 1 to 1 → still looks like 1           ║
+  ║    → DFS visits it again → infinite recursion!               ║
+  ║                                                              ║
+  ║  FIX: Check at the start:                                    ║
+  ║    if original_color == new_color: return image               ║
+  ║                                                              ║
+  ║  OR: Use explicit visited set (Version 3)                    ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Forgetting bounds check                          ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Grid has boundaries! Cells at edges have fewer neighbors.   ║
+  ║                                                              ║
+  ║  WRONG:                                                      ║
+  ║    nr, nc = r + dr, c + dc                                   ║
+  ║    if image[nr][nc] == original_color:  ← IndexError!        ║
+  ║                                                              ║
+  ║  RIGHT:                                                      ║
+  ║    if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols:  ← check FIRST     ║
+  ║        if image[nr][nc] == original_color:                   ║
+  ║                                                              ║
+  ║  Python won't crash on negative indices (wraps around!)      ║
+  ║  So image[-1][0] gives LAST row, not error → SILENT BUG      ║
+  ║  ALWAYS check: 0 &lt;= nr &lt; rows AND 0 &lt;= nc &lt; cols            ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Confusing (row, col) with (x, y)                 ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  In grids:                                                   ║
+  ║    row = vertical position (increases DOWNWARD)              ║
+  ║    col = horizontal position (increases RIGHTWARD)           ║
+  ║                                                              ║
+  ║  image[row][col]  NOT  image[col][row]                       ║
+  ║  image[r][c]      NOT  image[x][y] (unless x=row, y=col)    ║
+  ║                                                              ║
+  ║  Be consistent! I always use (r, c) for (row, col).         ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Stack overflow on large grids (recursive DFS)    ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Grid 1000×1000 = 10⁶ cells                                 ║
+  ║  Worst case recursion depth = 10⁶                            ║
+  ║  Python default recursion limit = 1000                       ║
+  ║  → RecursionError!                                           ║
+  ║                                                              ║
+  ║  FIX: Use BFS (iterative) for large grids                    ║
+  ║  OR: Use iterative DFS with explicit stack                   ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: 1×1 grid                                         ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  image = [[5]], sr=0, sc=0, new_color=3                      ║
+  ║  → Just change the single cell → [[3]]                       ║
+  ║  → No neighbors to explore                                   ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Entire grid is same color                        ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  image = [[1,1,1],[1,1,1]], new_color=2                      ║
+  ║  → ALL cells change to 2                                     ║
+  ║  → BFS/DFS visits every cell → O(rows × cols) ✓              ║
+  ╚══════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 10: HOW GRID PROBLEMS DIFFER FROM EXPLICIT GRAPH PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────┬──────────────────────┬──────────────────────┐
+</span>  │  Aspect              │  Explicit Graph       │  Grid Graph          │
+  │                      │  (Problems 1-5)       │  (Problem 6+)        │
+  ├──────────────────────┼──────────────────────┼──────────────────────┤
+  │  Nodes               │  Given as numbers     │  Cells (r, c)        │
+  │                      │  0, 1, 2, ...         │                      │
+  │                      │                       │                      │
+  │  Edges               │  Given as pairs       │  Computed from       │
+  │                      │  [u, v]               │  direction vectors   │
+  │                      │                       │                      │
+  │  Adjacency           │  Build adj list       │  Use grid directly   │
+  │  Structure           │  (Problem 1)          │  No adj list needed  │
+  │                      │                       │                      │
+  │  Neighbor Access     │  graph[node]          │  (r+dr, c+dc) with  │
+  │                      │                       │  bounds check        │
+  │                      │                       │                      │
+  │  Visited Marker      │  visited set          │  visited set OR      │
+  │                      │                       │  modify grid itself  │
+  │                      │                       │                      │
+  │  V (nodes)           │  Given as n           │  rows × cols         │
+  │  E (edges)           │  Given as len(edges)  │  ≈ 2 × rows × cols  │
+  │                      │                       │                      │
+  │  Bounds Check        │  Not needed           │  CRITICAL!           │
+  │                      │  (adj list handles)   │  0 ≤ r &lt; rows        │
+  │                      │                       │  0 ≤ c &lt; cols        │
+  └──────────────────────┴──────────────────────┴──────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 11: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  SIGNAL 1: "Given a 2D grid/matrix..."                         │
+  │    → The grid IS a graph                                       │
+  │    → Cells = nodes, adjacent cells = edges                     │
+  │                                                                │
+  │  SIGNAL 2: "Connected", "adjacent", "neighboring"              │
+  │    → Think 4-directional or 8-directional neighbors            │
+  │    → BFS/DFS on the grid                                       │
+  │                                                                │
+  │  SIGNAL 3: "Spread", "fill", "reach", "flow"                   │
+  │    → Flood fill pattern                                        │
+  │    → BFS/DFS from source with condition                        │
+  │                                                                │
+  │  SIGNAL 4: "Region", "area", "island", "cluster" on a grid    │
+  │    → Connected component on grid (Problem 7 next!)             │
+  │                                                                │
+  │  THINKING PROCESS:                                             │
+  │    "I see a 2D grid with connectivity conditions"              │
+  │    → "Grid cells are nodes, adjacent cells are edges"          │
+  │    → "Use BFS/DFS with direction vectors"                      │
+  │    → "Don't build adjacency list — use grid directly"          │
+  │    → "Remember bounds check!"                                  │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: GRID AS IMPLICIT GRAPH                     ║
+  ║                                                                    ║
+  ║   1. A 2D grid IS a graph:                                        ║
+  ║      → Cells = nodes                                               ║
+  ║      → Adjacent cells = edges                                      ║
+  ║      → No adjacency list needed — compute neighbors on the fly    ║
+  ║                                                                    ║
+  ║   2. Direction vectors: [(-1,0), (1,0), (0,-1), (0,1)]           ║
+  ║      → 4-directional (most problems)                               ║
+  ║      → 8-directional (when diagonals count)                        ║
+  ║                                                                    ║
+  ║   3. BOUNDS CHECK is mandatory:                                    ║
+  ║      → 0 &lt;= nr &lt; rows AND 0 &lt;= nc &lt; cols                          ║
+  ║      → Always check BEFORE accessing grid[nr][nc]                  ║
+  ║                                                                    ║
+  ║   4. Color change can serve as "visited" marker                    ║
+  ║      → Saves space (no visited set needed)                         ║
+  ║      → But watch out: same color → infinite loop!                  ║
+  ║                                                                    ║
+  ║   5. Same BFS/DFS logic from Problems 3-4                         ║
+  ║      → Just swap "graph[node]" with "direction-based neighbors"   ║
+  ║                                                                    ║
+  ║   MENTAL MODEL:                                                    ║
+  ║   "When I see a grid problem, I see a graph.                      ║
+  ║    Each cell talks to its neighbors.                               ║
+  ║    BFS/DFS explores the conversation."                             ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CONNECTION MAP</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 1 (Build Graph)       ── explicit graph
+</span>  Problem 2 (Matrix)            ── matrix representation
+  Problem 3 (BFS)               ── queue-based traversal
+  Problem 4 (DFS)               ── stack-based traversal
+  Problem 5 (Components)        ── counting groups
+  Problem 6 (Flood Fill)        ◄── YOU ARE HERE — grid as graph!
+           │
+           │   Built from: Problems 3/4 (BFS/DFS) on implicit grid
+           │   New concept: grid = graph, direction vectors, bounds check
+           │
+           ├──→ Problem 7  (Number of Islands)
+           │     → Connected components on grid
+           │     → Combines Problem 5 (components) + Problem 6 (grid)
+           │     → "Count separate regions on a grid"
+           │
+           ├──→ Problem 13 (Rotten Oranges) — multi-source BFS on grid
+           ├──→ Problem 14 (01 Matrix) — reverse BFS on grid
+           ├──→ Problem 16 (Surrounded Regions) — boundary BFS on grid
+           └──→ Problem 17 (Pacific Atlantic) — dual BFS on grid</code></pre></div>
+<hr>
+<p><strong>Problem 6 Complete.</strong><br>
+<strong>Ready for Problem 7: Number of Islands?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="15" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-5.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 6 of 50</span>
+            </div>
+            <a href="problem-7.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

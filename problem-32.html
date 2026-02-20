@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 32: Problem 32: Minimum Cost to Connect All Points (MST Application) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="15">
+<div class="px-2"><h1>Problem 32: Minimum Cost to Connect All Points (MST Application)</h1>
+<h2>[Algorithm Family: Minimum Spanning Tree — Choosing Kruskal vs Prim]</h2>
+<h2>[Phase 3: Standard Interview — "I can solve real interview graph problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are given an array of points where points[i] = [xi, yi]
+</span>represents a point on a 2D plane.
+
+The cost of connecting two points [xi, yi] and [xj, yj] is the
+Manhattan distance between them:
+    cost = |xi - xj| + |yi - yj|
+
+Return the minimum cost to connect ALL points such that there is
+exactly one simple path between any two points.
+
+("one simple path between any two points" = a TREE)
+
+Input:
+  points = [[0,0], [2,2], [3,10], [5,2], [7,0]]
+
+Output: 20
+
+Explanation:
+  Connect the 5 points with 4 edges (tree) at minimum total
+  Manhattan distance.</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<h3>Plot the Points</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Y
+</span>  10 |          ● P2(3,10)
+   9 |
+   8 |
+   7 |
+   6 |
+   5 |
+   4 |
+   3 |
+   2 |    ● P1(2,2)    ● P3(5,2)
+   1 |
+   0 ● P0(0,0)                ● P4(7,0)
+     └──────────────────────────── X
+     0  1  2  3  4  5  6  7
+
+  Points:
+    P0 = (0, 0)
+    P1 = (2, 2)
+    P2 = (3, 10)
+    P3 = (5, 2)
+    P4 = (7, 0)</code></pre></div>
+<h3>The Implicit COMPLETE Graph</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Every point connects to EVERY other point.
+</span>  5 points → C(5,2) = 10 possible edges.
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │  Edge         │ Manhattan Distance                           │
+  │               │ |xi-xj| + |yi-yj|                           │
+  ├───────────────┼──────────────────────────────────────────────┤
+  │  P0 — P1      │ |0-2| + |0-2|   = 2 + 2   = 4              │
+  │  P0 — P2      │ |0-3| + |0-10|  = 3 + 10  = 13             │
+  │  P0 — P3      │ |0-5| + |0-2|   = 5 + 2   = 7              │
+  │  P0 — P4      │ |0-7| + |0-0|   = 7 + 0   = 7              │
+  │  P1 — P2      │ |2-3| + |2-10|  = 1 + 8   = 9              │
+  │  P1 — P3      │ |2-5| + |2-2|   = 3 + 0   = 3              │
+  │  P1 — P4      │ |2-7| + |2-0|   = 5 + 2   = 7              │
+  │  P2 — P3      │ |3-5| + |10-2|  = 2 + 8   = 10             │
+  │  P2 — P4      │ |3-7| + |10-0|  = 4 + 10  = 14             │
+  │  P3 — P4      │ |5-7| + |2-0|   = 2 + 2   = 4              │
+  └───────────────┴──────────────────────────────────────────────┘
+
+  The complete graph (every node connected to every other):
+
+       P0 ────(4)──── P1 ────(9)──── P2
+       |╲             /|╲             /|
+       | ╲          /  |  ╲         /  |
+      (7) (7)    (3)  (7)  (10)  (14) |
+       |    ╲  /       |      ╲ /     |
+       |     ╳        |       ╳      |
+       |   /   ╲      |     /   ╲    |
+       | /      ╲     |   /      ╲   |
+       P4 ──(4)── P3 ─┘ /         ╲  |
+                                     (every pair connected)</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer              │  Why?                       ║
+╠══════════════════╪══════════════════════╪═════════════════════════════╣
+║  NODES           │  Points (coordinates)│  Each point = node          ║
+║  EDGES           │  ALL pairs of points │  Complete graph             ║
+║  Directed?       │  NO                  │  Distance is symmetric      ║
+║  Weighted?       │  YES                 │  Manhattan distance         ║
+║  Connected?      │  YES (complete graph)│  Every node reaches every   ║
+║  DENSE or SPARSE │  VERY DENSE          │  E = V(V-1)/2 ≈ V²         ║
+║                  │                      │  Complete graph = maximum   ║
+║                  │                      │  possible density           ║
+║  What we seek    │  MST                 │  "Connect all, min cost,    ║
+║                  │                      │   one path between any two" ║
+║                  │                      │   = spanning tree           ║
+╚══════════════════╧══════════════════════╧═════════════════════════════╝
+
+  THIS IS KEY: The graph is COMPLETE → MAXIMUM DENSITY
+  → V = 5, E = 10
+  → V = 1000, E = 499,500  (≈ V²/2)
+  → This density DETERMINES which MST algorithm to use</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<h3>Try All Possible Spanning Trees</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  5 nodes → spanning tree has 4 edges
+</span>  10 possible edges → C(10,4) = 210 possible subsets
+  Check each: is it a tree? What's its cost?
+  
+  For V = 1000:
+    E = 499,500
+    C(499500, 999) = astronomically large
+    → IMPOSSIBLE</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Enumeration is exponential.
+</span>  We need MST algorithm: Kruskal's or Prim's (from Problems 30-31).
+  
+  But WHICH ONE? This is the key decision for this problem.</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN — THE CRITICAL CHOICE</h2>
+<h3>The Thinking Process</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Connect all points with minimum total cost"
+</span>    → MST problem (recognized from Problems 30-31)
+
+  "Which MST algorithm?"
+    → Need to analyze the graph structure
+
+  "The graph is COMPLETE (every pair connected)"
+    → E = V(V-1)/2 ≈ V²/2
+    → This is the DENSEST possible graph
+    → From Problem 31's comparison table:
+      Dense → Prim's wins
+
+  Let me verify with concrete numbers:
+
+  ┌───────────────────────────────────────────────────────────────┐
+  │  V = 1000 points                                              │
+  │  E = 1000 × 999 / 2 = 499,500 edges                         │
+  │                                                               │
+  │  KRUSKAL'S:                                                   │
+  │    Step 1: Generate all E edges → O(V²) = O(1,000,000)       │
+  │    Step 2: Sort edges → O(E log E) = O(500,000 × 20)         │
+  │                       = O(10,000,000)                         │
+  │    Step 3: Union-Find → O(E × α(V)) ≈ O(500,000)            │
+  │    Total: ~10,000,000 operations                              │
+  │    Space: O(V²) to store all edges = O(1,000,000)            │
+  │                                                               │
+  │  PRIM'S (matrix, no heap):                                    │
+  │    O(V²) = O(1,000,000)                                      │
+  │    Space: O(V) = O(1,000)                                    │
+  │    No need to generate/store all edges!                       │
+  │                                                               │
+  │  PRIM'S (heap):                                               │
+  │    O(E log V) = O(500,000 × 10) = O(5,000,000)              │
+  │    Space: O(V²) for adjacency list + heap                    │
+  │                                                               │
+  │  WINNER: Prim's matrix version                                │
+  │    → O(V²) time, O(V) space                                  │
+  │    → 10× faster than Kruskal's                                │
+  │    → 1000× less memory than edge-based approaches             │
+  └───────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Why Prim's Matrix Version is PERFECT Here</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                   ║
+  ║  KEY INSIGHT: We don't need to BUILD the adjacency list/matrix!   ║
+  ║                                                                   ║
+  ║  The "matrix" is IMPLICIT:                                        ║
+  ║    cost(i, j) = |xi - xj| + |yi - yj|                            ║
+  ║                                                                   ║
+  ║  We can COMPUTE any edge weight on-the-fly in O(1)                ║
+  ║  → No need to store the complete graph                            ║
+  ║  → No need to generate all V² edges upfront                      ║
+  ║  → Just compute distances AS NEEDED during Prim's                 ║
+  ║                                                                   ║
+  ║  This is why Prim's matrix version is ideal:                      ║
+  ║    → At each step, scan all V nodes to find minimum               ║
+  ║    → Compute distance on-the-fly                                  ║
+  ║    → O(V) per step × V steps = O(V²) total                       ║
+  ║    → Space: only O(V) arrays (key[], in_mst[])                    ║
+  ║                                                                   ║
+  ║  Kruskal's would need to:                                         ║
+  ║    → Generate ALL V²/2 edges first                                ║
+  ║    → Store them all in memory                                     ║
+  ║    → Sort them: O(V² log V)                                       ║
+  ║    → WASTEFUL when we only need V-1 edges in the MST              ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — Prim's Matrix Version</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  points = [[0,0], [2,2], [3,10], [5,2], [7,0]]
+</span>  V = 5
+
+  Manhattan distance function:
+    dist(i, j) = |points[i][0] - points[j][0]| + |points[i][1] - points[j][1]|
+
+  Distance "matrix" (computed on-the-fly, shown for reference):
+
+         P0    P1    P2    P3    P4
+    P0 [  0     4    13     7     7  ]
+    P1 [  4     0     9     3     7  ]
+    P2 [ 13     9     0    10    14  ]
+    P3 [  7     3    10     0     4  ]
+    P4 [  7     7    14     4     0  ]
+
+
+  ═══════════════════════════════════════════════════════════════
+  INITIALIZATION
+  ═══════════════════════════════════════════════════════════════
+
+  key[]    = [0,   INF, INF, INF, INF]
+              ↑
+              start node (cost 0 to "reach" starting node)
+
+  in_mst[] = [F,   F,   F,   F,   F ]
+
+  mst_cost = 0
+
+  "key[i] = cheapest edge weight from ANY node in MST to node i"
+  "Start from P0 → key[0] = 0"
+
+
+  ═══════════════════════════════════════════════════════════════
+  ITERATION 1: Find minimum key among non-MST nodes
+  ═══════════════════════════════════════════════════════════════
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Scan for minimum key (not in MST):                           │
+  │   key[0]=0, key[1]=INF, key[2]=INF, key[3]=INF, key[4]=INF │
+  │   Minimum: key[0] = 0 → pick node P0                        │
+  │                                                              │
+  │ Add P0 to MST:                                               │
+  │   in_mst[0] = True                                           │
+  │   mst_cost += 0 → mst_cost = 0                              │
+  │                                                              │
+  │ Update keys for P0's neighbors (all non-MST nodes):          │
+  │   dist(0,1) = 4  &lt; key[1]=INF → key[1] = 4                  │
+  │   dist(0,2) = 13 &lt; key[2]=INF → key[2] = 13                 │
+  │   dist(0,3) = 7  &lt; key[3]=INF → key[3] = 7                  │
+  │   dist(0,4) = 7  &lt; key[4]=INF → key[4] = 7                  │
+  │                                                              │
+  │ State:                                                       │
+  │   key[]    = [0,  4,  13,  7,  7]                            │
+  │   in_mst[] = [T,  F,   F,  F,  F]                            │
+  │   mst_cost = 0                                               │
+  │                                                              │
+  │ Visually:                                                    │
+  │   MST: {P0}                                                  │
+  │   Cheapest edges FROM MST to each non-MST node:             │
+  │     → P1: $4 (from P0)                                       │
+  │     → P2: $13 (from P0)                                      │
+  │     → P3: $7 (from P0)                                       │
+  │     → P4: $7 (from P0)                                       │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  ITERATION 2: Find minimum key among non-MST nodes
+  ═══════════════════════════════════════════════════════════════
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Scan for minimum key (not in MST):                           │
+  │   key[1]=4, key[2]=13, key[3]=7, key[4]=7                   │
+  │   Minimum: key[1] = 4 → pick node P1                        │
+  │                                                              │
+  │ Add P1 to MST:                                               │
+  │   in_mst[1] = True                                           │
+  │   mst_cost += 4 → mst_cost = 4                              │
+  │                                                              │
+  │ Update keys for P1's neighbors (non-MST only):              │
+  │   P0: in MST → skip                                          │
+  │   dist(1,2) = 9  &lt; key[2]=13 → key[2] = 9   ✓ IMPROVED!    │
+  │   dist(1,3) = 3  &lt; key[3]=7  → key[3] = 3   ✓ IMPROVED!    │
+  │   dist(1,4) = 7  = key[4]=7  → no change                    │
+  │                                                              │
+  │ State:                                                       │
+  │   key[]    = [0,  4,  9,  3,  7]                             │
+  │   in_mst[] = [T,  T,  F,  F,  F]                             │
+  │   mst_cost = 4                                               │
+  │                                                              │
+  │ Visually:                                                    │
+  │   MST: P0──(4)──P1                                           │
+  │   Cheapest edges FROM MST to each non-MST node:             │
+  │     → P2: $9 (from P1, was $13 from P0)                      │
+  │     → P3: $3 (from P1, was $7 from P0)  ← BETTER!           │
+  │     → P4: $7 (from P0, unchanged)                            │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  ITERATION 3: Find minimum key among non-MST nodes
+  ═══════════════════════════════════════════════════════════════
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Scan for minimum key (not in MST):                           │
+  │   key[2]=9, key[3]=3, key[4]=7                               │
+  │   Minimum: key[3] = 3 → pick node P3                        │
+  │                                                              │
+  │ Add P3 to MST:                                               │
+  │   in_mst[3] = True                                           │
+  │   mst_cost += 3 → mst_cost = 7                              │
+  │                                                              │
+  │ Update keys for P3's neighbors (non-MST only):              │
+  │   P0: in MST → skip                                          │
+  │   P1: in MST → skip                                          │
+  │   dist(3,2) = 10 &gt; key[2]=9 → no change (P1 was better)     │
+  │   dist(3,4) = 4  &lt; key[4]=7 → key[4] = 4   ✓ IMPROVED!     │
+  │                                                              │
+  │ State:                                                       │
+  │   key[]    = [0,  4,  9,  3,  4]                             │
+  │   in_mst[] = [T,  T,  F,  T,  F]                             │
+  │   mst_cost = 7                                               │
+  │                                                              │
+  │ Visually:                                                    │
+  │   MST: P0──(4)──P1──(3)──P3                                  │
+  │   Cheapest edges FROM MST to each non-MST node:             │
+  │     → P2: $9 (from P1)                                       │
+  │     → P4: $4 (from P3, was $7 from P0)  ← BETTER!           │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  ITERATION 4: Find minimum key among non-MST nodes
+  ═══════════════════════════════════════════════════════════════
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Scan for minimum key (not in MST):                           │
+  │   key[2]=9, key[4]=4                                         │
+  │   Minimum: key[4] = 4 → pick node P4                        │
+  │                                                              │
+  │ Add P4 to MST:                                               │
+  │   in_mst[4] = True                                           │
+  │   mst_cost += 4 → mst_cost = 11                             │
+  │                                                              │
+  │ Update keys for P4's neighbors (non-MST only):              │
+  │   P0: in MST → skip                                          │
+  │   P1: in MST → skip                                          │
+  │   P3: in MST → skip                                          │
+  │   dist(4,2) = 14 &gt; key[2]=9 → no change                     │
+  │                                                              │
+  │ State:                                                       │
+  │   key[]    = [0,  4,  9,  3,  4]                             │
+  │   in_mst[] = [T,  T,  F,  T,  T]                             │
+  │   mst_cost = 11                                              │
+  │                                                              │
+  │ Visually:                                                    │
+  │   MST: P0──(4)──P1──(3)──P3──(4)──P4                        │
+  │   Cheapest edge FROM MST to remaining non-MST node:         │
+  │     → P2: $9 (from P1)                                       │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  ITERATION 5: Find minimum key among non-MST nodes
+  ═══════════════════════════════════════════════════════════════
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Scan for minimum key (not in MST):                           │
+  │   key[2]=9                                                   │
+  │   Minimum: key[2] = 9 → pick node P2                        │
+  │                                                              │
+  │ Add P2 to MST:                                               │
+  │   in_mst[2] = True                                           │
+  │   mst_cost += 9 → mst_cost = 20                             │
+  │                                                              │
+  │ All nodes in MST → DONE!                                     │
+  │                                                              │
+  │ State:                                                       │
+  │   key[]    = [0,  4,  9,  3,  4]                             │
+  │   in_mst[] = [T,  T,  T,  T,  T]                             │
+  │   mst_cost = 20 ✓                                            │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  ═══════════════════════════════════════════════════════════════
+  FINAL MST
+  ═══════════════════════════════════════════════════════════════
+
+      P2(3,10)
+      |
+     (9) ← from P1
+      |
+  P0──(4)──P1──(3)──P3──(4)──P4
+ (0,0)   (2,2)    (5,2)    (7,0)
+
+  Edges: P0-P1($4), P1-P3($3), P3-P4($4), P1-P2($9)
+  Total: 4 + 3 + 4 + 9 = 20 ✓
+
+  On the coordinate plane:
+
+  Y
+  10 |          ● P2
+   9 |          |
+   8 |          | $9
+   7 |          |
+   6 |          |
+   5 |          |
+   4 |          |
+   3 |          |
+   2 |    ● P1──────● P3
+   1 |    | $4  $3     | $4
+   0 ● P0              ● P4
+     └──────────────────────── X</code></pre></div>
+<hr>
+<h3>Summary Table</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────┬────────┬────────┬───────────────────────────────────────┐
+</span>  │ Iter │ Picked │ Cost   │ Key Updates                            │
+  ├──────┼────────┼────────┼───────────────────────────────────────┤
+  │  1   │  P0    │  +0    │ key[1]=4, key[2]=13, key[3]=7, key[4]=7│
+  │  2   │  P1    │  +4    │ key[2]: 13→9, key[3]: 7→3             │
+  │  3   │  P3    │  +3    │ key[4]: 7→4                            │
+  │  4   │  P4    │  +4    │ (no improvements)                      │
+  │  5   │  P2    │  +9    │ (done)                                 │
+  ├──────┼────────┼────────┼───────────────────────────────────────┤
+  │      │ TOTAL  │  20    │                                        │
+  └──────┴────────┴────────┴───────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Solution A: Prim's Matrix Version (OPTIMAL for this problem)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">minCostConnectPoints</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Minimum cost to connect all points using Manhattan distance.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Strategy: Prim's MST with O(V²) matrix approach.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    WHY Prim's matrix version?
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Complete graph: E = V(V-1)/2 ≈ V²
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Prim's matrix: O(V²) — optimal for dense graphs
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Kruskal's: O(V² log V) — slower due to sorting V² edges
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Prim's heap: O(E log V) = O(V² log V) — no better than Kruskal
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → No need to store edge list or adjacency structure
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Compute distances ON-THE-FLY in O(1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Builds on:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Problem 31: Prim's MST (matrix version)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → NEW: applying to coordinate geometry + implicit complete graph
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> n </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Manhattan distance helper ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">manhattan</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token builtin">abs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token builtin">abs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    INF </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># key[i] = cheapest edge weight from MST to node i</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Initially INF (no connection to MST yet)</span><span>
+</span><span>    key </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>INF</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># in_mst[i] = True if node i is already in MST</span><span>
+</span><span>    in_mst </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Start from node 0</span><span>
+</span><span>    key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Step A: Find non-MST node with minimum key ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Linear scan: O(V) per iteration</span><span>
+</span><span>        u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> in_mst</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> v
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Step B: Add node u to MST ───</span><span>
+</span><span>        in_mst</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>        mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Step C: Update keys of u's neighbors ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># For complete graph: every non-MST node is a neighbor</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Compute distance on-the-fly (no stored matrix needed!)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> in_mst</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> manhattan</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mst_cost
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>points </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">10</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Minimum cost: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">minCostConnectPoints</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">points</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 20</span></code></pre></div>
+<hr>
+<h3>Solution B: Prim's with Heap (Comparison)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">import</span><span> heapq
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">minCostConnectPoints_heap</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Prim's with min-heap — same as Problem 31.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Works but SUBOPTIMAL for this problem:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Heap pushes up to O(V²) entries (complete graph)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Each push: O(log V²) = O(log V)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Total: O(V² log V) — same as Kruskal's
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Matrix version is O(V²) — FASTER
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Including for comparison and for cases where
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    the graph is NOT complete (then heap might be better).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">manhattan</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token builtin">abs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token builtin">abs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (cost, node)</span><span>
+</span><span>    heap </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        cost</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> u </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>        
+<span>        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> cost
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Push ALL unvisited nodes (complete graph)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappush</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>manhattan</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mst_cost
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>minCostConnectPoints_heap</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">10</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 20</span></code></pre></div>
+<hr>
+<h3>Solution C: Kruskal's (Comparison)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">class</span><span> </span><span class="token" style="color: rgb(43, 145, 175);">UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Same Union-Find from Problems 27-30."""</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">__init__</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>self</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> x</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        rx</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ry </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>x</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>find</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>y</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> rx </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> ry</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>ry</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            rx</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> ry </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> ry</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> rx
+</span><span>        self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>parent</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>ry</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> rx
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>ry</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            self</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>rank</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>rx</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">minCostConnectPoints_kruskal</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Kruskal's approach — works but SUBOPTIMAL for complete graphs.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Step 1: Generate ALL V²/2 edges → O(V²)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Step 2: Sort them → O(V² log V)   ← BOTTLENECK
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Step 3: Union-Find → O(V² × α(V)) ≈ O(V²)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Total: O(V² log V) — worse than Prim's matrix O(V²)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Also needs O(V²) space to store all edges!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Generate ALL edges</span><span>
+</span><span>    edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> j </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>i </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">abs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token builtin">abs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>j</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            edges</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> j</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Sort by weight</span><span>
+</span><span>    edges</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>sort</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Kruskal's (from Problem 30)</span><span>
+</span><span>    uf </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> UnionFind</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    count </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> uf</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>union</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            mst_cost </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> dist
+</span><span>            count </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> count </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> n </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">break</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> mst_cost
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>minCostConnectPoints_kruskal</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">10</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 20</span></code></pre></div>
+<hr>
+<h2>STEP 6: HEAD-TO-HEAD COMPARISON ON THIS PROBLEM</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────────────┐
+</span>  │              PERFORMANCE ON COMPLETE GRAPH (V = 1000)                   │
+  ├──────────────────┬──────────────────┬──────────────┬──────────────────┤
+  │  Algorithm        │  Time             │  Space        │  Notes           │
+  ├──────────────────┼──────────────────┼──────────────┼──────────────────┤
+  │  Prim's Matrix    │  O(V²)           │  O(V)         │  ★ OPTIMAL       │
+  │  (Solution A)     │  = 1,000,000     │  = 1,000      │  No edge storage │
+  │                   │                  │               │  On-the-fly dist │
+  ├──────────────────┼──────────────────┼──────────────┼──────────────────┤
+  │  Prim's Heap      │  O(V² log V)     │  O(V²)        │  Heap overhead   │
+  │  (Solution B)     │  = 10,000,000    │  = 500,000    │  Many stale      │
+  │                   │                  │               │  entries in heap │
+  ├──────────────────┼──────────────────┼──────────────┼──────────────────┤
+  │  Kruskal's        │  O(V² log V)     │  O(V²)        │  Must generate   │
+  │  (Solution C)     │  = 10,000,000    │  = 500,000    │  &amp; sort ALL edges│
+  └──────────────────┴──────────────────┴──────────────┴──────────────────┘
+
+  Prim's Matrix wins by factor of ~10× in time and ~500× in space!
+  
+  WHY?
+    → No sorting needed (Kruskal's bottleneck)
+    → No heap operations (Prim's heap bottleneck)
+    → No edge storage (both alternatives need O(V²) for edges)
+    → Just two O(V) arrays + on-the-fly distance computation</code></pre></div>
+<hr>
+<h2>STEP 7: COMPLEXITY ANALYSIS</h2>
+<h3>Prim's Matrix Version (Solution A — Primary)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TIME: O(V²)                                                       │
+  │                                                                    │
+  │  WHY:                                                              │
+  │    → Outer loop: V iterations (add one node per iteration)         │
+  │    → Step A (find min key): scan V nodes → O(V)                    │
+  │    → Step C (update keys): scan V nodes → O(V)                     │
+  │    → Per iteration: O(V) + O(V) = O(V)                            │
+  │    → Total: V × O(V) = O(V²)                                      │
+  │                                                                    │
+  │    → Manhattan distance computed on-the-fly: O(1) each             │
+  │    → No sorting, no heap operations                                │
+  │                                                                    │
+  │  SPACE: O(V)                                                       │
+  │                                                                    │
+  │  WHY:                                                              │
+  │    → key[] array: O(V)                                             │
+  │    → in_mst[] array: O(V)                                         │
+  │    → No adjacency list or matrix stored                            │
+  │    → No edge list generated                                        │
+  │    → Total: O(V)                                                   │
+  │                                                                    │
+  │  CAN WE DO BETTER THAN O(V²)?                                     │
+  │    → The graph has V²/2 edges                                      │
+  │    → Any MST algorithm must examine at least O(E) = O(V²) edges   │
+  │    → So O(V²) is OPTIMAL for complete graphs!                      │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: ADDITIONAL TEST CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 2: Two points ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>minCostConnectPoints</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 2</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Manhattan: |0-1| + |0-1| = 2</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 3: Single point ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>minCostConnectPoints</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 0</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># No edges needed</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 4: Collinear points ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>minCostConnectPoints</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 3</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># MST is just the chain: 0─(1)─1─(1)─2─(1)─3</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Cost: 1 + 1 + 1 = 3</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 5: Square ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>minCostConnectPoints</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 6</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#  (0,2)──2──(2,2)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    |          |</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    2    4     2      ← diagonal costs 4 (|0-2|+|0-2|)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#    |   / \    |</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#  (0,0)──2──(2,0)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># MST: 3 edges of cost 2 = 6 (pick any 3 sides of square)</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 6: Points on same spot ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>minCostConnectPoints</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 0</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># All distances are 0!</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 7: Negative coordinates ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>minCostConnectPoints</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 30</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Square with side length 10 (Manhattan), MST needs 3 edges</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Each edge: 10 or 20 (diagonal)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># MST: three edges of cost 10 each = 30</span></code></pre></div>
+<hr>
+<h2>STEP 9: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Euclidean Distance Instead of Manhattan?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Euclidean: dist = sqrt((xi-xj)² + (yi-yj)²)
+</span>  
+  → Algorithm is EXACTLY the same
+  → Just change the distance function
+  → MST with Euclidean distance = "Euclidean MST"
+  
+  def euclidean(i, j):
+      dx = points[i][0] - points[j][0]
+      dy = points[i][1] - points[j][1]
+      return (dx*dx + dy*dy) ** 0.5
+  
+  Note: For MST, we can skip the sqrt!
+    → sqrt is monotonic: if a &lt; b then sqrt(a) &lt; sqrt(b)
+    → Comparing squared distances gives same MST
+    → Avoids floating point issues
+  
+  def euclidean_squared(i, j):
+      dx = points[i][0] - points[j][0]
+      dy = points[i][1] - points[j][1]
+      return dx*dx + dy*dy          # no sqrt needed for MST!</code></pre></div>
+<h3>What if 3D Points?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  points[i] = [xi, yi, zi]
+</span>  
+  Manhattan 3D: dist = |xi-xj| + |yi-yj| + |zi-zj|
+  Euclidean 3D: dist = sqrt((xi-xj)² + (yi-yj)² + (zi-zj)²)
+  
+  → Algorithm is EXACTLY the same
+  → Just change the distance function
+  → Still complete graph, still O(V²) Prim's matrix</code></pre></div>
+<h3>What if Not All Pairs Can Connect?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Some pairs have obstacles between them"
+</span>  → No longer a complete graph
+  → E &lt; V²/2
+  → Might be sparse enough that Kruskal's or Prim's-heap is better
+  → Need actual adjacency list/edge list
+  → Can't compute distances on-the-fly (need to know which pairs connect)</code></pre></div>
+<h3>What if Points Arrive One at a Time (Online)?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Points are added dynamically. After each addition, report MST cost."
+</span>  
+  → Can't re-run Prim's from scratch each time: O(V²) per addition
+  → Need incremental MST update
+  → When new point P arrives:
+    → Compute distance from P to all existing MST nodes
+    → Find cheapest edge from P to MST
+    → Add that edge
+    → Check if any existing MST edge can be replaced by a cheaper
+      path through P (more complex)
+  → This is an advanced topic beyond standard interviews</code></pre></div>
+<hr>
+<h2>STEP 10: THE "IMPLICIT GRAPH" PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════╗
+</span>  ║  IMPLICIT GRAPH — A Pattern We've Seen Before                    ║
+  ╠═══════════════════════════════════════════════════════════════════╣
+  ║                                                                   ║
+  ║  Problem 6-7: Grid as graph                                       ║
+  ║    → Nodes = grid cells                                           ║
+  ║    → Edges = adjacent cells (implicit, not stored)                ║
+  ║    → We COMPUTE neighbors on-the-fly                              ║
+  ║                                                                   ║
+  ║  Problem 15: Words as graph                                       ║
+  ║    → Nodes = words                                                ║
+  ║    → Edges = one-letter difference (implicit)                     ║
+  ║    → We COMPUTE edges on-the-fly                                  ║
+  ║                                                                   ║
+  ║  Problem 32: Points as complete graph     ← THIS PROBLEM         ║
+  ║    → Nodes = coordinate points                                    ║
+  ║    → Edges = Manhattan distance between ALL pairs (implicit)      ║
+  ║    → We COMPUTE distances on-the-fly                              ║
+  ║    → Never materialize the full adjacency matrix                  ║
+  ║                                                                   ║
+  ║  THE PATTERN:                                                     ║
+  ║    "The graph isn't GIVEN — it's DEFINED by a RULE"              ║
+  ║    → Don't store it. Compute what you need, when you need it.    ║
+  ║    → Saves massive amounts of memory                              ║
+  ║    → Often enables simpler, faster algorithms                     ║
+  ║                                                                   ║
+  ╚═══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 11: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Using Kruskal's on complete graph                   ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Tempting because Kruskal's is simpler to code.                  ║
+  ║  But for V = 1000:                                               ║
+  ║    → Must generate 499,500 edges: O(V²)                         ║
+  ║    → Must sort them: O(V² log V) ← 10× slower                  ║
+  ║    → Must store them: O(V²) memory ← 500× more memory          ║
+  ║                                                                  ║
+  ║  Still CORRECT, just suboptimal.                                 ║
+  ║  In interviews: mention why Prim's matrix is better here.        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Using Prim's HEAP on complete graph                 ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Heap-based Prim's pushes up to O(V²) entries.                   ║
+  ║  → O(V² log V) time — same as Kruskal's!                        ║
+  ║  → Heap overhead makes it even slower in practice                ║
+  ║                                                                  ║
+  ║  Matrix version avoids heap entirely → O(V²) pure.              ║
+  ║                                                                  ║
+  ║  RULE: Complete/dense graph + Prim's → use MATRIX, not HEAP     ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Materializing the adjacency matrix                  ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG:                                                          ║
+  ║    # Pre-compute full V×V matrix                                 ║
+  ║    matrix = [[0]*n for _ in range(n)]                            ║
+  ║    for i in range(n):                                            ║
+  ║        for j in range(n):                                        ║
+  ║            matrix[i][j] = manhattan(i, j)  ← O(V²) space!       ║
+  ║                                                                  ║
+  ║  RIGHT:                                                          ║
+  ║    # Compute distances on-the-fly                                ║
+  ║    dist = manhattan(u, v)  ← O(1) per call, O(V) total space    ║
+  ║                                                                  ║
+  ║  On-the-fly computation saves O(V²) space → just O(V)!          ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Off-by-one with point indices                       ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Points are 0-indexed: points[0] through points[n-1]            ║
+  ║  Make sure key[] and in_mst[] arrays are size n, not n+1        ║
+  ║  (Unlike Problem 29 which was 1-indexed)                         ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: All points at same location                         ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  points = [[5,5], [5,5], [5,5]]                                 ║
+  ║  → All distances are 0                                           ║
+  ║  → MST cost = 0                                                  ║
+  ║  → Algorithm works: key[] gets updated to 0 everywhere           ║
+  ║  → mst_cost sums up 0+0+0 = 0 ✓                                 ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Two points                                          ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  points = [[0,0], [3,4]]                                        ║
+  ║  → MST has 1 edge                                               ║
+  ║  → Cost = |0-3| + |0-4| = 7                                     ║
+  ║  → Algorithm: pick P0, update key[1]=7, pick P1 → done          ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  TRIGGER:                                                          │
+  │    "Given points/coordinates, connect ALL with minimum cost"       │
+  │                                                                    │
+  │  MY THINKING:                                                      │
+  │                                                                    │
+  │  Step 1: "Connect all with minimum cost"                           │
+  │    → MST problem ✓                                                 │
+  │                                                                    │
+  │  Step 2: "Points form a COMPLETE graph"                            │
+  │    → Every point connects to every other                           │
+  │    → E = V(V-1)/2 → VERY DENSE                                    │
+  │                                                                    │
+  │  Step 3: "Dense graph → which MST algorithm?"                      │
+  │    → From Problem 31 comparison: Prim's matrix wins for dense      │
+  │    → O(V²) time, O(V) space                                       │
+  │                                                                    │
+  │  Step 4: "Can I avoid storing the full graph?"                     │
+  │    → YES — compute distances on-the-fly                            │
+  │    → Manhattan/Euclidean distance in O(1)                          │
+  │    → No adjacency matrix needed                                    │
+  │                                                                    │
+  │  Step 5: Code Prim's matrix version (from Problem 31 Version 3)   │
+  │    → Swap adj_matrix[u][v] with manhattan(u, v)                    │
+  │    → Done!                                                         │
+  │                                                                    │
+  │  INTERVIEW DIALOGUE:                                               │
+  │    "This is an MST problem on a complete graph of points.          │
+  │     Since it's dense — E is V² — I'll use Prim's with the         │
+  │     matrix approach, computing Manhattan distances on-the-fly.     │
+  │     This gives O(V²) time and O(V) space, which is optimal        │
+  │     since we must examine all V² edges anyway."                    │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 13: CONNECTION TO PREVIOUS AND FUTURE PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────────┐
+</span>  │  BUILDS ON:                                                         │
+  │                                                                     │
+  │  Problem 30 → Kruskal's MST (we showed it works but is suboptimal) │
+  │  Problem 31 → Prim's MST (matrix version is OPTIMAL here)          │
+  │                                                                     │
+  │  This problem is the PAYOFF for learning BOTH MST algorithms:       │
+  │    → We can now CHOOSE the right one based on graph density         │
+  │    → Dense (this problem) → Prim's matrix                          │
+  │    → Sparse (Problem 30 example) → Kruskal's                       │
+  │                                                                     │
+  │  THE MST JOURNEY IS COMPLETE:                                       │
+  │                                                                     │
+  │    ┌──────────┐    ┌──────────┐    ┌──────────┐                    │
+  │    │  P30     │    │  P31     │    │  P32     │                    │
+  │    │ Kruskal  │ →  │  Prim    │ →  │ CHOOSE   │                    │
+  │    │ (learn)  │    │ (learn)  │    │ (apply)  │  ← HERE            │
+  │    └──────────┘    └──────────┘    └──────────┘                    │
+  │                                                                     │
+  │  ALSO CONNECTS TO:                                                  │
+  │                                                                     │
+  │  Problem 6  → Implicit graph (grid cells as nodes)                 │
+  │  Problem 15 → Implicit graph (words as nodes)                      │
+  │  Problem 32 → Implicit graph (points as nodes)                     │
+  │    → All share: "graph isn't given, it's defined by a rule"        │
+  │                                                                     │
+  │  LEADS TO:                                                          │
+  │                                                                     │
+  │  Problem 33 → Floyd-Warshall (all-pairs shortest path)            │
+  │               → Phase 4 begins: ADVANCED problems                   │
+  │               → Dense graph algorithm using DP                      │
+  │               → O(V³) — when you need ALL pairs, not just one      │
+  │                                                                     │
+  └─────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 14: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  NEW CONCEPT: CHOOSING THE RIGHT MST ALGORITHM                     ║
+  ║                                                                    ║
+  ║  This problem teaches the MOST IMPORTANT MST lesson:               ║
+  ║                                                                    ║
+  ║    "Don't just KNOW both algorithms.                               ║
+  ║     Know WHEN to use WHICH."                                       ║
+  ║                                                                    ║
+  ║  THE DECISION:                                                     ║
+  ║                                                                    ║
+  ║    ┌─────────────────────────────────────────────────────────────┐ ║
+  ║    │  Graph density?                                             │ ║
+  ║    │    │                                                        │ ║
+  ║    │    ├─ SPARSE (E ≈ V): Kruskal's O(E log E)                │ ║
+  ║    │    │                   or Prim's heap O(E log V)           │ ║
+  ║    │    │                                                        │ ║
+  ║    │    └─ DENSE (E ≈ V²): Prim's matrix O(V²) ★              │ ║
+  ║    │                        beats O(V² log V) alternatives      │ ║
+  ║    └─────────────────────────────────────────────────────────────┘ ║
+  ║                                                                    ║
+  ║  BONUS LESSON: Implicit Graphs for Geometric Problems              ║
+  ║                                                                    ║
+  ║    → Points on a plane form a COMPLETE graph                       ║
+  ║    → Don't materialize it — compute distances on-the-fly          ║
+  ║    → O(V) space instead of O(V²) space                            ║
+  ║    → Same algorithmic complexity, MUCH less memory                 ║
+  ║                                                                    ║
+  ║  PHASE 3 COMPLETE!                                                 ║
+  ║  ═══════════════                                                   ║
+  ║  You can now solve standard interview graph problems:              ║
+  ║    → BFS/DFS traversal and applications                           ║
+  ║    → Topological sort                                              ║
+  ║    → Dijkstra + Bellman-Ford (shortest path)                      ║
+  ║    → Union-Find (connectivity, cycles)                             ║
+  ║    → Kruskal's + Prim's (MST)                                     ║
+  ║                                                                    ║
+  ║  Phase 4 begins: ADVANCED graph algorithms!                        ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CLEAN INTERVIEW VERSION</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">minCostConnectPoints</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    MST on complete graph of coordinate points.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Prim's matrix version: O(V²) time, O(V) space.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> n </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    INF </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    key </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>INF</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n         </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># cheapest edge to MST</span><span>
+</span><span>    in_mst </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># is node in MST?</span><span>
+</span><span>    key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>              </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># start from node 0</span><span>
+</span><span>    total </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Find non-MST node with minimum key</span><span>
+</span><span>        u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> in_mst</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                u </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> v
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Add to MST</span><span>
+</span><span>        in_mst</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>        total </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Update keys: compute manhattan distance on-the-fly</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> in_mst</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">abs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token builtin">abs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span>points</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    key</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> total</span></code></pre></div>
+<hr>
+<h2>PHASE 3 COMPLETION SUMMARY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                PHASE 3 COMPLETE — PROBLEMS 19-32                   ║
+  ╠════════════════════════════════════════════════════════════════════╣
+  ║                                                                    ║
+  ║  ALGORITHMS MASTERED:                                              ║
+  ║    → Topological Sort (Kahn's BFS + DFS)         [P19-22]         ║
+  ║    → Dijkstra's Algorithm                         [P23-24]         ║
+  ║    → Modified Dijkstra / BFS with constraints     [P25]            ║
+  ║    → Bellman-Ford Algorithm                       [P26]            ║
+  ║    → Union-Find (DSU)                             [P27-29]         ║
+  ║    → Kruskal's MST                                [P30]            ║
+  ║    → Prim's MST                                   [P31-32]         ║
+  ║                                                                    ║
+  ║  SKILLS UNLOCKED:                                                  ║
+  ║    ✅ Order tasks by dependencies                                  ║
+  ║    ✅ Find shortest paths (weighted + unweighted)                  ║
+  ║    ✅ Handle negative weights                                      ║
+  ║    ✅ Track dynamic connectivity                                   ║
+  ║    ✅ Detect cycles with Union-Find                                ║
+  ║    ✅ Build minimum spanning trees                                 ║
+  ║    ✅ Choose between competing algorithms                          ║
+  ║                                                                    ║
+  ║  ENTERING PHASE 4: ADVANCED                                        ║
+  ║    → Floyd-Warshall, Tarjan's, SCC, State-Space BFS               ║
+  ║    → Problems that combine MULTIPLE concepts                       ║
+  ║    → "I can handle complex multi-concept problems"                 ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<p><strong>Problem 32 Complete. Phase 3 Complete.</strong><br>
+<strong>Ready for Problem 33: Floyd-Warshall (All-Pairs Shortest Path) — Phase 4 begins?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="17" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-31.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 32 of 50</span>
+            </div>
+            <a href="problem-33.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 15: Problem 15: Word Ladder (BFS on Implicit Graph) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="5">
+<div class="px-2"><h1>Problem 15: Word Ladder (BFS on Implicit Graph)</h1>
+<h2>[Algorithm Family: BFS — Shortest Path on Implicit Graph]</h2>
+<h2>[Phase 2: Core Patterns — "I know WHICH traversal and WHY"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are given two words: beginWord and endWord,
+</span>and a dictionary wordList of allowed words.
+
+Find the LENGTH of the SHORTEST transformation sequence from
+beginWord to endWord, such that:
+  → Only ONE letter can be changed at a time
+  → Each intermediate word MUST exist in wordList
+
+Return 0 if no such transformation exists.
+
+Example 1:
+  beginWord = "hit"
+  endWord   = "cog"
+  wordList  = ["hot", "dot", "dog", "lot", "log", "cog"]
+  
+  Output: 5
+  Explanation: "hit" → "hot" → "dot" → "dog" → "cog"
+               (5 words in the sequence = 4 transformations)
+
+Example 2:
+  beginWord = "hit"
+  endWord   = "cog"
+  wordList  = ["hot", "dot", "dog", "lot", "log"]
+  
+  Output: 0
+  Explanation: endWord "cog" is not in wordList</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — But Wait... Where's the Graph?</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  THIS IS THE KEY BREAKTHROUGH OF THIS PROBLEM:
+</span>  
+  There IS no explicit graph given.
+  No edges list. No adjacency matrix. No grid.
+  
+  But let me ask the GRAPH THINKING FRAMEWORK questions:
+
+  Step 1: "What are the NODES?"
+          → Each WORD is a node!
+          
+  Step 2: "What are the EDGES?"
+          → Two words are connected if they differ by EXACTLY one letter!
+          
+  Step 3: "What am I looking for?"
+          → SHORTEST transformation = SHORTEST PATH!
+          
+  Step 4: "What type of graph?"
+          → Unweighted (each transformation costs 1)
+          → Undirected (if A differs from B by one letter, B differs from A too)
+          
+  Step 5: "Shortest path in unweighted graph?"
+          → BFS! (Problem 9)</code></pre></div>
+<h3>Drawing the IMPLICIT Graph</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Words: hit, hot, dot, dog, lot, log, cog
+</span>  
+  Connect words that differ by exactly ONE letter:
+  
+  hit ─── hot       (h_t: i→o)
+           |
+          dot ─── dog       (do_: t→g)
+           |       |
+          lot     log ─── cog    (log→cog: l→c, log→dog: l→d... wait)
+           |       |
+           └───────┘        (lo_: t→g... lot→log)
+
+  Let me be precise. Check ALL pairs:
+
+  hit-hot: h[i→o]t         ✓ differ by 1
+  hit-dot: [h→d][i→o]t     ✗ differ by 2
+  hot-dot: [h→d]ot         ✓ differ by 1
+  hot-lot: [h→l]ot         ✓ differ by 1
+  dot-dog: do[t→g]         ✓ differ by 1
+  dot-lot: [d→l]ot         ✓ differ by 1
+  dog-log: [d→l]og         ✓ differ by 1
+  dog-cog: [d→c]og         ✓ differ by 1
+  lot-log: lo[t→g]         ✓ differ by 1
+  log-cog: [l→c]og         ✓ differ by 1
+  
+  Others: hit-dog(3), hit-lot(2), hit-log(3), hit-cog(3),
+          hot-dog(2), hot-log(2), hot-cog(3),
+          dot-log(2), dot-cog(3), lot-dog(2), lot-cog(3) → all differ by 2+
+
+
+  THE GRAPH:
+
+        hit
+         |
+        hot
+       /   \
+     dot    lot
+      |  \/  |
+      | /  \ |
+     dog    log
+       \   /
+        cog
+
+  More precisely (ASCII adjacency):
+
+        hit
+         │
+        hot ─────── lot
+         │           │
+        dot ─────── lot   (wait, let me redraw cleanly)
+         │           │
+        dog ─────── log
+         │           │
+         └─── cog ───┘</code></pre></div>
+<h3>Clean Graph Drawing</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>          hit
+</span>           │
+          hot
+         ╱   ╲
+       dot     lot
+      ╱   ╲  ╱   
+    dog     ╳    
+      ╲   ╱  ╲   
+       log     
+        │      
+       cog     
+
+  Let me just list the adjacency list clearly:
+
+    hit → [hot]
+    hot → [hit, dot, lot]
+    dot → [hot, dog, lot]
+    dog → [dot, log, cog]
+    lot → [hot, dot, log]
+    log → [dog, lot, cog]
+    cog → [dog, log]</code></pre></div>
+<h3>Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer         │  Why?                    ║
+╠══════════════════╪═════════════════╪══════════════════════════╣
+║  NODES           │  Words          │  Each word = a state     ║
+║  EDGES           │  1-letter diff  │  One change = one step   ║
+║  Directed?       │  NO             │  If A→B possible, B→A too║
+║  Weighted?       │  NO             │  Each step costs 1       ║
+║  Cyclic?         │  YES            │  hot→dot→lot→hot         ║
+║  Connected?      │  MAYBE          │  endWord might be        ║
+║                  │                 │  unreachable             ║
+║  IMPLICIT?       │  YES!           │  Graph not given—we      ║
+║                  │                 │  must DISCOVER edges     ║
+║  Sparse/Dense?   │  Sparse         │  Each word connects to   ║
+║                  │                 │  few others typically    ║
+╚══════════════════╧═════════════════╧══════════════════════════╝
+
+  ★ NEW CONCEPT: IMPLICIT GRAPH
+  
+  In Problems 1-5: graph was GIVEN (edge list)
+  In Problems 6-7: graph was a GRID (implicit but structured)
+  HERE:           graph is HIDDEN in the problem description
+                  We must CONSTRUCT it from the rules</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<h3>Approach: Try All Possible Transformation Sequences</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Start from "hit"
+</span>  Try changing every position to every letter (a-z)
+  For each valid word, recurse
+  Track the minimum-length sequence
+
+  hit → ait, bit, cit, dit, ... zit     (position 0, 26 options)
+      → hat, hbt, hct, ... hzt          (position 1, 26 options)
+      → hia, hib, hic, ... hiz          (position 2, 26 options)
+  
+  For each valid word found, repeat...
+  
+  This is essentially DFS/backtracking through ALL paths</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  If word length = L, dictionary size = N:
+</span>  
+  → At each step: L positions × 26 letters = 26L possible next words
+  → Depth can be up to N (visit every word)
+  → Branching factor: 26L at each level
+  → Total paths: (26L)^N in worst case
+  
+  For L=10, N=5000:
+  → 260^5000 → ASTRONOMICAL
+  
+  Even with pruning, DFS finds A path, not necessarily SHORTEST
+  → Would need to explore ALL paths to guarantee shortest
+  
+  BFS guarantees shortest by design (Problem 9)
+  → First time we reach endWord = shortest path</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────┐
+</span>  │  I see: "SHORTEST transformation sequence"               │
+  │       → SHORTEST PATH                                    │
+  │                                                          │
+  │  I see: "Each step changes one letter" (cost = 1)        │
+  │       → UNWEIGHTED graph                                 │
+  │                                                          │
+  │  I know: Shortest path + unweighted = BFS (Problem 9)    │
+  │                                                          │
+  │  NEW CHALLENGE: Graph is IMPLICIT                         │
+  │       → Must find neighbors ON THE FLY during BFS        │
+  │       → Don't pre-build entire graph (wasteful)          │
+  └─────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Two Ways to Find Neighbors</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  METHOD 1: Check all pairs of words
+</span>  ─────────────────────────────────
+    For each word, compare with ALL other words
+    If differ by 1 letter → neighbor
+    
+    Time to find neighbors of one word: O(N × L)
+      → N words to compare, L characters each
+    Total across BFS: O(N² × L)
+
+  METHOD 2: Generate all possible 1-letter changes (★ BETTER)
+  ─────────────────────────────────────────────────────────────
+    For current word, try changing each position to a-z
+    Check if result exists in wordList (using a SET for O(1) lookup)
+    
+    Time to find neighbors of one word: O(L × 26) = O(26L)
+    Total across BFS: O(N × 26L) = O(N × L)
+
+  COMPARISON:
+    Method 1: O(N² × L)    → for N=5000, L=10: 250,000,000
+    Method 2: O(N × 26 × L) → for N=5000, L=10: 1,300,000
+    
+    Method 2 is ~200x faster!
+
+  KEY INSIGHT: 
+    Instead of checking "which words in dictionary are my neighbors?"
+    → Generate "what words COULD be my neighbors?" and check if they exist
+    
+    This works because 26×L &lt;&lt; N for most cases</code></pre></div>
+<h3>Why Not Pre-Build the Graph?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  We COULD build the full adjacency list first, then BFS on it.
+</span>  
+  Pre-building:
+    → For each word, find all neighbors: O(N × 26L)
+    → Store adjacency list: O(N × 26L) space
+    → Then BFS: O(V + E)
+    
+  On-the-fly during BFS:
+    → Only discover neighbors of words we ACTUALLY VISIT
+    → If BFS ends early (found target at level 3), we skip
+      discovering neighbors of words at level 4+
+    → More efficient in practice
+    
+  VERDICT: Find neighbors ON THE FLY during BFS</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH</h2>
+<h3>Setup</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  beginWord = "hit"
+</span>  endWord   = "cog"
+  wordList  = ["hot", "dot", "dog", "lot", "log", "cog"]
+  
+  word_set = {"hot", "dot", "dog", "lot", "log", "cog"}
+  
+  BFS from "hit", target is "cog"
+  Each level = one more transformation
+  
+  Data structures:
+    queue:   BFS queue holding (word, level)
+    visited: set of words already processed</code></pre></div>
+<h3>How Neighbor Generation Works (Core Mechanism)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Current word: "hot"
+</span>  Word length: 3
+  
+  Position 0 (h): try a,b,c,...z replacing 'h'
+    "aot" → in word_set? NO
+    "bot" → in word_set? NO
+    "cot" → in word_set? NO
+    "dot" → in word_set? YES! → neighbor found
+    ...
+    "lot" → in word_set? YES! → neighbor found
+    ...
+    "zot" → in word_set? NO
+    
+  Position 1 (o): try a,b,...z replacing 'o'
+    "hat" → NO
+    "hbt" → NO
+    ...
+    "hit" → in word_set? NO (already visited or not in set)
+    ...
+    "hzt" → NO
+    
+  Position 2 (t): try a,b,...z replacing 't'
+    "hoa" → NO
+    "hob" → NO
+    ...
+    "hoz" → NO
+    
+  Result: neighbors of "hot" = ["dot", "lot"]
+  (also "hit" but it's already visited)</code></pre></div>
+<h3>Step-by-Step BFS Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ══════════════════════════════════════════════════════════
+</span>  INITIALIZATION
+  ══════════════════════════════════════════════════════════
+  
+  queue   = [("hit", 1)]        ← start word at level 1
+  visited = {"hit"}
+  word_set = {"hot","dot","dog","lot","log","cog"}
+  
+  ══════════════════════════════════════════════════════════
+  LEVEL 1: Process "hit"
+  ══════════════════════════════════════════════════════════
+  
+  Dequeue: ("hit", 1)
+  
+  Generate neighbors of "hit":
+    Position 0: ait,bit,cit,...zit → none in word_set
+    Position 1: hat,hbt,...hot,...hzt
+                                 ↑
+                              "hot" IS in word_set! → NEIGHBOR
+    Position 2: hia,hib,...hiz → none in word_set
+  
+  Neighbors found: ["hot"]
+  
+  "hot" == "cog"? NO
+  "hot" visited? NO → add to queue and visited
+  
+  queue   = [("hot", 2)]
+  visited = {"hit", "hot"}
+
+  ══════════════════════════════════════════════════════════
+  LEVEL 2: Process "hot"
+  ══════════════════════════════════════════════════════════
+  
+  Dequeue: ("hot", 2)
+  
+  Generate neighbors of "hot":
+    Position 0: aot,bot,...dot,...lot,...zot
+                              ↑       ↑
+                           "dot"    "lot"  → BOTH in word_set!
+    Position 1: hat,hbt,...hit,...hzt
+                              ↑
+                           "hit" in word_set? 
+                           NOT in word_set (beginWord wasn't added to set)
+                           BUT even if it were → already visited → SKIP
+    Position 2: hoa,hob,...hoz → none in word_set
+  
+  Neighbors found: ["dot", "lot"]
+  
+  "dot" == "cog"? NO → add to queue, mark visited
+  "lot" == "cog"? NO → add to queue, mark visited
+  
+  queue   = [("dot", 3), ("lot", 3)]
+  visited = {"hit", "hot", "dot", "lot"}
+
+  ══════════════════════════════════════════════════════════
+  LEVEL 3: Process "dot" and "lot"
+  ══════════════════════════════════════════════════════════
+  
+  Dequeue: ("dot", 3)
+  
+  Generate neighbors of "dot":
+    Position 0: aot,bot,...hot,...lot,...zot
+                              ↑       ↑
+                           "hot" → visited → SKIP
+                           "lot" → visited → SKIP
+    Position 1: dat,dbt,...dzt → none in word_set
+    Position 2: doa,dob,...dog,...doz
+                              ↑
+                           "dog" → in word_set, NOT visited → NEIGHBOR
+  
+  "dog" == "cog"? NO → add to queue, mark visited
+  
+  queue   = [("lot", 3), ("dog", 4)]
+  visited = {"hit", "hot", "dot", "lot", "dog"}
+  
+  ──────────────────────────────────────────────────────────
+  
+  Dequeue: ("lot", 3)
+  
+  Generate neighbors of "lot":
+    Position 0: aot,...dot,...hot,...zot
+                         ↑       ↑
+                      "dot" → visited → SKIP
+                      "hot" → visited → SKIP
+    Position 1: lat,lbt,...lzt → none
+    Position 2: loa,lob,...log,...loz
+                              ↑
+                           "log" → in word_set, NOT visited → NEIGHBOR
+  
+  "log" == "cog"? NO → add to queue, mark visited
+  
+  queue   = [("dog", 4), ("log", 4)]
+  visited = {"hit", "hot", "dot", "lot", "dog", "log"}
+
+  ══════════════════════════════════════════════════════════
+  LEVEL 4: Process "dog" and "log"
+  ══════════════════════════════════════════════════════════
+  
+  Dequeue: ("dog", 4)
+  
+  Generate neighbors of "dog":
+    Position 0: aog,bog,cog,...zog
+                         ↑
+                      "cog" → in word_set, NOT visited → NEIGHBOR
+    
+    ★★★ "cog" == "cog"? YES!!! ★★★
+    
+    → Return level + 1 = 4 + 1 = 5
+  
+  ══════════════════════════════════════════════════════════
+  ANSWER: 5
+  ══════════════════════════════════════════════════════════
+  
+  Path: hit → hot → dot → dog → cog
+  
+  Sequence length: 5 words (4 transformations)</code></pre></div>
+<h3>Visual BFS Level Expansion</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Level 1:  hit
+</span>             │
+  Level 2:  hot
+           ╱   ╲
+  Level 3: dot   lot
+            │     │
+  Level 4: dog   log
+            │     │
+  Level 5: cog   cog ← first arrival wins (from dog)
+  
+  BFS guarantees: first time we reach "cog" = shortest path
+  (Same principle as Problem 9)</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">ladder_length</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> endWord</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> wordList</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find shortest transformation sequence length from beginWord to endWord.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    GRAPH THINKING:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Nodes: words
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Edges: one-letter difference
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Goal: shortest path → BFS (Problem 9)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Implicit graph: find neighbors on-the-fly
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        beginWord: starting word
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        endWord: target word
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        wordList: list of allowed intermediate words
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        int: length of shortest transformation sequence, 0 if impossible
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── EARLY TERMINATION ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If target word isn't even in the dictionary, impossible</span><span>
+</span><span>    word_set </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>wordList</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># O(1) lookup instead of O(N) list search</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> endWord </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> word_set</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BFS SETUP ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Same pattern as Problem 9: BFS for shortest path in unweighted graph</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (current_word, sequence_length)</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BFS LOOP ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current_word</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> level </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── GENERATE NEIGHBORS ON THE FLY ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Try changing each position to each letter a-z</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># This is the "implicit graph" part — no pre-built adjacency list</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current_word</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'abcdefghijklmnopqrstuvwxyz'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Skip if same character (no actual change)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> current_word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Build the new word with one character changed</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Python strings are immutable → must rebuild</span><span>
+</span><span>                new_word </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> current_word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> current_word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">+</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── CHECK: Is this the target? ───</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_word </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> endWord</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> level </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Found shortest path!</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── CHECK: Valid and unvisited? ───</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_word </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> word_set </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> new_word </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_word</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_word</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> level </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># BFS exhausted all reachable words without finding endWord</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>ladder_length</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"hit"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"cog"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"hot"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"dot"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"dog"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"lot"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"log"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"cog"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 5  ("hit" → "hot" → "dot" → "dog" → "cog")</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>ladder_length</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"hit"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"cog"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"hot"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"dot"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"dog"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"lot"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"log"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 0  ("cog" not in wordList)</span></code></pre></div>
+<hr>
+<h3>Alternative: Pre-Build Graph with Wildcard Pattern</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">ladder_length_v2</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> endWord</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> wordList</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    OPTIMIZED VERSION using wildcard pattern grouping.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    IDEA:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Instead of trying 26 letters at each position during BFS,
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      pre-group words by their PATTERNS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      "hot" → patterns: "*ot", "h*t", "ho*"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      "dot" → patterns: "*ot", "d*t", "do*"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      "lot" → patterns: "*ot", "l*t", "lo*"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Words sharing a pattern are neighbors!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      "hot", "dot", "lot" all match "*ot" → they're all connected
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    WHY THIS HELPS:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      During BFS, instead of trying 26×L characters,
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      look up L patterns → get all neighbors directly
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    WHEN TO USE:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      When BFS runs multiple times (e.g., Word Ladder II)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      or when dictionary is very large
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    word_set </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>wordList</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> endWord </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> word_set</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    L </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PRE-PROCESSING: Group words by wildcard patterns ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># pattern_map["*ot"] = ["hot", "dot", "lot"]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># This means hot, dot, lot are all neighbors of each other</span><span>
+</span><span>    pattern_map </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Include beginWord in the mapping</span><span>
+</span><span>    all_words </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> wordList </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> word </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> all_words</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>L</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Replace position i with wildcard '*'</span><span>
+</span><span>            pattern </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'*'</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">+</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>            pattern_map</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pattern</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>word</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BFS ───</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current_word</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> level </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Find neighbors via pattern lookup</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>L</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            pattern </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> current_word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'*'</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> current_word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">+</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> pattern_map</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>pattern</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> endWord</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> level </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> level </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── VISUAL OF PATTERN MAP ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># </span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Pattern "*ot" → [hot, dot, lot]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#                     ↕    ↕    ↕     (all connected to each other)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   </span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Pattern "do*" → [dot, dog]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#                     ↕    ↕          (connected)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   </span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Pattern "d*g" → [dog]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#                     (only one word — no connections from this pattern)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   </span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Pattern "*og" → [dog, log, cog]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#                     ↕    ↕    ↕     (all connected)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   </span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   Pattern "lo*" → [lot, log]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#                     ↕    ↕          (connected)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># This is like creating "intermediate hub nodes" in the graph:</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   hot ─── [*ot] ─── dot ─── [do*] ─── dog ─── [*og] ─── cog</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#              │                                    │</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#             lot ─── [lo*] ─── log ────────────────┘</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>ladder_length_v2</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"hit"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"cog"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"hot"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"dot"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"dog"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"lot"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"log"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"cog"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 5</span></code></pre></div>
+<hr>
+<h3>Version 3: BFS with Level-by-Level Processing</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">ladder_length_v3</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> endWord</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> wordList</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Process BFS level-by-level (like Problem 13: Rotten Oranges).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Instead of storing level with each word,
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    process entire levels at once using len(queue).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    word_set </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>wordList</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> endWord </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> word_set</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span><span>    level </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># beginWord is level 1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Process ALL words at current level (same as Problem 13 pattern)</span><span>
+</span><span>        level_size </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>queue</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>level_size</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            current_word </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Generate all neighbors</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current_word</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'abcdefghijklmnopqrstuvwxyz'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> current_word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>                    
+<span>                    new_word </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> current_word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> current_word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">+</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>                    
+<span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_word </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> endWord</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> level </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>                    
+<span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_word </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> word_set </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> new_word </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_word</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                        queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_word</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        level </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Move to next level after processing all current level words</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>ladder_length_v3</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"hit"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"cog"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"hot"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"dot"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"dog"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"lot"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"log"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(163, 21, 21);">"cog"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 5</span></code></pre></div>
+<hr>
+<h3>Version 4: Optimized — Remove from Set Instead of Visited Set</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">ladder_length_v4</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> endWord</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> wordList</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    SPACE OPTIMIZATION: Instead of maintaining a separate visited set,
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    remove words from word_set when visited.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This works because:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Once a word is reached at level K, we never need it again
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Any future path to it would be longer (BFS guarantees this)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Removing it prevents revisiting AND shrinks search space
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    word_set </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>wordList</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> endWord </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> word_set</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>beginWord</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    level </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        level_size </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>queue</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Collect all words to remove AFTER processing this level</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (don't modify set while iterating through level)</span><span>
+</span><span>        words_to_remove </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>level_size</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            current_word </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current_word</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'abcdefghijklmnopqrstuvwxyz'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> current_word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>                    
+<span>                    new_word </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> current_word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> current_word</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>i</span><span class="token" style="color: rgb(57, 58, 52);">+</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>                    
+<span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_word </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> endWord</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> level </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>                    
+<span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_word </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> word_set</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_word</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                        words_to_remove</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_word</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Remove all visited words from the set</span><span>
+</span><span>        word_set </span><span class="token" style="color: rgb(57, 58, 52);">-=</span><span> words_to_remove
+</span><span>        level </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span></code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(N × L × 26) = O(N × L)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Where:
+</span>    N = number of words in wordList
+    L = length of each word
+    26 = alphabet size (constant)
+
+  BREAKDOWN:
+  ┌─────────────────────────────────────────────────────────────┐
+  │  BFS visits each word at most ONCE              → O(N)      │
+  │  For each word, generate neighbors:                         │
+  │    → L positions × 26 letters = 26L attempts    → O(L)      │
+  │    → Each attempt: build new string             → O(L)      │
+  │    → Each attempt: check in set                 → O(L)*     │
+  │                                                             │
+  │  Total: O(N) words × O(L) positions × O(26) letters         │
+  │         × O(L) string operations                            │
+  │       = O(N × 26 × L²)                                     │
+  │       = O(N × L²)  [dropping constant 26]                   │
+  └─────────────────────────────────────────────────────────────┘
+
+  * String hashing for set lookup is O(L)
+  * String slicing (word[:i] + c + word[i+1:]) is O(L)
+
+  WHY NOT O(N²)?
+    → We don't compare every pair of words
+    → We generate 26L candidates per word and check existence
+    → 26L &lt;&lt; N for typical cases
+    
+  COMPARISON with Method 1 (check all pairs):
+    Method 1: O(N² × L)    → compare each word with every other
+    Method 2: O(N × L²)    → generate candidates and lookup
+    
+    For N=5000, L=5: 
+      Method 1: 5000² × 5 = 125,000,000
+      Method 2: 5000 × 25 × 26 = 3,250,000  → 38× faster!</code></pre></div>
+<h3>Space Complexity: O(N × L)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────┐
+</span>  │  word_set:  O(N × L)  — N words of length L each           │
+  │  visited:   O(N × L)  — at most N words                    │
+  │  queue:     O(N × L)  — at most N words in queue            │
+  │                                                             │
+  │  Total: O(N × L)                                            │
+  └─────────────────────────────────────────────────────────────┘
+  
+  For pattern_map version (V2):
+    → O(N × L) patterns, each pointing to list of words
+    → Same asymptotic space: O(N × L)</code></pre></div>
+<hr>
+<h2>STEP 7: HOW THIS CONNECTS TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │  Problem 1:  We learned adjacency lists for EXPLICIT graphs      │
+  │              → Here: graph is IMPLICIT, no adjacency list given  │
+  │                                                                  │
+  │  Problem 3:  We learned BFS traversal with queue + visited       │
+  │              → Here: SAME BFS structure, just different "graph"  │
+  │                                                                  │
+  │  Problem 6:  We learned grids are implicit graphs                │
+  │              → Here: WORDS are implicit graphs (bigger leap!)    │
+  │              → Grid neighbors: move up/down/left/right           │
+  │              → Word neighbors: change one letter                 │
+  │                                                                  │
+  │  Problem 9:  We learned BFS = shortest path in unweighted graph  │
+  │              → Here: SAME PRINCIPLE, just on words not numbers   │
+  │              → "First time BFS reaches target = shortest"        │
+  │                                                                  │
+  │  Problem 13: We learned multi-source BFS level-by-level          │
+  │              → Here: Version 3 uses same level-by-level pattern  │
+  │                                                                  │
+  │  Problem 14: We learned reverse thinking (start from answer)     │
+  │              → Here: could also BFS from endWord backward        │
+  │              → Or BIDIRECTIONAL BFS (preview of Problem 42)      │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: WHEN TO USE THIS VS ALTERNATIVES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────┬──────────────────────────────────────┐
+</span>  │  Approach              │  When to use                          │
+  ├────────────────────────┼──────────────────────────────────────┤
+  │  BFS (this problem)    │  Shortest path, unweighted edges     │
+  │                        │  → PERFECT FIT here                  │
+  │                        │                                      │
+  │  DFS                   │  Would find A path, not SHORTEST     │
+  │                        │  → WRONG choice for shortest path    │
+  │                        │  → Would need to explore ALL paths   │
+  │                        │                                      │
+  │  Dijkstra (Problem 23) │  Overkill — all edges have weight 1  │
+  │                        │  → BFS is simpler and equally fast   │
+  │                        │                                      │
+  │  Bidirectional BFS     │  BETTER for this problem actually!   │
+  │  (Problem 42 preview)  │  → Search from both ends             │
+  │                        │  → Reduces O(26^d) to O(26^(d/2))   │
+  │                        │  → Will learn in Problem 42          │
+  └────────────────────────┴──────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 9: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Directed?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "You can change 'hot' to 'dot' but NOT 'dot' back to 'hot'"
+</span>  
+  → Edges become one-way
+  → BFS still works, but neighbor generation changes
+  → Would need explicit rules about which transformations are allowed
+  → Rare in practice for word ladder, but possible in state-space problems</code></pre></div>
+<h3>What if Weighted?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  "Changing a vowel costs 1, changing a consonant costs 3"
+</span>  
+  → No longer unweighted → BFS doesn't guarantee shortest
+  → Need Dijkstra (Problem 23) with priority queue
+  → Neighbor generation stays the same
+  → Just add weight when enqueueing</code></pre></div>
+<h3>What if We Need ALL Shortest Paths? (Word Ladder II)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Much harder! Need to track ALL paths, not just length
+</span>  → BFS to find shortest length first
+  → Then BFS/DFS to reconstruct all paths of that length
+  → Pattern map (Version 2) becomes more useful here
+  → This is a common hard interview follow-up</code></pre></div>
+<h3>What if Words Have Different Lengths?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Original problem assumes all words same length
+</span>  → If lengths differ, need different edge definition:
+    → Maybe insertion/deletion of one character
+    → This becomes "edit distance" → DP problem, not pure BFS
+    → Or could still model as BFS on state space with more complex neighbors</code></pre></div>
+<hr>
+<h2>STEP 10: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Forgetting to check endWord in wordList         ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  If endWord not in wordList → IMPOSSIBLE → return 0          ║
+  ║  Must check this FIRST before starting BFS                   ║
+  ║  Without this check: BFS runs to completion finding nothing  ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Not using a SET for word lookup                  ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  Using a LIST for wordList:                                  ║
+  ║    "new_word in wordList" → O(N) per check                   ║
+  ║    Total: O(N² × L) → TOO SLOW                              ║
+  ║                                                              ║
+  ║  Using a SET:                                                ║
+  ║    "new_word in word_set" → O(L) per check (hash of string) ║
+  ║    Total: O(N × L²) → FAST                                  ║
+  ║                                                              ║
+  ║  This single change can be 1000× speed difference!           ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Not marking visited BEFORE adding to queue       ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  WRONG:                                                      ║
+  ║    queue.append(new_word)                                    ║
+  ║    # mark visited when DEQUEUING                             ║
+  ║                                                              ║
+  ║  → Same word can be added to queue MULTIPLE TIMES            ║
+  ║  → Wastes time and memory                                    ║
+  ║                                                              ║
+  ║  RIGHT:                                                      ║
+  ║    visited.add(new_word)     ← mark NOW                      ║
+  ║    queue.append(new_word)                                    ║
+  ║                                                              ║
+  ║  (Same pitfall discussed in Problem 9)                       ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: beginWord might equal endWord                    ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  If beginWord == endWord → return 1 (sequence of length 1)   ║
+  ║  OR check problem constraints (usually they're different)    ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 5: beginWord might NOT be in wordList               ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  This is FINE — beginWord doesn't need to be in wordList     ║
+  ║  Only INTERMEDIATE words must be in wordList                 ║
+  ║  But endWord MUST be in wordList                             ║
+  ║  Don't accidentally require beginWord to be in the set       ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Direct transformation possible                   ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  beginWord = "hit", endWord = "hot", wordList = ["hot"]      ║
+  ║  → Only 1 letter different → answer = 2 (hit → hot)         ║
+  ║  → Check endWord match BEFORE adding to queue                ║
+  ╚══════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 11: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Transform X into Y with minimum steps"                │
+  │         → SHORTEST PATH → BFS                                     │
+  │                                                                    │
+  │  SIGNAL 2: "Each step changes one small thing"                     │
+  │         → Each step = one EDGE with weight 1                       │
+  │         → UNWEIGHTED graph                                         │
+  │                                                                    │
+  │  SIGNAL 3: No explicit graph given, but there ARE states           │
+  │         → IMPLICIT GRAPH                                           │
+  │         → Must define: what are nodes? what are edges?             │
+  │                                                                    │
+  │  SIGNAL 4: "Valid intermediate states from a given set"            │
+  │         → Use a SET for O(1) validation                            │
+  │                                                                    │
+  │  THINKING CHAIN:                                                   │
+  │  "Transform with minimum steps"                                    │
+  │     → shortest path                                                │
+  │        → unweighted? YES (each step = 1)                           │
+  │           → BFS                                                    │
+  │              → what are nodes? WORDS (or states)                   │
+  │                 → what are edges? one-letter changes               │
+  │                    → how to find neighbors? generate + validate    │
+  │                                                                    │
+  │  SIMILAR PROBLEMS THAT USE THIS EXACT PATTERN:                     │
+  │    → Open the Lock (digits instead of letters)                     │
+  │    → Sliding Puzzle (board states as nodes)                        │
+  │    → Gene Mutation (DNA strings as nodes)                          │
+  │    → Minimum Genetic Mutation                                      │
+  │    → Any "minimum operations to transform X to Y"                  │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: THE BIG PICTURE — Implicit Graph Classification</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  We've now seen THREE types of graphs:
+</span>
+  ┌──────────────────────────────────────────────────────────────────┐
+  │  Type 1: EXPLICIT GRAPH (Problems 1-5, 8-12)                     │
+  │    → Given: nodes and edges directly                             │
+  │    → Build adjacency list from edge list                         │
+  │    → Example: "5 nodes, edges = [[0,1],[1,2],...]"               │
+  │                                                                  │
+  │  Type 2: GRID GRAPH (Problems 6-7, 13-14)                       │
+  │    → Given: 2D grid                                              │
+  │    → Nodes = cells, Edges = adjacent cells                       │
+  │    → Neighbors: up/down/left/right (4-directional)               │
+  │    → Example: matrix of 0s and 1s                                │
+  │                                                                  │
+  │  Type 3: STATE-SPACE GRAPH (THIS PROBLEM — Problem 15) ★ NEW    │
+  │    → Given: rules for state transitions                          │
+  │    → Nodes = states (words, configurations, numbers)             │
+  │    → Edges = valid transitions between states                    │
+  │    → Neighbors: generated by applying transition rules           │
+  │    → Example: word transformations, lock combinations            │
+  │                                                                  │
+  │  ALL THREE use the SAME BFS/DFS algorithms!                      │
+  │  The only difference is HOW you find neighbors.                  │
+  └──────────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────────┐
+  │  Graph Type       │  How to find neighbors                     │
+  ├────────────────────┼───────────────────────────────────────────┤
+  │  Explicit          │  graph[node] → pre-built adjacency list   │
+  │  Grid              │  (r±1, c) and (r, c±1) → 4 directions    │
+  │  State-space       │  Apply transition rules → generate + check│
+  └────────────────────┴───────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: IMPLICIT GRAPHS (STATE-SPACE)              ║
+  ║                                                                    ║
+  ║   → A graph doesn't have to be GIVEN to you                       ║
+  ║   → ANY problem with STATES and TRANSITIONS is a graph            ║
+  ║   → Words, lock combinations, puzzle configurations = nodes       ║
+  ║   → Valid single-step changes = edges                             ║
+  ║                                                                    ║
+  ║   → To find neighbors: GENERATE candidates + VALIDATE existence   ║
+  ║   → Use a SET for O(1) validation                                 ║
+  ║   → BFS on this implicit graph = shortest transformation          ║
+  ║                                                                    ║
+  ║   THE POWER MOVE:                                                  ║
+  ║   "This problem doesn't look like a graph... but WHAT IF          ║
+  ║    I treat each state as a node and each valid move as an edge?"  ║
+  ║                                                                    ║
+  ║   This single insight unlocks HUNDREDS of problems that           ║
+  ║   don't obviously look like graph problems.                       ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h3>CONNECTION TO NEXT PROBLEM</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 15 → BFS on implicit graph (states as nodes)
+</span>  Problem 16 → Surrounded Regions (boundary DFS/BFS)
+  
+  Problem 16 returns to GRID graphs (Problem 6-7 territory)
+  but with a TWIST: instead of starting from everywhere,
+  we start from the BOUNDARY and work inward.
+  
+  This "reverse thinking" builds on Problem 14 (start from answer)
+  but applies it to a capture/region problem.</code></pre></div>
+<hr>
+<p><strong>Problem 15 Complete.</strong><br>
+<strong>Ready for Problem 16: Surrounded Regions (Boundary DFS/BFS)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="7" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-14.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 15 of 50</span>
+            </div>
+            <a href="problem-16.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

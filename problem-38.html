@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 38: Problem 38: Shortest Path with State (State-Space BFS) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="7">
+<div class="px-2"><h1>Problem 38: Shortest Path with State (State-Space BFS)</h1>
+<h2>[Algorithm Family: BFS on Expanded State Space]</h2>
+<h2>[Phase 4: Advanced — "I can handle complex multi-concept problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are given a grid where:
+</span>  '.' = empty cell (can walk through)
+  '#' = wall (cannot pass)
+  '@' = starting position
+  'a','b','c',... = keys (lowercase letters)
+  'A','B','C',... = locks (uppercase letters)
+
+You can move UP, DOWN, LEFT, RIGHT (one step at a time).
+
+To pass through a lock 'A', you must have collected key 'a' first.
+Keys can be collected by stepping on them (you keep all collected keys).
+
+Find the MINIMUM number of steps to collect ALL keys.
+If impossible, return -1.
+
+Input:
+  grid = [
+    [".", ".", ".", ".", ".", ".", "."],
+    [".", "#", ".", "#", ".", "#", "."],
+    [".", ".", "a", ".", "A", ".", "."],
+    [".", "#", ".", "#", ".", "#", "."],
+    [".", ".", "@", ".", "b", ".", "B"]
+  ]
+
+  2 keys: 'a' at (2,2), 'b' at (4,4)
+  2 locks: 'A' at (2,4), 'B' at (4,6)
+  Start: '@' at (4,2)
+
+Output: 8  (minimum steps to collect both keys 'a' and 'b')</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Grid</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  col:  0   1   2   3   4   5   6
+</span>       ┌───┬───┬───┬───┬───┬───┬───┐
+  r=0  │ . │ . │ . │ . │ . │ . │ . │
+       ├───┼───┼───┼───┼───┼───┼───┤
+  r=1  │ . │ # │ . │ # │ . │ # │ . │
+       ├───┼───┼───┼───┼───┼───┼───┤
+  r=2  │ . │ . │ a │ . │ A │ . │ . │
+       ├───┼───┼───┼───┼───┼───┼───┤
+  r=3  │ . │ # │ . │ # │ . │ # │ . │
+       ├───┼───┼───┼───┼───┼───┼───┤
+  r=4  │ . │ . │ @ │ . │ b │ . │ B │
+       └───┴───┴───┴───┴───┴───┴───┘
+
+  Start: @ at (4, 2)
+  Keys:  a at (2, 2),  b at (4, 4)
+  Locks: A at (2, 4),  B at (4, 6)
+  Walls: # at (1,1),(1,3),(1,5),(3,1),(3,3),(3,5)
+  
+  Total keys to collect: 2
+  Goal: collect BOTH 'a' and 'b' in minimum steps</code></pre></div>
+<h3>Why Is This Different From Normal BFS Shortest Path (Problem 9)?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  NORMAL BFS (Problem 9):
+</span>    → State = (row, col)
+    → "Have I visited this cell before?" → skip if yes
+    → Works because visiting a cell twice never helps
+
+  THIS PROBLEM:
+    → Visiting a cell WITH different keys = DIFFERENT situation!
+    → At (2,4) with key 'a' → CAN pass through lock 'A'
+    → At (2,4) WITHOUT key 'a' → CANNOT pass through lock 'A'
+    → Same cell, DIFFERENT outcomes depending on what keys you hold
+
+  CRITICAL INSIGHT:
+    State = (row, col, keys_collected)
+    NOT just (row, col)
+
+  Visiting cell (2,4) with keys={} is DIFFERENT from
+  visiting cell (2,4) with keys={a}
+  
+  Both must be explored separately!</code></pre></div>
+<h3>The State Space — Visualizing the "Expanded Graph"</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  NORMAL GRAPH (just positions):
+</span>    Nodes = grid cells
+    Example: 5×7 = 35 possible positions
+
+  EXPANDED GRAPH (positions × key states):
+    Nodes = (row, col, keys_held)
+    keys_held = which subset of keys we've collected
+    
+    With 2 keys (a, b), possible key states:
+      {} = no keys         → encoded as 00 in binary = 0
+      {a} = only key a     → encoded as 01 in binary = 1
+      {b} = only key b     → encoded as 10 in binary = 2
+      {a,b} = both keys    → encoded as 11 in binary = 3
+    
+    Total states: 35 positions × 4 key combinations = 140 nodes
+    
+  With K keys total: 2^K possible key states
+    K=1: 2 states
+    K=2: 4 states
+    K=3: 8 states
+    K=6: 64 states (maximum in typical problems)
+
+  VISUALIZATION — Think of it as LAYERED grids:
+
+    Layer 0 (keys={})      Layer 1 (keys={a})
+    ┌───────────────┐      ┌───────────────┐
+    │ . . . . . . . │      │ . . . . . . . │
+    │ . # . # . # . │      │ . # . # . # . │
+    │ . . a . A . . │      │ . . . . ✓ . . │  ← can pass lock A!
+    │ . # . # . # . │      │ . # . # . # . │
+    │ . . @ . b . B │      │ . . . . b . B │
+    └───────────────┘      └───────────────┘
+           ↑                       ↑
+    Can't pass A or B      Can pass A, not B
+
+    Layer 2 (keys={b})     Layer 3 (keys={a,b})  ← GOAL!
+    ┌───────────────┐      ┌───────────────┐
+    │ . . . . . . . │      │ . . . . . . . │
+    │ . # . # . # . │      │ . # . # . # . │
+    │ . . a . A . . │      │ . . . . ✓ . . │
+    │ . # . # . # . │      │ . # . # . # . │
+    │ . . . . . . ✓ │      │ . . . . . . ✓ │
+    └───────────────┘      └───────────────┘
+    Can pass B, not A      Can pass BOTH — GOAL STATE
+    
+    Picking up a key = TELEPORTING to a different layer
+    e.g., at (2,2) with keys={} → step on 'a' → jump to layer {a}</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════╗
+</span>  ║  Property        │  Answer                │  Why?             ║
+  ╠══════════════════╪════════════════════════╪═══════════════════╣
+  ║  NODES           │  (row, col, keys)      │  Position + state ║
+  ║  EDGES           │  4-directional moves   │  Up/Down/Left/Right║
+  ║                  │  + key pickups         │  Layer transitions ║
+  ║  Directed?       │  NO (can go back)      │  Movement is free ║
+  ║  Weighted?       │  NO (each step = 1)    │  Uniform cost     ║
+  ║  Cyclic?         │  Partially — can       │  But key state    ║
+  ║                  │  revisit positions     │  only increases   ║
+  ║  Connected?      │  Maybe not (walls)     │  Depends on grid  ║
+  ║  Implicit?       │  YES                   │  Not stored, built║
+  ║                  │                        │  during traversal ║
+  ╚══════════════════╧════════════════════════╧═══════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<h3>Naive Approach: BFS with Just (row, col)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Standard BFS from Problem 9:
+</span>    → State = (row, col)
+    → visited = set of (row, col)
+    → Problem: when we reach lock 'A', we don't know if we have key 'a'
+    → If we already marked (2,4) as visited WITHOUT key 'a',
+      we'll never try it again WITH key 'a'
+    → WRONG ANSWER</code></pre></div>
+<h3>Slightly Better Naive: BFS Without Visited</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Don't track visited at all
+</span>  → Explore every reachable cell at every step
+  → Problem: infinite loop! Can bounce between two cells forever
+  → NEVER TERMINATES</code></pre></div>
+<h3>Why Standard BFS Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  The FUNDAMENTAL issue:
+</span>
+  Standard BFS assumption:
+    "If I've been to cell X, going there again can't help"
+    
+  With keys and locks:
+    "Going to cell X WITH NEW KEYS might open new paths"
+    
+  Example:
+    Step 1: Reach (2,4) with no keys → can't pass lock A → dead end
+    Step 5: Collect key 'a' → now (2,4) WITH key 'a' → CAN pass!
+    
+  If we marked (2,4) as visited in step 1, we'd miss the solution.
+
+  SOLUTION: Include key state IN the visited check
+    visited = set of (row, col, keys_bitmask)
+    NOT just set of (row, col)</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  THINKING PROCESS:
+</span>
+  "I need shortest path"
+    → BFS (Problem 9) since all edges cost 1
+
+  "But same position with different keys = different state"
+    → Expand the state: node = (row, col, keys)
+    → BFS on this EXPANDED state space
+
+  "How to represent 'which keys I have' efficiently?"
+    → BITMASK! (from Problem 38 concept)
+    → With K keys, use K-bit integer
+    → key 'a' = bit 0, key 'b' = bit 1, key 'c' = bit 2, ...
+    → keys = {a, c} → binary 101 → integer 5
+    → Check if I have key 'x': keys &amp; (1 &lt;&lt; (ord(x) - ord('a')))
+    → Pick up key 'x':         keys | (1 &lt;&lt; (ord(x) - ord('a')))
+    
+  "When am I done?"
+    → When keys_bitmask has ALL bits set
+    → With K keys: goal = (1 &lt;&lt; K) - 1
+    → K=2: goal = 11 in binary = 3
+    → K=3: goal = 111 in binary = 7
+    
+  PATTERN: BFS on state (row, col, bitmask)
+  FAMILY: State-Space BFS</code></pre></div>
+<h3>Bitmask Primer</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  WHY bitmask instead of set/tuple for keys?
+</span>  
+  ┌────────────────────┬─────────────────┬──────────────────┐
+  │  Representation     │  Hashable?       │  Space per state │
+  ├────────────────────┼─────────────────┼──────────────────┤
+  │  set({'a','b'})    │  NO (unhashable) │  Large           │
+  │  frozenset         │  YES             │  ~200+ bytes     │
+  │  tuple('a','b')    │  YES             │  ~100+ bytes     │
+  │  bitmask (int 3)   │  YES             │  28 bytes        │
+  ├────────────────────┼─────────────────┼──────────────────┤
+  │  BITMASK WINS      │  ✓              │  Smallest, fastest│
+  └────────────────────┴─────────────────┴──────────────────┘
+  
+  Bitmask operations:
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │  Operation                  │  Code                         │
+  ├─────────────────────────────┼───────────────────────────────┤
+  │  Empty key set              │  keys = 0                     │
+  │  Add key 'a' (bit 0)       │  keys |= (1 &lt;&lt; 0)  → keys=1  │
+  │  Add key 'b' (bit 1)       │  keys |= (1 &lt;&lt; 1)  → keys=3  │
+  │  Check have key 'a'?       │  keys &amp; (1 &lt;&lt; 0) != 0         │
+  │  Check have ALL K keys?    │  keys == (1 &lt;&lt; K) - 1         │
+  │  Key char to bit position  │  bit = ord(ch) - ord('a')     │
+  └─────────────────────────────┴───────────────────────────────┘
+
+  Example with 2 keys (a, b):
+    00 (0) = no keys
+    01 (1) = have 'a'
+    10 (2) = have 'b'
+    11 (3) = have 'a' and 'b' = ALL KEYS = GOAL</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH</h2>
+<h3>The Algorithm</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  1. Scan grid to find:
+</span>     → Starting position '@'
+     → All keys and their count K
+     → Goal bitmask = (1 &lt;&lt; K) - 1
+
+  2. BFS with state = (row, col, keys_bitmask)
+     → Start: (start_row, start_col, 0)  [no keys]
+     → Queue: deque of (row, col, keys, steps)
+     → Visited: set of (row, col, keys)
+
+  3. For each state popped from queue:
+     → If keys == goal → return steps (FOUND!)
+     → Try all 4 directions:
+       → Skip if out of bounds or wall
+       → Skip if lock and don't have matching key
+       → If key cell → new_keys = keys | (1 &lt;&lt; key_bit)
+       → If (new_row, new_col, new_keys) not visited → add to queue
+
+  4. If queue empties → return -1 (impossible)</code></pre></div>
+<h3>Step-by-Step Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Grid (repeated for reference):
+</span>    col:  0   1   2   3   4   5   6
+    r=0: [ .   .   .   .   .   .   . ]
+    r=1: [ .   #   .   #   .   #   . ]
+    r=2: [ .   .   a   .   A   .   . ]
+    r=3: [ .   #   .   #   .   #   . ]
+    r=4: [ .   .   @   .   b   .   B ]
+
+  Start: (4, 2), keys = 0 (binary: 00)
+  Key 'a' at (2,2) → bit 0
+  Key 'b' at (4,4) → bit 1
+  Goal: keys = 3 (binary: 11 = both keys)
+
+  BFS begins:
+  ═══════════════════════════════════════════════════════════</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │  STEP 0: Initialize                                                │
+  │                                                                    │
+  │  queue = [(4, 2, 0b00, 0)]     state=(row=4, col=2, keys=0, d=0) │
+  │  visited = {(4, 2, 0)}                                            │
+  │                                                                    │
+  │  Position on grid:                                                 │
+  │    . . . . . . .                                                   │
+  │    . # . # . # .                                                   │
+  │    . . a . A . .                                                   │
+  │    . # . # . # .                                                   │
+  │    . . @ . b . B      @ = current (4,2), keys={}                  │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │  STEP 0 → STEP 1: Process (4, 2, 00, dist=0)                     │
+  │                                                                    │
+  │  Try 4 neighbors of (4,2):                                        │
+  │    UP:    (3,2) = '.'  → keys still 00 → NOT visited → ENQUEUE   │
+  │    DOWN:  (5,2) = out of bounds → SKIP                            │
+  │    LEFT:  (4,1) = '.'  → keys still 00 → NOT visited → ENQUEUE   │
+  │    RIGHT: (4,3) = '.'  → keys still 00 → NOT visited → ENQUEUE   │
+  │                                                                    │
+  │  queue = [(3,2,00,1), (4,1,00,1), (4,3,00,1)]                    │
+  │  visited = {(4,2,0), (3,2,0), (4,1,0), (4,3,0)}                  │
+  │                                                                    │
+  │  Grid state (dist=1 frontier marked as •):                        │
+  │    . . . . . . .                                                   │
+  │    . # . # . # .                                                   │
+  │    . . a . A . .                                                   │
+  │    . # • # . # .     (3,2)                                        │
+  │    . • @ • b . B     (4,1) and (4,3)                              │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │  STEP 1 → STEP 2: Process all dist=1 states                      │
+  │                                                                    │
+  │  Process (3,2,00,1):                                               │
+  │    UP: (2,2) = 'a' → PICK UP KEY! new_keys = 00|01 = 01          │
+  │        State (2,2,01) not visited → ENQUEUE with dist=2           │
+  │    LEFT: (3,1) = '#' → WALL → SKIP                               │
+  │    RIGHT: (3,3) = '#' → WALL → SKIP                              │
+  │    DOWN: (4,2) already visited with keys=00 → SKIP               │
+  │                                                                    │
+  │  Process (4,1,00,1):                                               │
+  │    Neighbors: (3,1)=#, (4,0)='.', (4,2)=visited → enqueue (4,0)  │
+  │                                                                    │
+  │  Process (4,3,00,1):                                               │
+  │    UP: (3,3)='#' → SKIP                                           │
+  │    RIGHT: (4,4)='b' → PICK UP KEY! new_keys = 00|10 = 10         │
+  │        State (4,4,10) not visited → ENQUEUE with dist=2           │
+  │    DOWN: out of bounds                                             │
+  │    LEFT: (4,2) visited → SKIP                                     │
+  │                                                                    │
+  │  KEY MOMENT: Two paths diverge!                                    │
+  │    Path A: went UP first → found key 'a' → keys = 01             │
+  │    Path B: went RIGHT first → found key 'b' → keys = 10          │
+  │                                                                    │
+  │  Queue now has states at dist=2 with DIFFERENT key sets!           │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │  Let me trace the OPTIMAL path more concisely:                    │
+  │                                                                    │
+  │  Optimal path (one of possibly several):                          │
+  │                                                                    │
+  │  Step 0: (4,2) keys=00  — start at @                              │
+  │  Step 1: (3,2) keys=00  — move UP                                │
+  │  Step 2: (2,2) keys=01  — move UP, pick up key 'a'! ★            │
+  │  Step 3: (3,2) keys=01  — move DOWN (revisit! but keys changed)  │
+  │  Step 4: (4,2) keys=01  — move DOWN                              │
+  │  Step 5: (4,3) keys=01  — move RIGHT                             │
+  │  Step 6: (4,4) keys=11  — move RIGHT, pick up key 'b'! ★★       │
+  │                                                                    │
+  │  keys = 11 = goal → RETURN 6                                      │
+  │                                                                    │
+  │  Wait — but another path:                                          │
+  │  Step 0: (4,2) keys=00  — start                                  │
+  │  Step 1: (4,3) keys=00  — move RIGHT                             │
+  │  Step 2: (4,4) keys=10  — pick up 'b' ★                          │
+  │  Step 3: (4,3) keys=10  — move LEFT                              │
+  │  Step 4: (4,2) keys=10  — (4,2 with keys=10 NOT visited!)        │
+  │  Step 5: (3,2) keys=10  — move UP  (3,2 with keys=10 NOT visited)│
+  │  Step 6: (2,2) keys=11  — pick up 'a' ★★                        │
+  │                                                                    │
+  │  keys = 11 = goal → RETURN 6                                      │
+  │                                                                    │
+  │  Both paths give distance 6!                                       │
+  │  BFS finds this because it explores level by level.               │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>The Critical "Revisit" Moment</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  WHY revisiting works:                                             │
+  │                                                                    │
+  │  Step 1: Visit (3,2) with keys=00 → mark (3,2, 0) as visited     │
+  │  Step 3: Visit (3,2) with keys=01 → (3,2, 1) NOT in visited!     │
+  │          → This is a NEW state → we explore it                    │
+  │                                                                    │
+  │  If we only tracked (row, col) in visited:                        │
+  │    → (3,2) already visited → SKIP → miss the path through 'a'    │
+  │    → WRONG ANSWER                                                  │
+  │                                                                    │
+  │  By tracking (row, col, keys) in visited:                         │
+  │    → (3,2, 0) visited but (3,2, 1) not → explore it              │
+  │    → Correct!                                                      │
+  │                                                                    │
+  │  This is THE key insight of state-space BFS.                      │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">shortest_path_all_keys</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find minimum steps to collect all keys in a grid with locks.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    State-space BFS where state = (row, col, keys_bitmask).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Key insight from Problem 9 (BFS shortest path):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      BFS guarantees shortest path when all edges have equal weight.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Key insight NEW to this problem:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      State includes MORE than just position.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Same position with different keys = different node in expanded graph.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        grid: 2D list of characters ('.', '#', '@', 'a'-'f', 'A'-'F')
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Minimum steps to collect all keys, or -1 if impossible.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    rows </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 1: Scan grid for start position and count keys ───</span><span>
+</span><span>    start_row</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_col </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>    total_keys </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            cell </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> cell </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'@'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                start_row</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_col </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'a'</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> cell </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'f'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Count keys (lowercase a-f)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Track the HIGHEST key to know total count</span><span>
+</span><span>                total_keys </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">max</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>total_keys</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cell</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'a'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Goal: bitmask with all key bits set</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># e.g., 2 keys → goal = 0b11 = 3</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># e.g., 3 keys → goal = 0b111 = 7</span><span>
+</span><span>    goal </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;&lt;</span><span> total_keys</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 2: BFS on expanded state space ───</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># State: (row, col, keys_bitmask)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Start: at '@' position with no keys (bitmask = 0)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start_row</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_col</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># (row, col, keys, dist)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Visited set tracks (row, col, keys_bitmask)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># NOT just (row, col) — this is the critical difference!</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start_row</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_col</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 4-directional movement (from Problem 6)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        row</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> col</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> keys</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── CHECK: Have we collected all keys? ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> keys </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> goal</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── EXPLORE: Try all 4 neighbors ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> row </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> col </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Boundary check</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> cols</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>            
+<span>            cell </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Wall check</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> cell </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'#'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Lock check: need the matching key</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Lock 'A' needs key 'a' (bit 0)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Lock 'B' needs key 'b' (bit 1)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'A'</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> cell </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'F'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Which key do we need?</span><span>
+</span><span>                needed_bit </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cell</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'A'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Do we have it?</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>keys </span><span class="token" style="color: rgb(57, 58, 52);">&amp;</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;&lt;</span><span> needed_bit</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Don't have the key → can't pass</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Determine new key state</span><span>
+</span><span>            new_keys </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> keys
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'a'</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> cell </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'f'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Pick up the key! Set the corresponding bit</span><span>
+</span><span>                key_bit </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cell</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'a'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                new_keys </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> keys </span><span class="token" style="color: rgb(57, 58, 52);">|</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;&lt;</span><span> key_bit</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Visited check with FULL state (position + keys)</span><span>
+</span><span>            state </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_keys</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>state</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_keys</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Queue exhausted without finding all keys</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST CASES ───</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 1: Main example</span><span>
+</span><span>grid1 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"#"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"#"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"#"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"a"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"A"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"#"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"#"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"#"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"@"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"b"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"B"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 1: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">shortest_path_all_keys</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid1</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 6</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 2: Simple — one key, no locks</span><span>
+</span><span>grid2 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"@"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"a"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 2: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">shortest_path_all_keys</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid2</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 2</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 3: Key behind lock, need other key first</span><span>
+</span><span>grid3 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"@"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"a"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"A"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"b"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 3: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">shortest_path_all_keys</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid3</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 6 (go right to 'a', continue right through 'A' to 'b')</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 4: Impossible — key behind locked door, no way to get key</span><span>
+</span><span>grid4 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"@"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"A"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"a"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 4: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">shortest_path_all_keys</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid4</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: -1 (can't pass 'A' without key 'a', but 'a' is behind 'A')</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 5: Multiple keys</span><span>
+</span><span>grid5 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"@"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"a"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"A"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"B"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"b"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 5: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">shortest_path_all_keys</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid5</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Need 'a' first (at index 3), then can pass 'A' (index 4)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># But 'B' at index 5 blocks 'b' at index 6</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Need to get 'b' somehow... 'b' is behind 'B'... </span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Actually this is impossible unless there's another path</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: -1</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test 6: No keys at all</span><span>
+</span><span>grid6 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"@"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Test 6: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">shortest_path_all_keys</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid6</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># goal = (1 &lt;&lt; 0) - 1 = 0, keys start at 0, immediately done</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: 0</span></code></pre></div>
+<hr>
+<h3>Version with Debug Output</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">shortest_path_all_keys_debug</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same algorithm with detailed state tracking for understanding.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    rows</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    start_row </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> start_col </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>    total_keys </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'@'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                start_row</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_col </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">elif</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'a'</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'f'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                total_keys </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">max</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>total_keys</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'a'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    goal </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;&lt;</span><span> total_keys</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Start: (</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">start_row</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">,</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">start_col</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">)"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Total keys: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">total_keys</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Goal bitmask: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">bin</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">goal</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">goal</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">keys_to_str</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>bitmask</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Convert bitmask to readable key set string."""</span><span>
+</span><span>        result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> bitmask </span><span class="token" style="color: rgb(57, 58, 52);">&amp;</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;&lt;</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">chr</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'a'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> i</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'{'</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">','</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>join</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>result</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'}'</span><span>
+</span>    
+<span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start_row</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_col</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start_row</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> start_col</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    states_explored </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        row</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> col</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> keys</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        states_explored </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> keys </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> goal</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\n✓ FOUND at (</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">row</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">,</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">col</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">) keys=</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">keys_to_str</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">keys</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> "</span><span>
+</span><span>                  </span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"dist=</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Total states explored: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">states_explored</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> states_explored </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">20</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># only print first 20 for readability</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Explore: (</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">row</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">,</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">col</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">) keys=</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">keys_to_str</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">keys</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> dist=</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> row </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> col </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> cols</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>            cell </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> cell </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'#'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'A'</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> cell </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'F'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>keys </span><span class="token" style="color: rgb(57, 58, 52);">&amp;</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;&lt;</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cell</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'A'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>            new_keys </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> keys
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'a'</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> cell </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">'f'</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                new_keys </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> keys </span><span class="token" style="color: rgb(57, 58, 52);">|</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;&lt;</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cell</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token builtin">ord</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'a'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_keys</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_keys</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_keys</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"✗ IMPOSSIBLE (explored </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">states_explored</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> states)"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Run debug</span><span>
+</span><span>grid1 </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"#"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"#"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"#"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"a"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"A"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"#"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"#"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"#"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"@"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"b"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"."</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"B"</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>shortest_path_all_keys_debug</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid1</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │  Let R = rows, C = cols, K = number of keys                     │
+  │                                                                  │
+  │  TOTAL POSSIBLE STATES:                                          │
+  │    R × C × 2^K                                                   │
+  │    (each cell × each possible key combination)                   │
+  │                                                                  │
+  │  TIME COMPLEXITY: O(R × C × 2^K)                                │
+  │    → BFS visits each state at most once                          │
+  │    → Each state has at most 4 neighbors to check                 │
+  │    → Total work: O(4 × R × C × 2^K) = O(R × C × 2^K)          │
+  │                                                                  │
+  │  SPACE COMPLEXITY: O(R × C × 2^K)                               │
+  │    → Visited set: at most R × C × 2^K entries                   │
+  │    → Queue: at most R × C × 2^K entries                         │
+  │    → Each entry: O(1) (three integers)                           │
+  │                                                                  │
+  │  CONCRETE NUMBERS:                                               │
+  │    Grid 30×30, K=6 keys:                                         │
+  │    → 30 × 30 × 64 = 57,600 states                               │
+  │    → Very manageable!                                            │
+  │                                                                  │
+  │    Grid 30×30, K=10 keys (hypothetical):                         │
+  │    → 30 × 30 × 1024 = 921,600 states                            │
+  │    → Still fine for modern computers                             │
+  │                                                                  │
+  │    Grid 30×30, K=20 keys:                                        │
+  │    → 30 × 30 × 1,048,576 ≈ 10^9 → TOO SLOW                    │
+  │    → Bitmask approach works for K ≤ ~16-18                       │
+  └──────────────────────────────────────────────────────────────────┘
+
+  WHY O(R × C × 2^K) and not O((R × C)^2 × 2^K)?
+    → BFS with visited set ensures each state explored EXACTLY ONCE
+    → No repeated work
+    → This is the same efficiency guarantee as Problem 9 BFS,
+      just on a LARGER state space</code></pre></div>
+<hr>
+<h2>STEP 7: THE STATE-SPACE BFS PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  This problem teaches a GENERAL pattern that appears in many problems:
+</span>
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║                                                                  ║
+  ║  STANDARD BFS:    state = (position)                            ║
+  ║  STATE-SPACE BFS: state = (position, extra_info)                ║
+  ║                                                                  ║
+  ║  The "extra_info" can be:                                        ║
+  ║    → Keys collected (this problem)                               ║
+  ║    → Number of obstacles removed                                 ║
+  ║    → Number of turns made                                        ║
+  ║    → Direction currently facing                                  ║
+  ║    → Resources remaining                                        ║
+  ║    → Any discrete state that affects future decisions            ║
+  ║                                                                  ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WHEN to use state-space BFS:                                    ║
+  ║                                                                  ║
+  ║  "The action I can take at position X depends on                 ║
+  ║   something OTHER than just my position"                         ║
+  ║                                                                  ║
+  ║  → Keys/doors: can I pass? depends on keys held                  ║
+  ║  → Fuel/energy: can I move? depends on fuel remaining            ║
+  ║  → Breaking walls: can I break? depends on breaks remaining      ║
+  ║  → Direction: cost depends on whether I'm turning                ║
+  ║                                                                  ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<h3>Classic Problems That Use This Pattern</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  Problem                      │  State                         │
+  ├─────────────────────────────────┼───────────────────────────────┤
+  │  Keys and Locks (this)         │  (row, col, keys_bitmask)     │
+  │  Break K Walls                 │  (row, col, walls_broken)     │
+  │  Fuel-limited Pathfinding      │  (row, col, fuel_remaining)   │
+  │  Knight on Chessboard          │  (row, col)  — standard BFS  │
+  │  Minimum Moves w/ Teleport     │  (row, col, teleports_used)   │
+  │  Shortest Path w/ Alternating  │  (row, col, last_color)       │
+  │  Robot Direction               │  (row, col, facing_direction)  │
+  └─────────────────────────────────┴───────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: RELATED PROBLEM — Shortest Path Breaking K Walls</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">shortest_path_k_obstacles</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find shortest path from (0,0) to (rows-1, cols-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    where you can break through at most K walls.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    State: (row, col, walls_remaining)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same STATE-SPACE BFS pattern as keys problem:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Position alone doesn't define state
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → How many walls we CAN still break affects future moves
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → (0,0, k=2) and (0,0, k=1) are DIFFERENT states
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    rows</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># State: (row, col, remaining_breaks)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># row, col, remaining, dist</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        row</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> col</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> remaining</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Goal check</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> row </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> col </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> row </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> col </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> cols</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> grid</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Empty cell — pass through, same remaining</span><span>
+</span><span>                state </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> remaining</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>state</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> remaining</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Wall — can break if remaining &gt; 0</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> remaining </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    state </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> remaining </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> state </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                        visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>state</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                        queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> remaining </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Test: grid where 0=empty, 1=wall</span><span>
+</span><span>grid </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"K=0: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">shortest_path_k_obstacles</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">0</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Must go around</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"K=1: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">shortest_path_k_obstacles</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">1</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Can break 1 wall</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"K=2: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">shortest_path_k_obstacles</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">grid</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">,</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">2</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Can break 2 walls</span></code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Why this is the SAME pattern:
+</span>
+  Keys problem:
+    → Extra state: which keys I have (bitmask)
+    → Keys only INCREASE (never lose a key)
+    → State space: positions × 2^K key combinations
+
+  K-obstacles problem:
+    → Extra state: how many breaks remaining (integer 0 to K)
+    → Breaks only DECREASE (never gain breaks)
+    → State space: positions × (K+1) break counts
+    
+  IDENTICAL BFS structure, different "extra dimension"</code></pre></div>
+<hr>
+<h2>STEP 9: OPTIMIZATION — State Space Pruning</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  OPTIMIZATION 1: Early termination                              ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Check keys == goal WHEN POPPING, not when enqueueing            ║
+  ║  (BFS guarantees first time we pop a goal state = shortest path) ║
+  ║                                                                  ║
+  ║  Actually: we can check WHEN ENQUEUEING for slightly faster      ║
+  ║  detection — check new_keys == goal immediately after            ║
+  ║  computing new_keys, before even adding to queue                 ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  OPTIMIZATION 2: Dominated states                               ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  For K-obstacles problem:                                        ║
+  ║    If we've visited (r, c, remaining=3),                         ║
+  ║    then (r, c, remaining=2) is STRICTLY WORSE                   ║
+  ║    (same position but fewer breaks left)                         ║
+  ║    → Can skip it!                                                ║
+  ║                                                                  ║
+  ║  For keys problem:                                               ║
+  ║    If we've visited (r, c, keys=0b11),                           ║
+  ║    then (r, c, keys=0b01) is STRICTLY WORSE                     ║
+  ║    (same position but fewer keys)                                ║
+  ║    → Can skip if new_keys is SUBSET of previously seen keys     ║
+  ║    → Check: if (new_keys &amp; prev_keys) == new_keys → dominated  ║
+  ║                                                                  ║
+  ║  CAUTION: This optimization is tricky to implement correctly     ║
+  ║  and rarely needed given small state spaces (K ≤ 6)             ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  OPTIMIZATION 3: BFS by key milestones                          ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  For very large grids with few keys:                             ║
+  ║    → First BFS from start to find distances to all keys          ║
+  ║    → Then BFS between each pair of keys                          ║
+  ║    → Use DP with bitmask on the key-distance graph               ║
+  ║    → Similar to Traveling Salesman Problem (TSP)                 ║
+  ║    → Reduces from O(R×C×2^K) to O(K²×R×C + K×2^K)             ║
+  ║                                                                  ║
+  ║  This is an ADVANCED optimization — beyond scope here            ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 10: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Using (row, col) as visited instead of             ║
+  ║             (row, col, keys)                                    ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  WRONG:  visited = set of (row, col)                            ║
+  ║  RIGHT:  visited = set of (row, col, keys_bitmask)             ║
+  ║                                                                  ║
+  ║  This is THE #1 mistake. Without key state in visited,          ║
+  ║  you block revisiting cells that should be revisited            ║
+  ║  with new keys.                                                 ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Counting keys incorrectly                           ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If grid has keys 'a' and 'c' (no 'b'):                        ║
+  ║    → total_keys should be 3 (bits 0, 1, 2)                     ║
+  ║    → goal = 0b111 = 7?  NO! That requires key 'b' too!        ║
+  ║                                                                  ║
+  ║  FIX: Count actual keys present, not max key letter             ║
+  ║  OR: Ensure keys are 'a','b','c',... contiguous (problem often ║
+  ║      guarantees this)                                            ║
+  ║                                                                  ║
+  ║  SAFEST: Collect actual key positions and count them             ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Forgetting that '@' and '.' are passable           ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  '@' is the start cell — it's also walkable (you can return)    ║
+  ║  Key cells are walkable even after picking up the key           ║
+  ║  Lock cells are walkable IF you have the key (then free to pass)║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Not handling "no keys" case                         ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If grid has zero keys:                                         ║
+  ║    → goal = (1 &lt;&lt; 0) - 1 = 0                                   ║
+  ║    → Starting keys = 0 = goal → return 0 immediately!           ║
+  ║    → Make sure code handles this                                ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Key on starting cell                                ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If '@' is at same cell as a key:                               ║
+  ║    → Actually '@' replaces the key in the grid                  ║
+  ║    → But if grid has '@' AND 'a' at same spot, pick up at start ║
+  ║    → Initial keys = that key's bit, not 0                       ║
+  ║    → Problem usually guarantees '@' is separate from keys       ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 11: CONNECTION TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 3  → BFS traversal (the foundation — queue + visited)
+</span>  Problem 6  → Grid as implicit graph (cells = nodes, adjacency = 4-dir)
+  Problem 9  → BFS for shortest path (BFS guarantees shortest when uniform cost)
+  Problem 13 → Multi-source BFS (multiple start points — here just one start)
+  Problem 15 → BFS on implicit graph (words as nodes — same "implicit" idea)
+  Problem 23 → Dijkstra (if steps had different costs, we'd need Dijkstra 
+               on the expanded state space — but here all steps cost 1)
+  Problem 37 → Building graph from non-obvious input (Phase A creativity)
+
+  EVOLUTION OF BFS:
+  ┌──────────────┬──────────────────────────────┬─────────────────────┐
+  │  Problem     │  State                       │  What's New         │
+  ├──────────────┼──────────────────────────────┼─────────────────────┤
+  │  3  Basic BFS│  (node)                      │  Queue + visited    │
+  │  6  Grid BFS │  (row, col)                  │  Grid as graph      │
+  │  9  Shortest │  (node) + distance           │  BFS = shortest     │
+  │  13 Multi-src│  (row, col) many starts      │  Multiple sources   │
+  │  15 Implicit │  (word_state)                │  Build graph on fly │
+  │  38 State BFS│  (row, col, extra_state)     │  Expanded state     │
+  │  39 0-1 BFS  │  (node) + deque (upcoming)   │  0/1 weights        │
+  └──────────────┴──────────────────────────────┴─────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: WHEN TO USE THIS VS ALTERNATIVES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │  Use STATE-SPACE BFS when:                                         │
+  │    → All edges have EQUAL weight (each step costs 1)               │
+  │    → State has DISCRETE extra dimension (keys, fuel, breaks)       │
+  │    → Extra dimension is SMALL (2^K manageable, K ≤ ~18)           │
+  │    → Need SHORTEST path in this expanded space                     │
+  │                                                                    │
+  │  Use STATE-SPACE DIJKSTRA when:                                    │
+  │    → Same as above but edges have DIFFERENT weights                │
+  │    → Replace queue with priority queue                             │
+  │    → Everything else stays the same                                │
+  │    → Example: grid where turning costs 1, moving forward costs 0   │
+  │      → state = (row, col, direction), use 0-1 BFS or Dijkstra    │
+  │                                                                    │
+  │  Use DP + BITMASK when:                                            │
+  │    → State space is too large for BFS                              │
+  │    → Can reformulate as "visit these K items in optimal order"     │
+  │    → TSP-like problems                                             │
+  │    → dp[mask][current] = min cost to visit items in mask,          │
+  │      currently at 'current'                                        │
+  │                                                                    │
+  │  DON'T use state-space BFS when:                                   │
+  │    → Extra dimension is CONTINUOUS (fuel = any real number)        │
+  │    → Extra dimension is HUGE (2^20 = 10^6 × grid size = too much) │
+  │    → Problem has no "extra state" affecting movement               │
+  │      (use plain BFS/Dijkstra instead)                              │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 13: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Shortest path" + "conditions change along the way"    │
+  │    → Shortest path = BFS/Dijkstra                                  │
+  │    → Conditions change = need extra state dimension                │
+  │                                                                    │
+  │  SIGNAL 2: "You can collect/use items that affect movement"        │
+  │    → Keys/doors, fuel, wall-breaking power                         │
+  │    → Items = bits in a bitmask                                     │
+  │                                                                    │
+  │  SIGNAL 3: "Same cell might need to be visited multiple times"     │
+  │    → Red flag for standard BFS                                     │
+  │    → "Maybe I need MORE in my state than just position"            │
+  │                                                                    │
+  │  SIGNAL 4: Small number of "special items" (≤ 16)                 │
+  │    → Bitmask is feasible                                           │
+  │    → 2^16 = 65,536 key states × grid size = manageable            │
+  │                                                                    │
+  │  MY THOUGHT PROCESS:                                               │
+  │                                                                    │
+  │    "Shortest path on grid"                                         │
+  │      → BFS (Problem 9)                                             │
+  │                                                                    │
+  │    "But there are keys and locks..."                               │
+  │      → Same position, different keys = different outcome           │
+  │      → Need to include keys in state                               │
+  │                                                                    │
+  │    "How to represent keys?"                                        │
+  │      → Small count (≤ 6) → bitmask                                │
+  │                                                                    │
+  │    "State = (row, col, key_bitmask)"                               │
+  │      → BFS on this expanded state space                            │
+  │      → visited tracks full state                                   │
+  │      → Goal: bitmask = all bits set                                │
+  │                                                                    │
+  │  TEMPLATE:                                                         │
+  │    "If the DECISION at a position depends on HISTORY,              │
+  │     encode the relevant history into the state."                   │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 14: THE STATE EXPANSION FRAMEWORK</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║  THE GENERAL FRAMEWORK:                                            ║
+  ║                                                                    ║
+  ║  1. IDENTIFY what affects future decisions beyond position         ║
+  ║     → Keys held? Fuel remaining? Walls broken? Direction facing?  ║
+  ║                                                                    ║
+  ║  2. ENCODE that as a compact, hashable state component             ║
+  ║     → Bitmask for sets (keys, visited items)                       ║
+  ║     → Integer for counts (fuel, breaks remaining)                  ║
+  ║     → Enum/int for categories (direction: 0,1,2,3)                ║
+  ║                                                                    ║
+  ║  3. DEFINE the expanded state                                      ║
+  ║     → state = (position_info, extra_info)                          ║
+  ║                                                                    ║
+  ║  4. RUN standard BFS/Dijkstra on expanded state space              ║
+  ║     → Queue/heap of states                                         ║
+  ║     → Visited set of states (FULL state, not just position)        ║
+  ║     → Transitions: position changes AND/OR extra_info changes      ║
+  ║                                                                    ║
+  ║  5. CHECK state space size is manageable                           ║
+  ║     → positions × extra_states ≤ ~10^7 typically feasible         ║
+  ║                                                                    ║
+  ╠════════════════════════════════════════════════════════════════════╣
+  ║                                                                    ║
+  ║  ANALOGY:                                                          ║
+  ║                                                                    ║
+  ║  Standard BFS: Exploring a FLAT map                                ║
+  ║                One layer, one visited set                          ║
+  ║                                                                    ║
+  ║  State-space BFS: Exploring a MULTI-STORY building                 ║
+  ║                   Each "floor" = different key state               ║
+  ║                   Picking up a key = taking stairs to new floor    ║
+  ║                   visited tracks (room, floor) not just (room)    ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: STATE-SPACE BFS                             ║
+  ║                                                                    ║
+  ║   When "shortest path" isn't just about POSITION:                  ║
+  ║     → Identify what EXTRA information affects movement             ║
+  ║     → Include it in the state: (position, extra)                   ║
+  ║     → BFS on this EXPANDED graph                                   ║
+  ║     → Visited must track FULL state, not just position             ║
+  ║                                                                    ║
+  ║   The BITMASK trick:                                               ║
+  ║     → Represent a SET of collected items as an integer             ║
+  ║     → K items → 2^K possible states → manageable for K ≤ ~18     ║
+  ║     → Pick up item i: state |= (1 &lt;&lt; i)                           ║
+  ║     → Check have item i: state &amp; (1 &lt;&lt; i)                         ║
+  ║     → Check have all K: state == (1 &lt;&lt; K) - 1                     ║
+  ║                                                                    ║
+  ║   MANTRA:                                                          ║
+  ║   "If the SAME position can behave DIFFERENTLY                     ║
+  ║    depending on history, the state must ENCODE that history."       ║
+  ║                                                                    ║
+  ║   This bridges to:                                                  ║
+  ║     → Problem 39: 0-1 BFS (different edge weights)                ║
+  ║     → Problem 40: Dijkstra on grid (weighted state-space)         ║
+  ║     → Problem 48: A* search (heuristic-guided state-space)        ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<p><strong>Problem 38 Complete.</strong><br>
+<strong>Ready for Problem 39: Shortest Path in Binary Matrix (0-1 BFS)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="9" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-37.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 38 of 50</span>
+            </div>
+            <a href="problem-39.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

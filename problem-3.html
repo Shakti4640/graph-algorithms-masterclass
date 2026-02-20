@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 3: Problem 3: BFS Traversal (Level Order) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="7">
+<div class="px-2"><h1>Problem 3: BFS Traversal (Level Order)</h1>
+<h2>[Algorithm Family: BFS — Breadth-First Search]</h2>
+<h2>[Phase 1: Fundamentals — "I can represent and traverse any graph"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are a fire chief. A fire starts at building 0 in a city.
+</span>Every minute, the fire spreads to ALL directly connected buildings
+that haven't caught fire yet.
+
+Given N buildings and connections between them, determine:
+  → The ORDER in which buildings catch fire
+  → The TIME (in minutes) each building catches fire
+  → Which buildings are reached at each "wave" of spreading
+
+Input:
+  n = 7  (buildings: 0, 1, 2, 3, 4, 5, 6)
+  edges = [[0,1], [0,2], [1,3], [1,4], [2,5], [2,6]]
+  source = 0  (fire starts here)
+
+Output:
+  BFS order: [0, 1, 2, 3, 4, 5, 6]
+  
+  Minute 0: Building 0 catches fire
+  Minute 1: Buildings 1, 2 catch fire  (directly connected to 0)
+  Minute 2: Buildings 3, 4, 5, 6 catch fire  (connected to 1, 2)</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>              0              ← Fire starts here (minute 0)
+</span>             / \
+            /   \
+           1     2           ← These catch fire at minute 1
+          / \   / \
+         3   4 5   6         ← These catch fire at minute 2
+
+
+  Edge List:
+    0 — 1
+    0 — 2
+    1 — 3
+    1 — 4
+    2 — 5
+    2 — 6</code></pre></div>
+<h3>Identify Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════╗
+</span>  ║  Property        │  Answer         │  Why?                ║
+  ╠══════════════════╪═════════════════╪══════════════════════╣
+  ║  NODES           │  Buildings 0-6  │  Each building=node  ║
+  ║  EDGES           │  Connections    │  Fire can spread     ║
+  ║  Directed?       │  NO             │  Fire spreads both   ║
+  ║                  │                 │  ways through a wall ║
+  ║  Weighted?       │  NO             │  Spread takes 1 min  ║
+  ║                  │                 │  per connection       ║
+  ║  Cyclic?         │  NO             │  It's a tree here    ║
+  ║  Connected?      │  YES            │  All buildings       ║
+  ║                  │                 │  reachable            ║
+  ║  Sparse/Dense?   │  Sparse         │  6 edges, max 21     ║
+  ╚══════════════════╧═════════════════╧══════════════════════╝</code></pre></div>
+<h3>Build Adjacency List (from Problem 1)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Using Problem 1's technique</span><span>
+</span><span>  graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span>
+</span><span>      </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>      </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>      </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>      </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>      </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>      </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>      </span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>  </span><span class="token" style="color: rgb(57, 58, 52);">}</span></code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST — What's the Naive Approach?</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Naive idea: "Try ALL possible orderings of visiting nodes,
+</span>               find ones that respect the spreading pattern"
+  
+  → 7 nodes → 7! = 5040 permutations to check
+  → For V nodes → V! permutations
+  → V! grows INSANELY fast: 20! = 2.4 × 10^18
+  → COMPLETELY IMPRACTICAL
+
+  Even a slightly better naive approach:
+    "For each unvisited node, check if ANY of its neighbors 
+     have been visited, and if so, visit it"
+  
+  → For each node: scan all its neighbors → O(E) total per wave
+  → Number of waves: up to V
+  → Repeated scanning: O(V × E) with lots of redundant work
+  
+  We need a SYSTEMATIC way to explore level by level.</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  The problem with ad-hoc exploration:
+</span>    → How do you know WHICH unvisited node to check next?
+    → How do you ensure you visit NEAREST nodes first?
+    → How do you avoid visiting the same node twice?
+    → How do you track "waves" or "levels"?
+  
+  BFS solves ALL of these with ONE elegant data structure: the QUEUE.</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<h3>The Key Insight: "Nearest First"</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │  "Fire spreads to ALL directly connected buildings first"      │
+  │                                                                │
+  │  This means:                                                   │
+  │    → Distance-1 buildings burn BEFORE distance-2 buildings     │
+  │    → Distance-2 buildings burn BEFORE distance-3 buildings     │
+  │    → We explore by LEVELS / LAYERS / WAVES                    │
+  │                                                                │
+  │  This is EXACTLY what BFS does.                                │
+  │                                                                │
+  │  BFS = "Explore everything at distance 1,                      │
+  │         then everything at distance 2,                         │
+  │         then everything at distance 3, ..."                    │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>What Data Structure Enables This?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  A QUEUE (First-In-First-Out = FIFO)
+</span>
+  WHY a queue?
+  
+  Imagine you're in a line at a store:
+    → First person in line gets served FIRST
+    → New people join at the BACK
+    
+  In BFS:
+    → First discovered nodes get explored FIRST
+    → Newly discovered neighbors join at the BACK
+    
+  This ensures: nodes discovered EARLIER (closer to source)
+                get explored BEFORE nodes discovered LATER (farther)
+
+  ┌─────────────────────────────────────────────────────┐
+  │                                                       │
+  │  QUEUE behavior:                                      │
+  │                                                       │
+  │    enqueue (add to back):  [A] → [A, B] → [A, B, C] │
+  │    dequeue (remove front): [A, B, C] → [B, C]        │
+  │                                                       │
+  │  Result: A processed before B, B before C             │
+  │          = LEVEL ORDER guaranteed                      │
+  │                                                       │
+  └─────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Why Not a Stack?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Stack = Last-In-First-Out (LIFO)
+</span>    → Most recently discovered node gets explored FIRST
+    → This goes DEEP, not WIDE
+    → That's DFS (Problem 4), not BFS
+    
+  Queue = First-In-First-Out (FIFO)
+    → Earliest discovered node gets explored FIRST  
+    → This goes WIDE, level by level
+    → That's BFS ✓</code></pre></div>
+<h3>The Three Essential Components of BFS</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  1. QUEUE      → decides exploration ORDER (who gets processed next)
+</span>  2. VISITED SET → prevents INFINITE LOOPS (don't revisit nodes)
+  3. GRAPH      → provides NEIGHBORS (who can we reach from here?)
+
+  Without queue:    → no guaranteed level-order
+  Without visited:  → infinite loop on cycles (A→B→A→B→A→...)
+  Without graph:    → don't know where edges go</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH — Step by Step</h2>
+<h3>The BFS Algorithm (in English)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  1. Start: put source node in queue, mark it visited
+</span>  2. Loop while queue is not empty:
+     a. Remove the FRONT node from queue (call it "current")
+     b. Process it (print it, record it, whatever)
+     c. Look at ALL neighbors of current
+     d. For each neighbor that is NOT yet visited:
+        → Mark it visited
+        → Add it to the BACK of the queue
+  3. Done when queue is empty (all reachable nodes processed)</code></pre></div>
+<h3>Why Mark Visited WHEN ADDING to Queue (Not When Processing)?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  CRITICAL DETAIL — This is the #1 BFS mistake!
+</span>
+  WRONG: mark visited when you DEQUEUE (process) a node
+  
+    Queue: [0]
+    Dequeue 0, mark visited, add neighbors 1, 2
+    Queue: [1, 2]
+    Dequeue 1, mark visited, add neighbors... 
+      neighbor 0: visited ✓ skip
+      neighbor 3: not visited, add
+      neighbor 4: not visited, add
+    Queue: [2, 3, 4]
+    Dequeue 2, mark visited, add neighbors...
+      neighbor 0: visited ✓ skip  
+      neighbor 5: not visited, add
+      neighbor 6: not visited, add
+    Queue: [3, 4, 5, 6]
+    → This WORKS for trees...
+
+  BUT for graphs with cycles:
+  
+      0 --- 1
+      |     |
+      3 --- 2
+
+    Queue: [0]
+    Dequeue 0, mark visited, add 1, 3
+    Queue: [1, 3]
+    Dequeue 1, mark visited, add neighbors...
+      neighbor 0: visited ✓ skip
+      neighbor 2: NOT visited → add
+    Queue: [3, 2]
+    Dequeue 3, mark visited, add neighbors...
+      neighbor 0: visited ✓ skip
+      neighbor 2: NOT visited → add AGAIN!   ← DUPLICATE!
+    Queue: [2, 2]   ← NODE 2 IS IN QUEUE TWICE!
+    → Node 2 gets processed TWICE → wrong!
+
+  RIGHT: mark visited when you ENQUEUE (add to queue)
+  
+    Queue: [0], visited = {0}
+    Dequeue 0, add neighbors...
+      1: not visited → mark visited, add → visited = {0,1}
+      3: not visited → mark visited, add → visited = {0,1,3}
+    Queue: [1, 3]
+    Dequeue 1, add neighbors...
+      0: visited ✓ skip
+      2: not visited → mark visited, add → visited = {0,1,2,3}
+    Queue: [3, 2]
+    Dequeue 3, add neighbors...
+      0: visited ✓ skip
+      2: visited ✓ skip   ← ALREADY MARKED! No duplicate!
+    Queue: [2]
+    Dequeue 2 → process once ✓
+
+  ┌──────────────────────────────────────────────────────┐
+  │  RULE: Mark visited when ADDING to queue, not when   │
+  │        removing from queue.                           │
+  │                                                       │
+  │  This prevents duplicates in the queue.               │
+  └──────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Full Trace on Our Example</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Graph:
+</span>              0
+             / \
+            1   2
+           / \ / \
+          3  4 5  6
+
+  Adjacency List:
+    0: [1, 2]
+    1: [0, 3, 4]
+    2: [0, 5, 6]
+    3: [1]
+    4: [1]
+    5: [2]
+    6: [2]</code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔═══════════════════════════════════════════════════════════════════════╗
+</span>  ║  INITIALIZATION                                                       ║
+  ╠═══════════════════════════════════════════════════════════════════════╣
+  ║                                                                       ║
+  ║  Queue:    [0]         ← source goes in                               ║
+  ║  Visited:  {0}         ← mark source as visited immediately           ║
+  ║  Result:   []          ← will store BFS order                         ║
+  ║                                                                       ║
+  ║  WHY mark 0 visited now?                                              ║
+  ║  → If we don't, and some other path leads back to 0,                  ║
+  ║    0 could be added to queue again                                    ║
+  ║                                                                       ║
+  ╚═══════════════════════════════════════════════════════════════════════╝
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 1: Dequeue node 0                                              │
+  │                                                                     │
+  │   Queue BEFORE: [0]                                                 │
+  │   Dequeue: current = 0                                              │
+  │   Queue AFTER:  []                                                  │
+  │   Result: [0]                                                       │
+  │                                                                     │
+  │   Explore neighbors of 0: [1, 2]                                    │
+  │                                                                     │
+  │     Neighbor 1: visited? NO  → mark visited, enqueue                │
+  │     Neighbor 2: visited? NO  → mark visited, enqueue                │
+  │                                                                     │
+  │   Queue:   [1, 2]                                                   │
+  │   Visited: {0, 1, 2}                                                │
+  │   Result:  [0]                                                      │
+  │                                                                     │
+  │   Visual — what we've explored:                                     │
+  │              [0]  ← PROCESSED (dequeued and explored)               │
+  │              / \                                                     │
+  │            (1) (2)  ← IN QUEUE (discovered but not yet explored)    │
+  │            / \ / \                                                   │
+  │           3  4 5  6  ← UNDISCOVERED                                 │
+  │                                                                     │
+  │   Fire analogy: minute 0 — building 0 is burning                    │
+  │                 buildings 1, 2 just caught fire (in queue)           │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 2: Dequeue node 1                                              │
+  │                                                                     │
+  │   Queue BEFORE: [1, 2]                                              │
+  │   Dequeue: current = 1     ← FRONT of queue (FIFO)                 │
+  │   Queue AFTER:  [2]                                                 │
+  │   Result: [0, 1]                                                    │
+  │                                                                     │
+  │   Explore neighbors of 1: [0, 3, 4]                                 │
+  │                                                                     │
+  │     Neighbor 0: visited? YES → SKIP (already burned)                │
+  │     Neighbor 3: visited? NO  → mark visited, enqueue               │
+  │     Neighbor 4: visited? NO  → mark visited, enqueue               │
+  │                                                                     │
+  │   Queue:   [2, 3, 4]                                                │
+  │   Visited: {0, 1, 2, 3, 4}                                         │
+  │   Result:  [0, 1]                                                   │
+  │                                                                     │
+  │   Visual:                                                           │
+  │              [0]                                                     │
+  │              / \                                                     │
+  │           [1]  (2)   ← 1 processed, 2 still in queue               │
+  │           / \  / \                                                   │
+  │         (3)(4) 5  6  ← 3,4 just discovered, 5,6 unknown            │
+  │                                                                     │
+  │   WHY did we skip neighbor 0?                                       │
+  │   → 0 is in visited set → already burning → no need to spread again│
+  │   → Without this check: 0 goes back in queue → infinite loop!      │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 3: Dequeue node 2                                              │
+  │                                                                     │
+  │   Queue BEFORE: [2, 3, 4]                                           │
+  │   Dequeue: current = 2     ← FRONT of queue                        │
+  │   Queue AFTER:  [3, 4]                                              │
+  │   Result: [0, 1, 2]                                                 │
+  │                                                                     │
+  │   Explore neighbors of 2: [0, 5, 6]                                 │
+  │                                                                     │
+  │     Neighbor 0: visited? YES → SKIP                                 │
+  │     Neighbor 5: visited? NO  → mark visited, enqueue               │
+  │     Neighbor 6: visited? NO  → mark visited, enqueue               │
+  │                                                                     │
+  │   Queue:   [3, 4, 5, 6]                                             │
+  │   Visited: {0, 1, 2, 3, 4, 5, 6}     ← ALL nodes now discovered!  │
+  │   Result:  [0, 1, 2]                                                │
+  │                                                                     │
+  │   Visual:                                                           │
+  │              [0]                                                     │
+  │              / \                                                     │
+  │           [1]  [2]   ← both level-1 nodes now processed             │
+  │           / \  / \                                                   │
+  │         (3)(4)(5)(6) ← all in queue, waiting to be processed        │
+  │                                                                     │
+  │   NOTICE: all of level 1 processed BEFORE any of level 2!          │
+  │   This is the GUARANTEE of BFS + queue.                             │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 4: Dequeue node 3                                              │
+  │                                                                     │
+  │   Queue BEFORE: [3, 4, 5, 6]                                        │
+  │   Dequeue: current = 3                                              │
+  │   Queue AFTER:  [4, 5, 6]                                           │
+  │   Result: [0, 1, 2, 3]                                              │
+  │                                                                     │
+  │   Explore neighbors of 3: [1]                                       │
+  │                                                                     │
+  │     Neighbor 1: visited? YES → SKIP                                 │
+  │                                                                     │
+  │   Queue:   [4, 5, 6]      ← nothing new added                      │
+  │   Visited: {0, 1, 2, 3, 4, 5, 6}                                   │
+  │   Result:  [0, 1, 2, 3]                                             │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 5: Dequeue node 4                                              │
+  │                                                                     │
+  │   Queue BEFORE: [4, 5, 6]                                           │
+  │   Dequeue: current = 4                                              │
+  │   Queue AFTER:  [5, 6]                                              │
+  │   Result: [0, 1, 2, 3, 4]                                          │
+  │                                                                     │
+  │   Explore neighbors of 4: [1]                                       │
+  │                                                                     │
+  │     Neighbor 1: visited? YES → SKIP                                 │
+  │                                                                     │
+  │   Queue:   [5, 6]                                                   │
+  │   Visited: {0, 1, 2, 3, 4, 5, 6}                                   │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 6: Dequeue node 5                                              │
+  │                                                                     │
+  │   Queue BEFORE: [5, 6]                                               │
+  │   Dequeue: current = 5                                              │
+  │   Queue AFTER:  [6]                                                 │
+  │   Result: [0, 1, 2, 3, 4, 5]                                       │
+  │                                                                     │
+  │   Explore neighbors of 5: [2]                                       │
+  │                                                                     │
+  │     Neighbor 2: visited? YES → SKIP                                 │
+  │                                                                     │
+  │   Queue:   [6]                                                      │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ STEP 7: Dequeue node 6                                              │
+  │                                                                     │
+  │   Queue BEFORE: [6]                                                  │
+  │   Dequeue: current = 6                                              │
+  │   Queue AFTER:  []          ← EMPTY!                                │
+  │   Result: [0, 1, 2, 3, 4, 5, 6]                                    │
+  │                                                                     │
+  │   Explore neighbors of 6: [2]                                       │
+  │                                                                     │
+  │     Neighbor 2: visited? YES → SKIP                                 │
+  │                                                                     │
+  │   Queue:   []  ← EMPTY → LOOP ENDS                                 │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  ═══════════════════════════════════════════════════════════════════
+  FINAL BFS ORDER: [0, 1, 2, 3, 4, 5, 6]
+  
+  Level 0 (distance 0 from source): [0]
+  Level 1 (distance 1 from source): [1, 2]
+  Level 2 (distance 2 from source): [3, 4, 5, 6]
+  ═══════════════════════════════════════════════════════════════════</code></pre></div>
+<h3>Summary Table of Each Step</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────┬─────────┬────────────────┬───────────────────────┬───────────────┐
+</span>  │ Step │ Dequeue │ Queue After    │ Visited               │ Result So Far │
+  ├──────┼─────────┼────────────────┼───────────────────────┼───────────────┤
+  │  0   │  init   │ [0]            │ {0}                   │ []            │
+  │  1   │  0      │ [1, 2]         │ {0,1,2}               │ [0]           │
+  │  2   │  1      │ [2, 3, 4]      │ {0,1,2,3,4}           │ [0,1]         │
+  │  3   │  2      │ [3, 4, 5, 6]   │ {0,1,2,3,4,5,6}       │ [0,1,2]       │
+  │  4   │  3      │ [4, 5, 6]      │ {0,1,2,3,4,5,6}       │ [0,1,2,3]     │
+  │  5   │  4      │ [5, 6]         │ {0,1,2,3,4,5,6}       │ [0,1,2,3,4]   │
+  │  6   │  5      │ [6]            │ {0,1,2,3,4,5,6}       │ [0,1,2,3,4,5] │
+  │  7   │  6      │ []             │ {0,1,2,3,4,5,6}       │ [0,1,2,3,4,5,6]│
+  └──────┴─────────┴────────────────┴───────────────────────┴───────────────┘
+
+  OBSERVE THE QUEUE PATTERN:
+  → Level 0 nodes dequeued first (step 1)
+  → Level 1 nodes dequeued next (steps 2-3)
+  → Level 2 nodes dequeued last (steps 4-7)
+  → FIFO guarantees this order!</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: Basic BFS Traversal</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bfs_traversal</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Perform BFS starting from source node.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        graph: adjacency list (from Problem 1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        source: starting node
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: total number of nodes
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        order: list of nodes in BFS visit order
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Data Structures:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → queue (deque): determines WHO to explore next (FIFO)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → visited (set): prevents revisiting nodes (avoids infinite loops)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Time:  O(V + E) — each node dequeued once, each edge checked once
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Space: O(V) — queue + visited set each hold at most V nodes
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── INITIALIZATION ───</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>           </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># tracks which nodes we've seen</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>           </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># FIFO queue for BFS order</span><span>
+</span><span>    order </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># stores the BFS traversal result</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Start BFS from source</span><span>
+</span><span>    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># mark visited BEFORE enqueuing</span><span>
+</span><span>    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>      </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># source enters the queue</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BFS LOOP ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Dequeue the FRONT node (earliest discovered unprocessed node)</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># O(1) for deque — this is why we use deque!</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Process current node (here: just record it)</span><span>
+</span><span>        order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Explore ALL neighbors of current</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>      </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># only visit unvisited nodes</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># mark visited NOW (not later!)</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># add to BACK of queue</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> order
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD GRAPH (Problem 1 technique) ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── RUN BFS ───</span><span>
+</span><span>result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> bfs_traversal</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"BFS Order: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">result</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: BFS Order: [0, 1, 2, 3, 4, 5, 6]</span></code></pre></div>
+<hr>
+<h3>Version 2: BFS with Level Tracking (Which Minute Does Each Building Burn?)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bfs_with_levels</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    BFS that also tracks the LEVEL (distance from source) of each node.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is the foundation for:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Shortest path in unweighted graphs (Problem 9)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Multi-source BFS (Problem 13)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Many level-based problems
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        order: BFS traversal order
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        level: dict mapping each node to its distance from source
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        levels_grouped: list of lists, nodes grouped by level
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    order </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    level </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>                   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># NEW: tracks distance from source</span><span>
+</span><span>    levels_grouped </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>          </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># NEW: nodes at each level</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Initialize source at level 0</span><span>
+</span><span>    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    level</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                level</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> level</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># one step further</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Group nodes by level</span><span>
+</span><span>    max_level </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">max</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>level</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>values</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> level </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> lv </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>max_level </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        nodes_at_level </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> lv_val </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> level</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>items</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> lv_val </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> lv</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        levels_grouped</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nodes_at_level</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> order</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> level</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> levels_grouped
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD GRAPH ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── RUN BFS WITH LEVELS ───</span><span>
+</span><span>order</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> level</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> levels_grouped </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> bfs_with_levels</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"BFS Order: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">order</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\nDistance from source 0:"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dist </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">sorted</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>level</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>items</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: distance = </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">dist</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"\nNodes by level (fire spread by minute):"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> lv</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nodes </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">enumerate</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>levels_grouped</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Minute </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">lv</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: buildings </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">nodes</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> catch fire"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>BFS Order: [0, 1, 2, 3, 4, 5, 6]
+</span>
+Distance from source 0:
+  Node 0: distance = 0
+  Node 1: distance = 1
+  Node 2: distance = 1
+  Node 3: distance = 2
+  Node 4: distance = 2
+  Node 5: distance = 2
+  Node 6: distance = 2
+
+Nodes by level (fire spread by minute):
+  Minute 0: buildings [0] catch fire
+  Minute 1: buildings [1, 2] catch fire
+  Minute 2: buildings [3, 4, 5, 6] catch fire</code></pre></div>
+<hr>
+<h3>Version 3: BFS Level-by-Level (Alternative Pattern — Very Common in Interviews)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bfs_level_by_level</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    BFS processing ONE COMPLETE LEVEL at a time.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Instead of popping one node at a time,
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    we process ALL nodes at the current level before moving on.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This pattern is used in:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Rotten Oranges (Problem 13)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → 01 Matrix (Problem 14)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        → Any problem asking "how many steps/waves?"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    The trick: at the start of each iteration,
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    queue contains EXACTLY all nodes at the current level.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    We process all of them, then move to next level.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    current_level </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        level_size </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>queue</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># HOW MANY nodes at this level?</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Level </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">current_level</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: "</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> end</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(163, 21, 21);">""</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Process ALL nodes at current level</span><span>
+</span><span>        level_nodes </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>level_size</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># exactly level_size iterations</span><span>
+</span><span>            current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            level_nodes</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>level_nodes</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        current_level </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># At this point, queue contains ONLY next level's nodes</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD GRAPH ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span>
+</span><span>edges </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── RUN ───</span><span>
+</span><span>bfs_level_by_level</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>Level 0: [0]
+</span>Level 1: [1, 2]
+Level 2: [3, 4, 5, 6]</code></pre></div>
+<h3>Why <code>level_size = len(queue)</code> Works</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  At the START of each while-loop iteration:
+</span>    → Queue contains ONLY nodes from the CURRENT level
+    → We save this count: level_size = len(queue)
+    → We dequeue EXACTLY that many nodes
+    → During processing, new nodes (next level) get added to queue
+    → After the for-loop, queue has ONLY next level's nodes
+    → Repeat!
+
+  Trace:
+    Start of iteration 1: queue = [0]         → level_size = 1
+      Process 0, add 1, 2
+    End of iteration 1:   queue = [1, 2]      → these are ALL level-1 nodes
+
+    Start of iteration 2: queue = [1, 2]      → level_size = 2
+      Process 1, add 3, 4
+      Process 2, add 5, 6
+    End of iteration 2:   queue = [3,4,5,6]   → these are ALL level-2 nodes
+
+    Start of iteration 3: queue = [3,4,5,6]   → level_size = 4
+      Process 3 (no new)
+      Process 4 (no new)
+      Process 5 (no new)
+      Process 6 (no new)
+    End of iteration 3:   queue = []           → DONE</code></pre></div>
+<hr>
+<h3>Why <code>deque</code> Instead of <code>list</code>?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Python list as queue — SLOW</span><span>
+</span><span>queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>          </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># O(V) — shifts ALL remaining elements left!</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># collections.deque as queue — FAST</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span><span>queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># O(1) — doubly-linked list, just move pointer!</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># PERFORMANCE COMPARISON:</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   V = 100,000 nodes</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   list.pop(0):    100,000 × O(V) = O(V²) = 10^10 operations</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   deque.popleft(): 100,000 × O(1) = O(V)  = 10^5 operations</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   That's 100,000× FASTER with deque!</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;">#   ALWAYS use deque for BFS. ALWAYS.</span></code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(V + E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  WHY O(V + E)? Let's count EXACTLY what happens:
+</span>
+  1. Each node is ENQUEUED at most once
+     → Because we check "if neighbor not in visited" before enqueuing
+     → Once visited, a node is NEVER added again
+     → V enqueue operations → O(V)
+
+  2. Each node is DEQUEUED at most once
+     → V dequeue operations → O(V)
+
+  3. For each dequeued node, we scan its NEIGHBOR LIST
+     → Node 0 has 2 neighbors → scan 2 edges
+     → Node 1 has 3 neighbors → scan 3 edges  (including edge back to 0)
+     → Node 2 has 3 neighbors → scan 3 edges
+     → ...
+     → Total scans across ALL nodes = sum of all degrees
+     → For undirected: sum of degrees = 2E
+     → For directed: sum of out-degrees = E
+     → Total: O(E)
+
+  GRAND TOTAL: O(V) for node processing + O(E) for edge scanning = O(V + E)
+
+  CONCRETE EXAMPLE:
+    V = 7, E = 6
+    → 7 enqueue + 7 dequeue + 12 edge checks (2×6) = 26 operations
+    → O(V + E) = O(7 + 6) = O(13) ✓</code></pre></div>
+<h3>Space Complexity: O(V)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  1. visited set: at most V nodes → O(V)
+</span>  2. queue: at most V nodes simultaneously → O(V)
+     (when would queue have V nodes? 
+      → star graph: one center connected to V-1 leaves
+      → process center, all V-1 leaves enter queue)
+  3. order list: exactly V nodes → O(V)
+  4. graph storage: O(V + E) — but this is INPUT, not extra space
+
+  Extra space used by BFS itself: O(V)</code></pre></div>
+<h3>Why NOT O(V × E) or O(V²)?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Common MISCONCEPTION: "We loop V times and check E edges each time"
+</span>  
+  REALITY: 
+    → We loop V times (once per node)
+    → But each loop iteration checks ONLY that node's neighbors
+    → Node with degree 3 checks 3 edges
+    → Node with degree 1 checks 1 edge
+    → TOTAL edge checks across ALL iterations = E (or 2E for undirected)
+    → NOT V × E!
+
+  Think of it like this:
+    → Every edge in the graph gets "looked at" exactly TWICE
+      (once from each endpoint)
+    → That's 2E total edge looks, regardless of how many nodes exist</code></pre></div>
+<hr>
+<h2>STEP 7: BFS ON A GRAPH WITH CYCLES (Why Visited Set is Essential)</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Let's trace BFS on a CYCLIC graph to see why visited matters:
+</span>
+      0 ---- 1
+      |      |
+      |      |
+      3 ---- 2
+
+  Adjacency List:
+    0: [1, 3]
+    1: [0, 2]
+    2: [1, 3]
+    3: [0, 2]
+
+  ─── WITHOUT visited set (BROKEN) ───
+
+    Queue: [0]
+    Dequeue 0, add neighbors 1, 3
+    Queue: [1, 3]
+    Dequeue 1, add neighbors 0, 2
+    Queue: [3, 0, 2]          ← 0 is back in queue!
+    Dequeue 3, add neighbors 0, 2
+    Queue: [0, 2, 0, 2]      ← duplicates everywhere!
+    Dequeue 0, add neighbors 1, 3
+    Queue: [2, 0, 2, 1, 3]   ← GROWING, never ends!
+    ... INFINITE LOOP ...
+
+  ─── WITH visited set (CORRECT) ───
+
+    Queue: [0],  visited: {0}
+    Dequeue 0, check neighbors:
+      1: not visited → add, visited: {0,1}
+      3: not visited → add, visited: {0,1,3}
+    Queue: [1, 3]
+    
+    Dequeue 1, check neighbors:
+      0: VISITED → skip
+      2: not visited → add, visited: {0,1,2,3}
+    Queue: [3, 2]
+    
+    Dequeue 3, check neighbors:
+      0: VISITED → skip
+      2: VISITED → skip        ← already discovered via node 1!
+    Queue: [2]
+    
+    Dequeue 2, check neighbors:
+      1: VISITED → skip
+      3: VISITED → skip
+    Queue: []  → DONE!
+
+    BFS Order: [0, 1, 3, 2] ✓ (all nodes visited exactly once)</code></pre></div>
+<hr>
+<h2>STEP 8: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Directed?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Same BFS algorithm — just the adjacency list is different
+</span>  (only one direction per edge, as discussed in Problem 1)
+  
+  IMPORTANT: in a directed graph, BFS from source may NOT reach all nodes!
+  
+      0 → 1 → 2
+            ↓
+            3
+  
+  BFS from 0: visits 0, 1, 2, 3 ✓
+  BFS from 3: visits ONLY 3 (no outgoing edges!) 
+  
+  → Some nodes may be unreachable depending on edge directions</code></pre></div>
+<h3>What if Weighted?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  BFS treats ALL edges as having EQUAL cost (cost = 1)
+</span>  
+  If edges have DIFFERENT weights:
+    → BFS does NOT guarantee shortest path!
+    → Need Dijkstra's algorithm (Problem 23)
+    
+  Example:
+      0 --1-- 1 --1-- 2
+      |               |
+      +------10-------+
+  
+  BFS from 0: visits 1 (distance 1), then 2 (distance 2 via BFS)
+  But direct path 0→2 costs 10, path 0→1→2 costs 2
+  BFS gives correct HOPS (2 edges) but if we wanted COST-based shortest, 
+  we'd need Dijkstra
+  
+  BFS STILL works for shortest path when ALL weights are 1 (Problem 9)</code></pre></div>
+<h3>What if Disconnected?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  BFS from source only visits nodes REACHABLE from source.
+</span>  
+      0 --- 1       3 --- 4
+              \
+               2
+  
+  BFS from 0: visits {0, 1, 2}
+  Nodes {3, 4}: NEVER visited!
+  
+  To visit ALL nodes in a disconnected graph:
+    → Run BFS from each unvisited node (Problem 5: Connected Components)
+    
+  for node in range(n):
+      if node not in visited:
+          bfs(node)   ← this discovers one new component</code></pre></div>
+<hr>
+<h2>STEP 9: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Using list instead of deque                      ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  list.pop(0) is O(V) → makes BFS O(V² + E) instead of O(V+E)║
+  ║  ALWAYS use collections.deque for BFS                        ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Marking visited when DEQUEUING instead of        ║
+  ║             when ENQUEUING                                   ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  → Causes duplicate entries in queue                         ║
+  ║  → Wastes time processing same node multiple times           ║
+  ║  → In worst case, changes O(V+E) to O(V²)                   ║
+  ║                                                              ║
+  ║  RULE: visited.add(neighbor) BEFORE queue.append(neighbor)   ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Forgetting to handle disconnected graphs         ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  If graph has multiple components, BFS from one source       ║
+  ║  only visits ONE component                                   ║
+  ║                                                              ║
+  ║  FIX: loop through all nodes, BFS from each unvisited        ║
+  ║  (Will be used in Problem 5)                                 ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Single node graph                                ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  n = 1, edges = [], source = 0                               ║
+  ║  → Queue: [0], dequeue 0, no neighbors                       ║
+  ║  → Result: [0] ✓                                             ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Source node has no edges                         ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  graph = {0: [], 1: [2], 2: [1]}                             ║
+  ║  BFS from 0: visits only {0}                                 ║
+  ║  → This is correct! 0 is isolated.                           ║
+  ╚══════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 10: BFS TEMPLATE — Use This in Every BFS Problem</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bfs_template</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    UNIVERSAL BFS TEMPLATE
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Copy this and modify the "PROCESS" section for any BFS problem.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── INITIALIZE ───</span><span>
+</span><span>    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BFS LOOP ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ╔════════════════════════════════╗</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ║  PROCESS current node here     ║</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ║  (customize per problem)       ║</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ╚════════════════════════════════╝</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bfs_level_template</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>graph</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    UNIVERSAL LEVEL-BY-LEVEL BFS TEMPLATE
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Use when you need to track levels/waves/steps.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    visited </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>source</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    level </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        level_size </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>queue</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>           </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># nodes at current level</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>level_size</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># process entire level</span><span>
+</span><span>            current </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ╔════════════════════════════════╗</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ║  PROCESS current at this level  ║</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ╚════════════════════════════════╝</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>current</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    visited</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        level </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># move to next level</span></code></pre></div>
+<hr>
+<h2>STEP 11: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────┐
+</span>  │                                                                │
+  │  SIGNAL 1: "Spreading" or "expanding" from a source            │
+  │    → Fire spreading, infection spreading, ripple in water      │
+  │    → BFS = simultaneous expansion in all directions            │
+  │                                                                │
+  │  SIGNAL 2: "Nearest" or "closest" or "minimum steps"          │
+  │    → "Find the nearest exit"                                   │
+  │    → "Minimum number of moves"                                 │
+  │    → BFS explores nearest first → finds shortest path          │
+  │      (in unweighted graphs — see Problem 9)                   │
+  │                                                                │
+  │  SIGNAL 3: "Level by level" or "wave by wave"                  │
+  │    → "How many waves until everything is reached?"             │
+  │    → BFS with level tracking                                   │
+  │                                                                │
+  │  SIGNAL 4: "All edges have equal cost" (or cost = 1)           │
+  │    → BFS gives shortest path                                   │
+  │    → If costs DIFFER → need Dijkstra (Problem 23)              │
+  │                                                                │
+  │  THINKING PROCESS:                                             │
+  │    "I see spreading/nearest/levels + equal costs"              │
+  │    → "This means explore nearest first"                        │
+  │    → "Use BFS with a queue"                                    │
+  │                                                                │
+  └────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPTS LEARNED:                                            ║
+  ║                                                                    ║
+  ║   1. BFS = Breadth-First Search = explore LEVEL by LEVEL           ║
+  ║   2. Uses QUEUE (FIFO) → nearest nodes explored first              ║
+  ║   3. VISITED SET prevents infinite loops on cyclic graphs          ║
+  ║   4. Mark visited when ENQUEUING, not when dequeuing               ║
+  ║   5. Time: O(V + E) — each node and edge processed once           ║
+  ║   6. Space: O(V) — queue + visited set                             ║
+  ║   7. Use collections.deque, NEVER list for queue                   ║
+  ║   8. Level-by-level BFS: use len(queue) trick                      ║
+  ║                                                                    ║
+  ║   BFS GUARANTEES:                                                  ║
+  ║   → Visits nodes in order of DISTANCE from source                  ║
+  ║   → Finds SHORTEST PATH in unweighted graphs (Problem 9)          ║
+  ║   → Discovers ALL reachable nodes from source                      ║
+  ║                                                                    ║
+  ║   MENTAL MODEL:                                                    ║
+  ║   "BFS is like dropping a stone in water —                         ║
+  ║    the ripple expands outward uniformly,                           ║
+  ║    reaching distance-1 before distance-2 before distance-3"        ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>CONNECTION MAP</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 1 (Adjacency List) ─── provides the GRAPH structure
+</span>           │
+  Problem 2 (Adjacency Matrix) ─ alternative structure
+           │
+  Problem 3 (BFS) ◄── YOU ARE HERE
+           │
+           ├──→ Problem 4 (DFS) — the OTHER traversal
+           │     "What if we use a STACK instead of QUEUE?"
+           │
+           ├──→ Problem 5 (Connected Components) — BFS on disconnected graphs
+           │
+           ├──→ Problem 9 (Shortest Path) — BFS level = distance
+           │
+           ├──→ Problem 13 (Multi-source BFS) — multiple starting points
+           │
+           └──→ Problem 23 (Dijkstra) — "BFS but with weights"</code></pre></div>
+<hr>
+<p><strong>Problem 3 Complete.</strong><br>
+<strong>Ready for Problem 4: DFS Traversal (Deep Exploration)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="9" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-2.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 3 of 50</span>
+            </div>
+            <a href="problem-4.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

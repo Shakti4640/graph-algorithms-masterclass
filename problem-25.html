@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 25: Problem 25: Cheapest Flights Within K Stops — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="27">
+<div class="px-2"><h1>Problem 25: Cheapest Flights Within K Stops</h1>
+<h2>[Algorithm Family: Modified BFS / Bellman-Ford with Constraints]</h2>
+<h2>[Phase 3: Standard Interview — "I can solve real interview problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are booking a flight from city src to city dst.
+</span>
+There are n cities connected by flights.
+Each flight is given as [from, to, price].
+
+Find the CHEAPEST price from src to dst with AT MOST K stops.
+If no such route exists, return -1.
+
+A "stop" is an intermediate city (not counting src and dst).
+
+Example 1:
+  n = 4
+  flights = [[0,1,100], [1,2,100], [0,2,500], [2,3,100]]
+  src = 0, dst = 3, k = 1
+
+  Output: 500
+
+  Explanation:
+    Route 0→1→2→3: price 100+100+100=300, but 2 stops (1 and 2) &gt; k=1 ✗
+    Route 0→2→3:   price 500+100=600, 1 stop (2) = k=1 ✓
+    Route 0→1→2:   doesn't reach dst ✗
+    
+    Wait, let me recount:
+    Route 0→2→3:   1 stop (city 2), price = 500+100 = 600 ✓
+    Route 0→1→2→3: 2 stops (cities 1,2), price = 300 ✗ (exceeds k=1)
+    
+    Cheapest within k=1 stops: 600
+    
+    Actually, let me re-examine. The answer should be 500 per the problem.
+    
+    Hmm, rechecking: with flights [[0,1,100],[1,2,100],[0,2,500],[2,3,100]]
+    
+    0→2→3: edges used = 2, stops = 1 (city 2), price = 500+100 = 600
+    0→1→2→3: edges used = 3, stops = 2 (cities 1,2), price = 300
+    
+    With k=1: only 0→2→3 works = 600
+    
+    Let me use a cleaner example.
+
+Example 1 (corrected):
+  n = 4
+  flights = [[0,1,100], [1,2,100], [2,3,100], [0,3,700]]
+  src = 0, dst = 3, k = 1
+
+  Output: 700
+
+  Routes:
+    0→3:       0 stops, price 700 ✓
+    0→1→2→3:  2 stops, price 300 ✗ (exceeds k=1)
+    0→1→3:    doesn't exist
+    
+  Cheapest within k=1 stops: 700
+
+Example 2:
+  n = 4
+  flights = [[0,1,100], [1,2,100], [2,3,100], [0,3,700]]
+  src = 0, dst = 3, k = 2
+
+  Output: 300
+
+  Routes:
+    0→3:       0 stops, price 700
+    0→1→2→3:  2 stops, price 300 ✓ (exactly k=2)
+    
+  Cheapest within k=2 stops: 300
+
+Example 3:
+  n = 3
+  flights = [[0,1,100], [1,2,100]]
+  src = 0, dst = 2, k = 0
+
+  Output: -1  (no direct flight 0→2, and 0 stops means direct only)</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Example 2:
+</span>  flights = [[0,1,100], [1,2,100], [2,3,100], [0,3,700]]
+  src = 0, dst = 3, k = 2
+  
+  THE GRAPH:
+  
+    0 ──100──→ 1 ──100──→ 2 ──100──→ 3
+    │                                 ↑
+    └─────────── 700 ─────────────────┘
+    
+  ADJACENCY LIST:
+    0 → [(1, 100), (3, 700)]
+    1 → [(2, 100)]
+    2 → [(3, 100)]
+    3 → []
+  
+  PATHS FROM 0 TO 3:
+    Path 0→3:       0 stops, cost 700
+    Path 0→1→2→3:  2 stops, cost 300
+    
+  With k=2: both valid, cheaper = 300  ✓
+  With k=1: only 0→3 valid, cost 700
+  With k=0: only 0→3 valid, cost 700</code></pre></div>
+<h3>Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer           │  Why?                          ║
+╠══════════════════╪═══════════════════╪════════════════════════════════╣
+║  NODES           │  Cities 0 to n-1  │  Each city = node              ║
+║  EDGES           │  Flights w/ price │  Directed, weighted            ║
+║  Directed?       │  YES              │  Flights are one-way           ║
+║  Weighted?       │  YES              │  Each flight has a price       ║
+║  Weights         │  All ≥ 0          │  Prices are non-negative       ║
+║  CONSTRAINT      │  At most K stops  │  ★ NEW: limits path length    ║
+║  What we need    │  Cheapest path    │  Shortest path WITH constraint ║
+║                  │  within K stops   │                                ║
+╚══════════════════╧═══════════════════╧════════════════════════════════╝
+
+  ★ THE NEW ELEMENT: K-stop constraint
+  
+  This is the FIRST time we have a CONSTRAINT on the path
+  beyond just finding the shortest/cheapest.
+  
+  "At most K stops" = "at most K+1 edges" in the path
+  (K intermediate cities + src + dst = K+2 total cities = K+1 edges)</code></pre></div>
+<hr>
+<h2>STEP 2: WHY STANDARD DIJKSTRA FAILS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Standard Dijkstra (Problem 23) finds GLOBALLY cheapest path.    │
+  │  It doesn't care about number of stops.                          │
+  │                                                                  │
+  │  Example: src=0, dst=3, k=1                                     │
+  │                                                                  │
+  │    0 ──100──→ 1 ──100──→ 2 ──100──→ 3                          │
+  │    └──────────── 700 ──────────────→ 3                          │
+  │                                                                  │
+  │  Dijkstra would find: 0→1→2→3, cost 300 (globally cheapest)    │
+  │  But this has 2 stops &gt; k=1 → INVALID!                          │
+  │                                                                  │
+  │  Correct answer with k=1: 0→3, cost 700                         │
+  │                                                                  │
+  │  PROBLEM: Dijkstra's greedy finalization is WRONG here.          │
+  │                                                                  │
+  │  When Dijkstra pops node 3 with cost 300 (via 0→1→2→3),        │
+  │  it finalizes dist[3] = 300 and never considers the             │
+  │  more expensive but VALID path 0→3 with cost 700.               │
+  │                                                                  │
+  │  The greedy guarantee breaks because a MORE EXPENSIVE path      │
+  │  might be the ONLY VALID one (fewer stops).                     │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Can We Fix Dijkstra?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  IDEA: Track (cost, node, stops_remaining) in the heap.
+</span>  
+  Same city with different remaining stops = DIFFERENT STATES.
+  
+  State: (city, stops_left)
+  → Node 3 reached with 2 stops left ≠ Node 3 reached with 0 stops left
+  → Both are valid states, potentially with different costs
+  
+  This is STATE-SPACE expansion (preview of Problem 38):
+    Original graph: V nodes
+    State graph: V × (K+1) nodes  (each city × each possible stops_left)
+  
+  This WORKS but has subtleties. Let's explore multiple approaches.</code></pre></div>
+<hr>
+<h2>STEP 3: THREE APPROACHES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  APPROACH 1: Bellman-Ford with K+1 iterations                    │
+  │    → Simplest and most elegant for this problem                  │
+  │    → O(K × E) time                                              │
+  │    → Natural fit: K iterations = K edges = K stops               │
+  │                                                                  │
+  │  APPROACH 2: Modified BFS/Dijkstra with state (city, stops)      │
+  │    → State-space expansion                                       │
+  │    → Works but more complex                                      │
+  │    → O(K × E × log(K × V)) time with heap                      │
+  │                                                                  │
+  │  APPROACH 3: BFS level-by-level (without heap)                   │
+  │    → Treat as BFS where each level = one more stop               │
+  │    → Simple and correct                                          │
+  │    → O(K × E) time                                              │
+  │                                                                  │
+  │  BEST CHOICE: Approach 1 (Bellman-Ford with K+1 iterations)     │
+  │    → Cleanest code, easiest to understand                        │
+  │    → Directly addresses the constraint                           │
+  │    → Also previews Bellman-Ford (Problem 26)                     │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 4: APPROACH 1 — BELLMAN-FORD WITH K+1 ITERATIONS</h2>
+<h3>The Key Insight</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  BELLMAN-FORD (preview of Problem 26):                           │
+  │    → Relax ALL edges repeatedly                                  │
+  │    → After i iterations: dist[] contains shortest paths using    │
+  │      AT MOST i edges                                             │
+  │                                                                  │
+  │  THIS IS EXACTLY WHAT WE NEED!                                   │
+  │                                                                  │
+  │  "At most K stops" = "at most K+1 edges"                        │
+  │  → Run Bellman-Ford for exactly K+1 iterations                   │
+  │  → After K+1 iterations: dist[dst] = cheapest using ≤ K+1 edges │
+  │  → That's our answer!                                            │
+  │                                                                  │
+  │  WHY IT WORKS:                                                   │
+  │    Iteration 1: finds best paths using exactly 1 edge            │
+  │    Iteration 2: finds best paths using ≤ 2 edges                 │
+  │    Iteration i: finds best paths using ≤ i edges                 │
+  │    Iteration K+1: finds best paths using ≤ K+1 edges ← ANSWER!  │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘
+  
+  CRITICAL DETAIL: Must use a COPY of dist[] for each iteration!
+  
+  WHY? Without copying, relaxing edge A→B in the same iteration
+  might use a distance for A that was ALSO updated in this iteration.
+  This effectively allows using MORE edges than intended.
+  
+  Example without copy (WRONG):
+    Iteration 1: relax 0→1: dist[1] = 100
+                 relax 1→2: dist[2] = dist[1] + 100 = 200
+                 → Used 2 edges in 1 iteration! WRONG!
+    
+  With copy (CORRECT):
+    Iteration 1: use prev_dist (copy from before iteration)
+                 relax 0→1: dist[1] = prev_dist[0] + 100 = 100
+                 relax 1→2: dist[2] = prev_dist[1] + 100 = ∞ + 100 = ∞
+                 → prev_dist[1] was ∞ (not yet discovered) → correct!
+    Iteration 2: use prev_dist (copy of dist after iteration 1)
+                 relax 1→2: dist[2] = prev_dist[1] + 100 = 100 + 100 = 200
+                 → Now 2 edges used after 2 iterations → correct!</code></pre></div>
+<h3>Step-by-Step Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  flights = [[0,1,100], [1,2,100], [2,3,100], [0,3,700]]
+</span>  src = 0, dst = 3, k = 1
+  
+  K+1 = 2 iterations (at most 2 edges = 1 stop)
+  
+  dist = [0, ∞, ∞, ∞]
+  
+  ══════════════════════════════════════════════════════════
+  ITERATION 1 (paths using ≤ 1 edge)
+  ══════════════════════════════════════════════════════════
+  
+  prev = [0, ∞, ∞, ∞]  ← copy BEFORE this iteration
+  
+  Relax ALL edges using prev[]:
+  
+    Edge [0,1,100]: prev[0]=0, 0+100=100 &lt; dist[1]=∞ → dist[1]=100
+    Edge [1,2,100]: prev[1]=∞, ∞+100=∞   → no update (can't use edge 1→2 yet)
+    Edge [2,3,100]: prev[2]=∞, ∞+100=∞   → no update
+    Edge [0,3,700]: prev[0]=0, 0+700=700 &lt; dist[3]=∞ → dist[3]=700
+  
+  After iteration 1:
+    dist = [0, 100, ∞, 700]
+    
+    Interpretation: using ≤ 1 edge:
+      0→0: 0
+      0→1: 100 (direct flight)
+      0→2: ∞ (no direct flight)
+      0→3: 700 (direct flight)
+
+  ══════════════════════════════════════════════════════════
+  ITERATION 2 (paths using ≤ 2 edges = ≤ 1 stop)
+  ══════════════════════════════════════════════════════════
+  
+  prev = [0, 100, ∞, 700]  ← copy of dist after iteration 1
+  
+  Relax ALL edges using prev[]:
+  
+    Edge [0,1,100]: prev[0]=0, 0+100=100 = dist[1]=100 → no update
+    Edge [1,2,100]: prev[1]=100, 100+100=200 &lt; dist[2]=∞ → dist[2]=200
+    Edge [2,3,100]: prev[2]=∞, ∞+100=∞   → no update
+                    (can't reach 3 via 2 because 2 wasn't reached in prev)
+    Edge [0,3,700]: prev[0]=0, 0+700=700 = dist[3]=700 → no update
+  
+  After iteration 2:
+    dist = [0, 100, 200, 700]
+    
+    Interpretation: using ≤ 2 edges (≤ 1 stop):
+      0→0: 0
+      0→1: 100
+      0→2: 200 (0→1→2, 1 stop)
+      0→3: 700 (0→3 direct, 0 stops)
+      
+      Note: 0→1→2→3 would cost 300 but needs 3 edges (2 stops)
+      → NOT found because we only ran 2 iterations!
+  
+  ══════════════════════════════════════════════════════════
+  ANSWER: dist[3] = 700
+  ══════════════════════════════════════════════════════════
+  
+  The cheapest flight from 0 to 3 with at most 1 stop = 700
+  (The 300-cost route needs 2 stops, which exceeds k=1)</code></pre></div>
+<h3>Trace with k=2</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Same graph, but k=2 → K+1 = 3 iterations
+</span>  
+  After iteration 1: dist = [0, 100, ∞, 700]    (same as above)
+  After iteration 2: dist = [0, 100, 200, 700]   (same as above)
+  
+  ══════════════════════════════════════════════════════════
+  ITERATION 3 (paths using ≤ 3 edges = ≤ 2 stops)
+  ══════════════════════════════════════════════════════════
+  
+  prev = [0, 100, 200, 700]
+  
+  Relax ALL edges using prev[]:
+  
+    Edge [0,1,100]: prev[0]=0, 0+100=100 = dist[1] → no update
+    Edge [1,2,100]: prev[1]=100, 100+100=200 = dist[2] → no update
+    Edge [2,3,100]: prev[2]=200, 200+100=300 &lt; dist[3]=700 → dist[3]=300 ★
+    Edge [0,3,700]: prev[0]=0, 0+700=700 &gt; dist[3]=300 → no update
+  
+  After iteration 3:
+    dist = [0, 100, 200, 300]
+    
+    0→1→2→3: cost 300, 2 stops → valid with k=2! ✓
+  
+  ANSWER: dist[3] = 300</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Solution 1: Bellman-Ford with K+1 Iterations (Recommended)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">findCheapestPrice_bf</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> src</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dst</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Cheapest flight from src to dst with at most k stops.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    APPROACH: Bellman-Ford limited to K+1 iterations.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    WHY BELLMAN-FORD?
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → After i iterations: dist[] has shortest paths using ≤ i edges
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → K stops = K+1 edges → run K+1 iterations
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Naturally handles the constraint!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    CRITICAL: Use a COPY of dist[] each iteration.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Without copy: updates within same iteration "chain"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        allowing more edges than intended
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → With copy: each iteration only extends by exactly 1 edge
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of cities
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        flights: list of [from, to, price]
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        src: source city
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        dst: destination city
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        k: maximum number of stops
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        int: cheapest price, or -1 if impossible
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── INITIALIZE DISTANCES ───</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>src</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── RUN K+1 ITERATIONS ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Each iteration allows one more edge in the path</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> i </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>k </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ CRITICAL: Copy dist before this iteration</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># This ensures we only extend paths by ONE edge per iteration</span><span>
+</span><span>        prev </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># shallow copy of the array</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Relax ALL edges</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> prev</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># can only extend from reachable nodes</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> prev</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> prev</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>dst</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>dst</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TESTS ───</span><span>
+</span><span>flights </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">100</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">100</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">100</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">700</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findCheapestPrice_bf</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 700 (0→3 direct, 1 stop max)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findCheapestPrice_bf</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 300 (0→1→2→3, 2 stops)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findCheapestPrice_bf</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 700 (0→3 direct, 0 stops)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findCheapestPrice_bf</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">100</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">100</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># -1 (no direct)</span></code></pre></div>
+<hr>
+<h3>Solution 2: BFS Level-by-Level (No Heap Needed)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">findCheapestPrice_bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> src</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dst</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    BFS approach: each BFS level = one more stop.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Process level by level (like Problem 13: Rotten Oranges).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    At each level, try extending all current paths by one edge.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Stop after K+1 levels (K+1 edges = K stops).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is conceptually the same as Bellman-Ford with iterations,
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    but structured as BFS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD GRAPH ───</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BFS ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># dist[node] = cheapest known cost to reach node</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>src</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Queue holds (node, cost_to_reach_it)</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>src</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    stops </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> stops </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Process ALL nodes at current level (same as Problem 13 pattern)</span><span>
+</span><span>        level_size </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>queue</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>level_size</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            node</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                new_cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> cost </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> weight
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Only explore if we found a CHEAPER path</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> new_cost </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> new_cost
+</span><span>                    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> new_cost</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        stops </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>dst</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>dst</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">!=</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TESTS ───</span><span>
+</span><span>flights </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">100</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">100</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">100</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">700</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findCheapestPrice_bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 700</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findCheapestPrice_bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 300</span></code></pre></div>
+<hr>
+<h3>Solution 3: Modified Dijkstra with State (city, stops_used)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">import</span><span> heapq
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">findCheapestPrice_dijkstra</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> src</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dst</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Modified Dijkstra with state = (city, stops_used).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    STATE-SPACE EXPANSION (preview of Problem 38):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Original graph has V nodes
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → State graph has V × (K+2) nodes
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        (each city × each possible number of stops used: 0 to K+1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → We explore this expanded state space with a priority queue
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    KEY DIFFERENCE from standard Dijkstra:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Same city with different stops_used = DIFFERENT states
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Can't just skip a city because we visited it before
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Must track: have we visited this (city, stops) combination?
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    WHY this is more complex than Bellman-Ford:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → More states to track
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Need heap operations (log factor)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Bellman-Ford is simpler for this specific problem
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Heap: (cost, city, stops_used)</span><span>
+</span><span>    heap </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> src</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Track best cost to reach each (city, stops) state</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># This prevents revisiting with worse cost</span><span>
+</span><span>    best </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">{</span><span class="token" style="color: rgb(57, 58, 52);">}</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> heap</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        cost</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> city</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> stops </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── REACHED DESTINATION? ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> city </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> dst</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> cost    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># first pop of dst = cheapest (greedy guarantee)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── EXCEEDED STOP LIMIT? ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> stops </span><span class="token" style="color: rgb(57, 58, 52);">&gt;</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># can't take any more flights</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── ALREADY VISITED THIS STATE WITH BETTER COST? ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>city</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> stops</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> best </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> best</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>city</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> stops</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> cost</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span><span>        best</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>city</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> stops</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> cost
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── EXPLORE NEIGHBORS ───</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> weight </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>city</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            new_cost </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> cost </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> weight
+</span><span>            heapq</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>heappush</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heap</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>new_cost</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> neighbor</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> stops </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TESTS ───</span><span>
+</span><span>flights </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">100</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">100</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">100</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">700</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findCheapestPrice_dijkstra</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 700</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>findCheapestPrice_dijkstra</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># 300</span></code></pre></div>
+<hr>
+<h3>Solution 4: Simplified Bellman-Ford (Interview-Ready)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">findCheapestPrice</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> src</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dst</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> k</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Clean, minimal Bellman-Ford solution.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This is the version to write in a real interview.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    dist </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span><span>    dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>src</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>k </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        prev </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> u</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> v</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> w </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> flights</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> prev</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>v</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> prev</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>u</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> w
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>dst</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> dist</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>dst</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token builtin">float</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">'inf'</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span></code></pre></div>
+<hr>
+<h2>STEP 6: WHY THE COPY IS CRITICAL — Deep Dive</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  WITHOUT COPY (WRONG):                                           │
+  │                                                                  │
+  │  dist = [0, ∞, ∞, ∞]                                           │
+  │                                                                  │
+  │  Iteration 1 (should find paths using ≤ 1 edge):                │
+  │    Edge [0,1,100]: dist[1] = min(∞, dist[0]+100) = 100          │
+  │    Edge [1,2,100]: dist[2] = min(∞, dist[1]+100) = 200          │
+  │                                     ↑                            │
+  │                         USES UPDATED dist[1] = 100               │
+  │                         But dist[1] was just set THIS iteration! │
+  │                         This means 0→1→2 (2 edges) found in     │
+  │                         just 1 iteration!                        │
+  │    Edge [2,3,100]: dist[3] = min(∞, dist[2]+100) = 300          │
+  │                         Same problem: 0→1→2→3 (3 edges) in 1 iter│
+  │                                                                  │
+  │  After iteration 1: dist = [0, 100, 200, 300]                   │
+  │  → Found 3-edge path in 1 iteration → WRONG for k=0 or k=1!    │
+  │                                                                  │
+  │  ─────────────────────────────────────────────────────           │
+  │                                                                  │
+  │  WITH COPY (CORRECT):                                            │
+  │                                                                  │
+  │  dist = [0, ∞, ∞, ∞]                                           │
+  │                                                                  │
+  │  Iteration 1:                                                    │
+  │    prev = [0, ∞, ∞, ∞]  ← snapshot before iteration             │
+  │    Edge [0,1,100]: prev[0]+100 = 100 &lt; dist[1]=∞ → dist[1]=100 │
+  │    Edge [1,2,100]: prev[1]+100 = ∞+100 = ∞ → no update         │
+  │                    ↑                                             │
+  │                 Uses prev[1] = ∞ (not the updated 100!)          │
+  │                 Can't extend through node 1 yet!                 │
+  │    Edge [2,3,100]: prev[2]+100 = ∞ → no update                  │
+  │                                                                  │
+  │  After iteration 1: dist = [0, 100, ∞, ∞]                      │
+  │  → Only 1-edge paths found → CORRECT!                           │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘
+  
+  THE COPY ensures:
+    → Iteration i only uses distances from iteration i-1
+    → Each iteration extends paths by EXACTLY one more edge
+    → After K+1 iterations: paths use at most K+1 edges = K stops</code></pre></div>
+<hr>
+<h2>STEP 7: COMPLEXITY ANALYSIS</h2>
+<h3>Bellman-Ford Approach (Solution 1, 4)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  Time Complexity: O(K × E)                                     │
+  │                                                                 │
+  │  WHERE:                                                         │
+  │    K = maximum stops allowed                                    │
+  │    E = number of flights (edges)                                │
+  │                                                                 │
+  │  BREAKDOWN:                                                     │
+  │    → K+1 iterations (outer loop)                                │
+  │    → Each iteration: relax all E edges                          │
+  │    → Each relaxation: O(1)                                      │
+  │    → Copy dist array: O(V) per iteration                        │
+  │    → Total: O(K × (E + V)) = O(K × E) for E ≥ V               │
+  │                                                                 │
+  │  COMPARISON:                                                     │
+  │    Standard Dijkstra:  O((V + E) log V)                         │
+  │    This approach:      O(K × E)                                 │
+  │                                                                 │
+  │    When K is small (K &lt;&lt; V): this can be FASTER than Dijkstra!  │
+  │    When K ≈ V: O(V × E) = standard Bellman-Ford                 │
+  │                                                                 │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Space Complexity: O(V)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  dist array:   O(V)                                            │
+  │  prev copy:    O(V)                                            │
+  │  (No graph needed — iterate flights directly!)                 │
+  │                                                                 │
+  │  TOTAL: O(V)                                                   │
+  │                                                                 │
+  │  Note: Bellman-Ford uses EDGE LIST, not adjacency list.        │
+  │  The input flights IS the edge list → no extra graph storage!  │
+  │  This is O(V) space vs Dijkstra's O(V + E).                    │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Modified Dijkstra Approach (Solution 3)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  Time: O(K × E × log(K × V))                                   │
+  │    → Up to K × V states in the heap                             │
+  │    → Each state: O(degree) neighbors × O(log(K×V)) heap push   │
+  │                                                                 │
+  │  Space: O(K × V)                                                │
+  │    → best[] dict has up to K × V entries                        │
+  │    → Heap has up to K × E entries                               │
+  │                                                                 │
+  │  VERDICT: More complex, more overhead than Bellman-Ford          │
+  │  Bellman-Ford wins for this specific problem.                    │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: HOW THIS CONNECTS TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Problem 9 (BFS Shortest Path — Unweighted):                     │
+  │    → BFS finds shortest path (fewest edges)                      │
+  │    → If we limit to K edges: just run BFS for K levels           │
+  │    → Problem 25 is the WEIGHTED version of this idea             │
+  │                                                                  │
+  │  Problem 23 (Dijkstra):                                          │
+  │    → Finds shortest path WITHOUT stop constraint                 │
+  │    → Adding constraint breaks Dijkstra's greedy guarantee        │
+  │    → Need modified approach or different algorithm               │
+  │                                                                  │
+  │  Problem 24 (Network Delay Time):                                │
+  │    → Direct Dijkstra application (no constraints)                │
+  │    → Problem 25 adds a constraint that changes everything        │
+  │                                                                  │
+  │  Problem 13 (Rotten Oranges — Level BFS):                        │
+  │    → Process BFS level by level                                  │
+  │    → Solution 2 uses same level-by-level pattern                 │
+  │    → Each level = one more stop                                  │
+  │                                                                  │
+  │  THE LESSON:                                                     │
+  │    Problem 24: "Dijkstra works perfectly"                        │
+  │    Problem 25: "Dijkstra needs modification" (constraint added)  │
+  │    → Not every weighted shortest path is standard Dijkstra!      │
+  │    → Constraints can change which algorithm is best              │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 9: WHEN TO USE WHICH APPROACH</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────┬──────────────────────────────────────┐
+</span>  │  Approach                    │  When to use                         │
+  ├──────────────────────────────┼──────────────────────────────────────┤
+  │  Bellman-Ford K+1 iters      │  ★ DEFAULT for this problem          │
+  │  (Solution 1, 4)             │  ★ Simple, correct, efficient        │
+  │                              │  ★ K is small relative to V          │
+  │                              │  ★ Directly handles edge constraint  │
+  │                              │                                      │
+  │  BFS level-by-level          │  ★ Intuitive for BFS-familiar people │
+  │  (Solution 2)                │  ★ Same time complexity as BF        │
+  │                              │  ★ Uses adjacency list (not edge list│
+  │                              │                                      │
+  │  Modified Dijkstra           │  ★ When K is large (K ≈ V)          │
+  │  (Solution 3)                │  ★ When graph is very sparse         │
+  │                              │  ★ More complex, more overhead       │
+  │                              │                                      │
+  │  Standard Dijkstra           │  ✗ DOESN'T WORK for this problem    │
+  │  (Problem 23)                │  ✗ No way to enforce stop constraint │
+  └──────────────────────────────┴──────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 10: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if K Were Unlimited (No Stop Constraint)?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Standard Dijkstra (Problem 23/24)
+</span>  → Bellman-Ford with V-1 iterations (Problem 26)
+  → The constraint is what makes this problem special
+  → Without it, this is just "cheapest flight" = shortest path</code></pre></div>
+<h3>What if Weights Could Be Negative?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Bellman-Ford approach still works! (handles negative weights naturally)
+</span>  → Modified Dijkstra would need careful handling
+  → Bellman-Ford is even MORE appropriate with negative weights
+  → This is why Bellman-Ford is the best choice for this problem</code></pre></div>
+<h3>What if We Needed the Actual Path, Not Just Cost?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Track parent[node] at each iteration of Bellman-Ford
+</span>  → parent[v] = u when we relax edge u→v
+  → Reconstruct path backward from dst using parent[]
+  → Same technique as Dijkstra path reconstruction (Problem 23 Version 2)
+  
+  BUT with a subtlety: parent might change across iterations
+  → Need parent per (node, iteration) or just track final state</code></pre></div>
+<h3>What if K=0?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → 0 stops = only DIRECT flights (1 edge)
+</span>  → Bellman-Ford with 1 iteration: relax all edges once
+  → Only finds direct flights from src
+  → dist[dst] = cost of direct flight, or ∞ if none exists</code></pre></div>
+<h3>What if Multiple Flights Between Same Cities?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  → Both approaches handle this naturally
+</span>  → Bellman-Ford: relaxes all edges, picks cheapest automatically
+  → Dijkstra: explores all edges, updates when cheaper found
+  → No special handling needed</code></pre></div>
+<hr>
+<h2>STEP 11: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Forgetting the dist[] COPY in Bellman-Ford           ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Without copy: edges "chain" within same iteration               ║
+  ║  → Finds paths with more edges than allowed                      ║
+  ║  → WRONG answer for constrained problems                         ║
+  ║                                                                  ║
+  ║  MUST do: prev = dist[:] before each iteration                   ║
+  ║  AND use prev[u] (not dist[u]) when relaxing edges               ║
+  ║                                                                  ║
+  ║  This is THE most common bug in this problem!                    ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Confusing stops vs edges                             ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  K stops = K intermediate cities = K+1 edges in path             ║
+  ║                                                                  ║
+  ║  Path: src → A → B → dst                                        ║
+  ║  Stops: 2 (A and B)                                              ║
+  ║  Edges: 3 (src→A, A→B, B→dst)                                   ║
+  ║                                                                  ║
+  ║  Bellman-Ford iterations needed: K+1 (for K+1 edges)            ║
+  ║  NOT K iterations!                                               ║
+  ║                                                                  ║
+  ║  WRONG: for i in range(k)      ← only K iterations              ║
+  ║  RIGHT: for i in range(k + 1)  ← K+1 iterations                 ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Relaxing from unreachable nodes                      ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If prev[u] = infinity, then prev[u] + w = infinity             ║
+  ║  This won't improve dist[v], so it's harmless BUT:              ║
+  ║                                                                  ║
+  ║  In some languages: infinity + number = overflow/error           ║
+  ║  In Python: float('inf') + 100 = float('inf') → safe            ║
+  ║                                                                  ║
+  ║  SAFE FIX: add check "if prev[u] != float('inf')"               ║
+  ║  (Not strictly necessary in Python, but good practice)           ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Using standard Dijkstra without modification         ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Standard Dijkstra ignores the stop constraint                   ║
+  ║  → Finds globally cheapest path regardless of stops              ║
+  ║  → May return path that exceeds K stops                          ║
+  ║  → WRONG for this problem!                                       ║
+  ║                                                                  ║
+  ║  Must either:                                                    ║
+  ║    → Use Bellman-Ford with K+1 iterations (best)                 ║
+  ║    → Modify Dijkstra with state (city, stops) (Solution 3)       ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: src == dst                                           ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  → dist[src] = 0 → dist[dst] = 0 → return 0                    ║
+  ║  → Already at destination, zero cost                             ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: No flights at all                                    ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  flights = []                                                    ║
+  ║  → No edges to relax → dist stays infinity for all except src   ║
+  ║  → If src != dst → return -1                                    ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Shortest/cheapest path" + "constraint on path length" │
+  │         → Can't use standard Dijkstra                              │
+  │         → Need constrained shortest path algorithm                 │
+  │                                                                    │
+  │  SIGNAL 2: "At most K stops/edges/hops"                            │
+  │         → Bellman-Ford with K+1 iterations                         │
+  │         → Or modified Dijkstra with state (node, hops)             │
+  │                                                                    │
+  │  SIGNAL 3: "Cheapest flight within K stops"                        │
+  │         → Classic interview problem                                │
+  │         → Bellman-Ford is the cleanest solution                    │
+  │                                                                    │
+  │  THINKING CHAIN:                                                   │
+  │  "Cheapest path with at most K stops"                              │
+  │     → weighted shortest path with constraint                       │
+  │        → standard Dijkstra doesn't handle constraints              │
+  │           → Bellman-Ford: iteration i = paths with ≤ i edges      │
+  │              → K stops = K+1 edges → run K+1 iterations            │
+  │                 → remember to COPY dist[] each iteration!          │
+  │                                                                    │
+  │  WHEN TO SUSPECT THIS PATTERN:                                     │
+  │    → "Shortest path" + "at most K _____"                           │
+  │    → "Minimum cost" + "within K moves/steps/hops"                  │
+  │    → Any path constraint that limits number of edges               │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 13: THE BIGGER PICTURE — Constrained Shortest Path</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  UNCONSTRAINED SHORTEST PATH:                                    │
+  │    → "Find cheapest path, no restrictions"                       │
+  │    → BFS (unweighted), Dijkstra (weighted), Bellman-Ford (neg)   │
+  │                                                                  │
+  │  CONSTRAINED SHORTEST PATH: ★ NEW CONCEPT                       │
+  │    → "Find cheapest path WITH restrictions"                      │
+  │    → Standard algorithms need MODIFICATION                       │
+  │                                                                  │
+  │  Common constraints:                                             │
+  │    → "At most K edges" → Bellman-Ford K iters (this problem)     │
+  │    → "Must visit node X" → split into two shortest paths         │
+  │    → "Avoid node Y" → remove Y from graph, then shortest path   │
+  │    → "Path must have property P" → state-space BFS (Problem 38)  │
+  │                                                                  │
+  │  GENERAL APPROACH for constraints:                               │
+  │    1. Can we modify existing algorithm? (K-iteration BF)         │
+  │    2. Can we expand the state? (city, constraint_state)          │
+  │    3. Can we transform the graph? (remove nodes, add edges)      │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: CONSTRAINED SHORTEST PATH                  ║
+  ║                                                                    ║
+  ║   → Standard Dijkstra FAILS when path has constraints             ║
+  ║     (e.g., "at most K stops")                                     ║
+  ║                                                                    ║
+  ║   → Bellman-Ford with K+1 iterations naturally handles this:      ║
+  ║     → Iteration i finds shortest paths using ≤ i edges            ║
+  ║     → K stops = K+1 edges → run K+1 iterations                   ║
+  ║     → MUST copy dist[] before each iteration!                     ║
+  ║                                                                    ║
+  ║   → Alternative: State-space expansion (city, stops_used)         ║
+  ║     → Same city at different stop counts = different states       ║
+  ║     → More complex, used when constraints are more complex        ║
+  ║     → Full treatment in Problem 38                                ║
+  ║                                                                    ║
+  ║   → THE CRITICAL BUG: Forgetting to copy dist[]                  ║
+  ║     → Without copy: updates chain within same iteration           ║
+  ║     → Allows more edges than intended → WRONG answer              ║
+  ║                                                                    ║
+  ║   → Time: O(K × E), Space: O(V)                                  ║
+  ║     → Simpler and often faster than modified Dijkstra!            ║
+  ║                                                                    ║
+  ║   → This PREVIEWS Bellman-Ford (Problem 26):                      ║
+  ║     → Same "relax all edges repeatedly" idea                      ║
+  ║     → Problem 26 will explain the full algorithm                  ║
+  ║       including negative weight handling                          ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h3>CONNECTION TO NEXT PROBLEM</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 25 → Bellman-Ford with K iterations (constrained shortest path)
+</span>  Problem 26 → Bellman-Ford Algorithm (full — negative weight handling)
+  
+  Problem 25 used a SUBSET of Bellman-Ford (limited iterations).
+  Problem 26 covers the COMPLETE Bellman-Ford algorithm:
+    → V-1 iterations (instead of K+1)
+    → Handles NEGATIVE edge weights (Dijkstra can't)
+    → Detects NEGATIVE CYCLES (infinite cost reduction loops)
+    → Explains WHY V-1 iterations suffice
+    
+  The progression:
+    Problem 9:  BFS          (unweighted shortest path)
+    Problem 23: Dijkstra     (non-negative weighted shortest path)
+    Problem 25: Modified BF  (constrained shortest path)
+    Problem 26: Full BF      (negative weights + cycle detection)
+    
+  After Problem 26, we'll have THREE shortest path algorithms mastered,
+  each handling progressively harder constraints.</code></pre></div>
+<hr>
+<p><strong>Problem 25 Complete.</strong><br>
+<strong>Ready for Problem 26: Bellman-Ford Algorithm (Negative Weights)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="29" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-24.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 25 of 50</span>
+            </div>
+            <a href="problem-26.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 19: Problem 19: Topological Sort (Kahn's Algorithm — BFS) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="13">
+<div class="px-2"><h1>Problem 19: Topological Sort (Kahn's Algorithm — BFS)</h1>
+<h2>[Algorithm Family: Topological Sort — BFS with In-Degree Tracking]</h2>
+<h2>[Phase 3: Standard Interview — "I can solve real interview problems"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are a university course planner. There are N courses (labeled 0 to N-1).
+</span>Some courses have PREREQUISITES:
+  → To take course B, you must FIRST complete course A.
+  → This is represented as a directed edge: A → B
+    ("A must come before B")
+
+Given N courses and a list of prerequisite pairs,
+find a VALID ORDER to take ALL courses such that
+every prerequisite is satisfied.
+
+If no valid order exists (impossible to take all courses), return empty.
+
+Example:
+  n = 6
+  prerequisites = [[0,1], [0,2], [1,3], [2,3], [3,4], [1,5]]
+  
+  Meaning:
+    → Course 0 must come before courses 1 and 2
+    → Course 1 must come before courses 3 and 5
+    → Course 2 must come before course 3
+    → Course 3 must come before course 4
+  
+  Valid order: [0, 1, 2, 5, 3, 4]  (or [0, 2, 1, 3, 5, 4], etc.)
+  
+  Multiple valid orders may exist — return ANY one.</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Directed Graph</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  prerequisites = [[0,1], [0,2], [1,3], [2,3], [3,4], [1,5]]
+</span>  
+  Edge [A, B] means: A must come before B (A → B)
+  
+  THE DIRECTED GRAPH:
+  
+       0
+      / \
+     ↓   ↓
+     1    2
+    / \   |
+   ↓   ↓  ↓
+   5    3←─┘
+        |
+        ↓
+        4
+
+  ASCII with clear arrows:
+  
+    0 ───→ 1 ───→ 5
+    │      │
+    │      ↓
+    │      3 ───→ 4
+    │      ↑
+    ↓      │
+    2 ─────┘
+
+  ADJACENCY LIST (directed):
+    0 → [1, 2]
+    1 → [3, 5]
+    2 → [3]
+    3 → [4]
+    4 → []
+    5 → []</code></pre></div>
+<h3>Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer          │  Why?                           ║
+╠══════════════════╪══════════════════╪═════════════════════════════════╣
+║  NODES           │  Courses 0-5     │  Each course = node             ║
+║  EDGES           │  Prerequisites   │  A→B means "A before B"         ║
+║  Directed?       │  YES!            │  "Before" is one-directional    ║
+║  Weighted?       │  NO              │  Just ordering, no costs        ║
+║  Cyclic?         │  NO (DAG)        │  If cyclic → impossible to      ║
+║                  │                  │  order (chicken-and-egg)        ║
+║  Connected?      │  Not necessarily │  Some courses might be          ║
+║                  │                  │  independent                    ║
+║  What we need    │  Linear ordering │  All nodes in line respecting   ║
+║                  │                  │  all edge directions            ║
+╚══════════════════╧══════════════════╧═════════════════════════════════╝
+
+  ★ KEY TERM: DAG = Directed Acyclic Graph
+  
+  Topological sort ONLY works on DAGs.
+  If there's a cycle → no valid ordering exists.
+  
+  WHY? If A requires B AND B requires A:
+    → A must come before B (A→B)
+    → B must come before A (B→A)
+    → CONTRADICTION! Neither can go first.
+    → This is exactly what a CYCLE means in a dependency graph.</code></pre></div>
+<h3>What IS Topological Sort?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  DEFINITION (by intuition, not textbook):
+</span>  
+  Arrange all nodes in a LINE such that:
+    → For EVERY directed edge A → B,
+      node A appears BEFORE node B in the line.
+  
+  Visual:
+  
+    Graph:    0 → 1 → 3 → 4
+              0 → 2 → 3
+              1 → 5
+    
+    Valid orderings (topological sorts):
+      [0, 1, 2, 5, 3, 4]  ✓  (0 before 1,2; 1 before 3,5; 2 before 3; 3 before 4)
+      [0, 2, 1, 5, 3, 4]  ✓  (same constraints satisfied, different valid order)
+      [0, 1, 5, 2, 3, 4]  ✓  (5 can go anywhere after 1 and before... well, no constraint)
+      [0, 2, 1, 3, 5, 4]  ✓
+    
+    INVALID orderings:
+      [1, 0, 2, 3, 5, 4]  ✗  (1 before 0, but edge 0→1 requires 0 first)
+      [0, 1, 3, 2, 5, 4]  ✗  (3 before 2, but edge 2→3 requires 2 first)
+  
+  REAL-WORLD ANALOGIES:
+    → Course prerequisites (this problem)
+    → Build system: compile file A before file B
+    → Task scheduling: do task X before task Y
+    → Package dependencies: install package P before package Q
+    → Getting dressed: underwear before pants, socks before shoes</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<h3>Approach: Try All Permutations</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Generate all N! permutations of courses.
+</span>  For each permutation, check if ALL prerequisites are satisfied.
+  Return the first valid one.
+  
+  Example for 6 courses:
+    Try [0,1,2,3,4,5]: check all edges... valid? 
+    Try [0,1,2,3,5,4]: check all edges... valid?
+    ... 720 permutations total (6! = 720)</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  N! permutations to check:
+</span>    N=10:  3,628,800
+    N=15:  1,307,674,368,000
+    N=20:  2,432,902,008,176,640,000
+    
+  For each permutation: check E edges → O(E) per check
+  Total: O(N! × E) → IMPOSSIBLY SLOW for N &gt; 15
+  
+  We need O(V + E) — linear time!</code></pre></div>
+<hr>
+<h2>STEP 3: IDENTIFYING THE GRAPH PATTERN</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────┐
+</span>  │  I see: "Order items respecting dependencies"                │
+  │       → TOPOLOGICAL SORT                                     │
+  │                                                              │
+  │  I see: "Prerequisites" = directed edges                     │
+  │       → DIRECTED graph                                       │
+  │                                                              │
+  │  I see: "Valid order" = all constraints satisfied             │
+  │       → Linear ordering where every edge goes left-to-right  │
+  │                                                              │
+  │  WHICH ALGORITHM?                                            │
+  │    → Kahn's Algorithm (BFS-based topological sort)           │
+  │    → Also: DFS-based topological sort (Problem 20)           │
+  │                                                              │
+  │  WHY Kahn's? It's intuitive and naturally detects cycles.    │
+  └──────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>The Core Insight: IN-DEGREE</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  IN-DEGREE of a node = number of INCOMING edges
+</span>                      = number of prerequisites for this course
+  
+  For our graph:
+    Node 0: in-degree = 0  (no prerequisites — can take IMMEDIATELY)
+    Node 1: in-degree = 1  (needs course 0)
+    Node 2: in-degree = 1  (needs course 0)
+    Node 3: in-degree = 2  (needs courses 1 AND 2)
+    Node 4: in-degree = 1  (needs course 3)
+    Node 5: in-degree = 1  (needs course 1)
+  
+  KEY INSIGHT:
+    → A node with in-degree 0 has NO unfulfilled prerequisites
+    → It can be taken RIGHT NOW
+    → After taking it, reduce in-degree of its dependents
+    → This might create NEW nodes with in-degree 0
+    → Repeat until all nodes are processed (or stuck = cycle!)
+  
+  This is like peeling an onion layer by layer:
+    Layer 1: nodes with no dependencies (in-degree 0)
+    Layer 2: nodes whose dependencies are ALL in layer 1
+    Layer 3: nodes whose dependencies are ALL in layers 1-2
+    ... and so on
+    
+  THIS IS BFS! Each "layer" is a BFS level!
+  (Same level-by-level pattern as Problem 3, 13)</code></pre></div>
+<hr>
+<h2>STEP 4: KAHN'S ALGORITHM — THE IDEA</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────┐
+</span>  │                                                              │
+  │  KAHN'S ALGORITHM:                                           │
+  │                                                              │
+  │  1. Compute in-degree for every node                         │
+  │  2. Add all nodes with in-degree 0 to a queue                │
+  │     (these have no prerequisites — safe to process first)    │
+  │  3. While queue is not empty:                                │
+  │     a. Dequeue a node → add it to result (topological order) │
+  │     b. For each neighbor of this node:                       │
+  │        → Decrease neighbor's in-degree by 1                  │
+  │          ("one of my prerequisites is now completed")        │
+  │        → If neighbor's in-degree becomes 0:                  │
+  │          → Add to queue ("all prerequisites done!")          │
+  │  4. If result has ALL V nodes → valid topological order      │
+  │     If result has FEWER than V → cycle exists → impossible   │
+  │                                                              │
+  └──────────────────────────────────────────────────────────────┘
+  
+  WHY THIS WORKS:
+  
+  → In-degree 0 means "no unfinished prerequisites" → safe to take
+  → Processing a node = "completing that course"
+  → Reducing neighbor's in-degree = "one less prerequisite to wait for"
+  → When in-degree hits 0 = "all prerequisites done, you're free!"
+  → BFS ensures we process layer by layer (earliest first)
+  
+  WHY IT DETECTS CYCLES:
+  
+  → If a cycle exists: A → B → C → A
+  → None of A, B, C ever reaches in-degree 0
+    (A waits for C, C waits for B, B waits for A)
+  → They're NEVER added to the queue
+  → Result will be missing these nodes
+  → len(result) &lt; V → cycle detected!</code></pre></div>
+<hr>
+<h2>STEP 5: ALGORITHM WALKTHROUGH</h2>
+<h3>Setup</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  n = 6
+</span>  prerequisites = [[0,1], [0,2], [1,3], [2,3], [3,4], [1,5]]
+  
+  ADJACENCY LIST (directed):
+    0 → [1, 2]
+    1 → [3, 5]
+    2 → [3]
+    3 → [4]
+    4 → []
+    5 → []
+  
+  IN-DEGREE ARRAY:
+    Node:      0  1  2  3  4  5
+    In-degree: 0  1  1  2  1  1
+               ↑
+          Only node with in-degree 0!</code></pre></div>
+<h3>Step-by-Step Trace</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ══════════════════════════════════════════════════════════
+</span>  INITIALIZATION
+  ══════════════════════════════════════════════════════════
+  
+  in_degree = [0, 1, 1, 2, 1, 1]
+  queue     = [0]            ← only node 0 has in-degree 0
+  result    = []
+  
+  Graph state:
+    (0)→→[1]→→(3)→→[4]
+    (0)→→[2]→→(3)
+    [1]→→(5)
+    
+    () = in-degree 0 (ready)
+    [] = waiting (in-degree &gt; 0)
+  
+  ══════════════════════════════════════════════════════════
+  STEP 1: Process node 0
+  ══════════════════════════════════════════════════════════
+  
+  Dequeue: 0
+  result = [0]
+  
+  Process neighbors of 0: [1, 2]
+  
+    Neighbor 1: in_degree[1] = 1 → 1-1 = 0 → BECOMES 0! → add to queue
+    Neighbor 2: in_degree[2] = 1 → 1-1 = 0 → BECOMES 0! → add to queue
+  
+  in_degree = [0, 0, 0, 2, 1, 1]
+                  ↑  ↑
+               both hit 0!
+  queue     = [1, 2]
+  result    = [0]
+  
+  INTUITION: "Course 0 is done. Courses 1 and 2 only needed course 0,
+              so they're now free to take!"
+  
+  Graph state:
+    ✓0  (1)→→[3]→→[4]
+        (2)→→[3]
+        (1)→→(5)... wait, let me be precise:
+    
+    After removing node 0's outgoing edges conceptually:
+    Node 1: in-degree 0 (ready!)
+    Node 2: in-degree 0 (ready!)
+    Node 3: in-degree 2 (still waiting for 1 AND 2)
+    Node 4: in-degree 1 (waiting for 3)
+    Node 5: in-degree 1 (waiting for 1)
+  
+  ══════════════════════════════════════════════════════════
+  STEP 2: Process node 1
+  ══════════════════════════════════════════════════════════
+  
+  Dequeue: 1
+  result = [0, 1]
+  
+  Process neighbors of 1: [3, 5]
+  
+    Neighbor 3: in_degree[3] = 2 → 2-1 = 1 → NOT 0 yet → don't add
+    Neighbor 5: in_degree[5] = 1 → 1-1 = 0 → BECOMES 0! → add to queue
+  
+  in_degree = [0, 0, 0, 1, 1, 0]
+                         ↑        ↑
+                   still 1      hit 0!
+  queue     = [2, 5]
+  result    = [0, 1]
+  
+  INTUITION: "Course 1 is done. Course 3 still needs course 2 (in-degree 1).
+              Course 5 only needed course 1, so it's free now!"
+  
+  ══════════════════════════════════════════════════════════
+  STEP 3: Process node 2
+  ══════════════════════════════════════════════════════════
+  
+  Dequeue: 2
+  result = [0, 1, 2]
+  
+  Process neighbors of 2: [3]
+  
+    Neighbor 3: in_degree[3] = 1 → 1-1 = 0 → BECOMES 0! → add to queue
+  
+  in_degree = [0, 0, 0, 0, 1, 0]
+                      ↑
+                   hit 0!
+  queue     = [5, 3]
+  result    = [0, 1, 2]
+  
+  INTUITION: "Course 2 is done. Course 3 was waiting for courses 1 AND 2.
+              Course 1 was done earlier, now course 2 is done too.
+              In-degree of 3: 2 → 1 (after step 2) → 0 (now). All prerequisites met!"
+  
+  ══════════════════════════════════════════════════════════
+  STEP 4: Process node 5
+  ══════════════════════════════════════════════════════════
+  
+  Dequeue: 5
+  result = [0, 1, 2, 5]
+  
+  Process neighbors of 5: []  ← no outgoing edges
+  
+  Nothing to update.
+  
+  queue     = [3]
+  result    = [0, 1, 2, 5]
+  
+  INTUITION: "Course 5 is done. It had no dependents (nobody needs 5)."
+  
+  ══════════════════════════════════════════════════════════
+  STEP 5: Process node 3
+  ══════════════════════════════════════════════════════════
+  
+  Dequeue: 3
+  result = [0, 1, 2, 5, 3]
+  
+  Process neighbors of 3: [4]
+  
+    Neighbor 4: in_degree[4] = 1 → 1-1 = 0 → BECOMES 0! → add to queue
+  
+  in_degree = [0, 0, 0, 0, 0, 0]
+  queue     = [4]
+  result    = [0, 1, 2, 5, 3]
+  
+  ══════════════════════════════════════════════════════════
+  STEP 6: Process node 4
+  ══════════════════════════════════════════════════════════
+  
+  Dequeue: 4
+  result = [0, 1, 2, 5, 3, 4]
+  
+  Process neighbors of 4: []  ← no outgoing edges
+  
+  queue     = []  ← EMPTY, algorithm complete!
+  result    = [0, 1, 2, 5, 3, 4]
+  
+  ══════════════════════════════════════════════════════════
+  VALIDATION
+  ══════════════════════════════════════════════════════════
+  
+  len(result) = 6 = n → ALL nodes included → no cycle → VALID!
+  
+  Check all prerequisites:
+    [0,1]: 0 at index 0, 1 at index 1 → 0 before 1 ✓
+    [0,2]: 0 at index 0, 2 at index 2 → 0 before 2 ✓
+    [1,3]: 1 at index 1, 3 at index 4 → 1 before 3 ✓
+    [2,3]: 2 at index 2, 3 at index 4 → 2 before 3 ✓
+    [3,4]: 3 at index 4, 4 at index 5 → 3 before 4 ✓
+    [1,5]: 1 at index 1, 5 at index 3 → 1 before 5 ✓
+    
+  ALL constraints satisfied! ✓
+  
+  ANSWER: [0, 1, 2, 5, 3, 4]</code></pre></div>
+<h3>Visual: Layer-by-Layer Peeling</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────┐
+</span>  │                                                         │
+  │  Layer 0 (in-degree 0 initially):   [0]                 │
+  │                                      ↓                  │
+  │  Layer 1 (in-degree 0 after layer 0): [1, 2]            │
+  │                                        ↓                │
+  │  Layer 2 (in-degree 0 after layer 1): [5, 3]            │
+  │                                        ↓                │
+  │  Layer 3 (in-degree 0 after layer 2): [4]               │
+  │                                                         │
+  │  Result: 0, 1, 2, 5, 3, 4                              │
+  │                                                         │
+  │  This IS BFS level-by-level!                            │
+  │  Each layer = nodes that become "ready" at same time    │
+  │  Within a layer, order doesn't matter                   │
+  │  (1 before 2 OR 2 before 1 — both valid)               │
+  │                                                         │
+  └─────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>What Happens With a CYCLE?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Example with cycle:
+</span>    n = 3, prerequisites = [[0,1], [1,2], [2,0]]
+    
+    0 → 1 → 2 → 0  (cycle!)
+    
+    In-degrees: [1, 1, 1]  ← ALL are 1, NONE is 0!
+    
+    Queue starts EMPTY → nothing to process
+    Result = [] → len(0) &lt; n(3) → CYCLE DETECTED!
+    
+  Another example:
+    n = 4, prerequisites = [[0,1], [1,2], [2,1], [0,3]]
+    
+    0 → 1 ⇄ 2    (cycle between 1 and 2)
+    0 → 3
+    
+    In-degrees: [0, 1, 1, 1]
+    
+    Process 0: result = [0]
+      → in_degree[1] = 0, in_degree[3] = 0
+    Process 1: result = [0, 1]
+      → in_degree[2] = 0... wait, let me recount.
+    
+    Actually: edges are 0→1, 1→2, 2→1, 0→3
+    In-degrees: node0=0, node1=1+1=2 (from 0 and 2), node2=1 (from 1), node3=1 (from 0)
+    
+    Process 0: result = [0]
+      → in_degree[1] = 2-1 = 1 (still waiting for node 2)
+      → in_degree[3] = 1-1 = 0 → add to queue
+    Process 3: result = [0, 3]
+      → no neighbors
+    
+    Queue empty! Result = [0, 3], but n = 4
+    len(result) = 2 &lt; n = 4 → CYCLE DETECTED among nodes 1 and 2!
+    
+    Nodes 1 and 2 are in a cycle → neither ever reaches in-degree 0
+    → They're trapped in mutual dependency forever</code></pre></div>
+<hr>
+<h2>STEP 6: COMPLETE CODE</h2>
+<h3>Version 1: Kahn's Algorithm (BFS)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">topological_sort_kahn</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> prerequisites</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Topological sort using Kahn's Algorithm (BFS-based).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    CORE IDEA:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Nodes with in-degree 0 = no dependencies = process first
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → After processing a node, reduce dependents' in-degree
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → New in-degree 0 nodes become processable
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Repeat until done (or stuck = cycle)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Args:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        n: number of nodes (0 to n-1)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        prerequisites: list of [A, B] meaning A must come before B
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Returns:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        list: valid topological order, or [] if cycle exists
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BUILD GRAPH + COMPUTE IN-DEGREES ───</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>   </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># adjacency list</span><span>
+</span><span>    in_degree </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n         </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># count of incoming edges for each node</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> a</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> b </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> prerequisites</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>a</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>b</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>      </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># a → b (a must come before b)</span><span>
+</span><span>        in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>b</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>       </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># b has one more incoming edge</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── INITIALIZE QUEUE WITH IN-DEGREE 0 NODES ───</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BFS: PROCESS NODES LAYER BY LAYER ───</span><span>
+</span><span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>     </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># add to topological order</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># "Complete" this node → reduce dependents' in-degree</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If all prerequisites met → ready to process</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── CYCLE CHECK ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If all nodes processed → valid order</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># If some nodes missing → cycle exists (they never reached in-degree 0)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>result</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># cycle detected!</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 1: Valid DAG ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">6</span><span>
+</span><span>prereqs </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Test 1 (valid):"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> topological_sort_kahn</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> prereqs</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [0, 1, 2, 5, 3, 4]  (or another valid order)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 2: Cycle exists ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span>
+</span><span>prereqs </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Test 2 (cycle):"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> topological_sort_kahn</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> prereqs</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: []</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 3: No prerequisites ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>prereqs </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Test 3 (no deps):"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> topological_sort_kahn</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> prereqs</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [0, 1, 2, 3]  (all have in-degree 0, any order valid)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST 4: Linear chain ───</span><span>
+</span><span>n </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span>
+</span><span>prereqs </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Test 4 (chain):"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> topological_sort_kahn</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> prereqs</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [0, 1, 2, 3]  (only one valid order)</span></code></pre></div>
+<hr>
+<h3>Version 2: With Detailed Tracing</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">topological_sort_traced</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> prerequisites</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same algorithm with step-by-step tracing for understanding.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Build graph</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    in_degree </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> a</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> b </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> prerequisites</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>a</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>b</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>b</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Initial in-degrees: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">in_degree</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Graph: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">dict</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">graph</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Initialize</span><span>
+</span><span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Initial queue (in-degree 0): </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">list</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">queue</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    step </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        step </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>        node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"Step </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">step</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">: Process node </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">node</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  result so far: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">result</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  → in_degree[</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">neighbor</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">]: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">in_degree</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">neighbor</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">+</span><span class="token string-interpolation interpolation" style="color: rgb(54, 172, 170);">1</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> → </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">in_degree</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">[</span><span class="token string-interpolation interpolation">neighbor</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">]</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> end</span><span class="token" style="color: rgb(57, 58, 52);">=</span><span class="token" style="color: rgb(163, 21, 21);">""</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  ★ READY! Added to queue"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  (still waiting)"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  queue: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">list</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">queue</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>result</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"✓ All </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">n</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> nodes processed — valid topological order!"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"✗ Only </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">len</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">result</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">/</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">n</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> nodes processed — CYCLE EXISTS!"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  Nodes stuck in cycle: </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">set</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation builtin">range</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">n</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">-</span><span class="token string-interpolation interpolation"> </span><span class="token string-interpolation interpolation builtin">set</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">result</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>result</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> n </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── RUN WITH TRACING ───</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"="</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">60</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"TEST: Valid DAG"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"="</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">60</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>topological_sort_traced</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"\n"</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> </span><span class="token" style="color: rgb(163, 21, 21);">"="</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">60</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"TEST: Graph with cycle"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"="</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">60</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>topological_sort_traced</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>============================================================
+</span>TEST: Valid DAG
+============================================================
+Initial in-degrees: [0, 1, 1, 2, 1, 1]
+Graph: {0: [1, 2], 1: [3, 5], 2: [3], 3: [4]}
+Initial queue (in-degree 0): [0]
+
+Step 1: Process node 0
+  result so far: [0]
+  → in_degree[1]: 1 → 0  ★ READY! Added to queue
+  → in_degree[2]: 1 → 0  ★ READY! Added to queue
+  queue: [1, 2]
+
+Step 2: Process node 1
+  result so far: [0, 1]
+  → in_degree[3]: 2 → 1  (still waiting)
+  → in_degree[5]: 1 → 0  ★ READY! Added to queue
+  queue: [2, 5]
+
+Step 3: Process node 2
+  result so far: [0, 1, 2]
+  → in_degree[3]: 1 → 0  ★ READY! Added to queue
+  queue: [5, 3]
+
+Step 4: Process node 5
+  result so far: [0, 1, 2, 5]
+  queue: [3]
+
+Step 5: Process node 3
+  result so far: [0, 1, 2, 5, 3]
+  → in_degree[4]: 1 → 0  ★ READY! Added to queue
+  queue: [4]
+
+Step 6: Process node 4
+  result so far: [0, 1, 2, 5, 3, 4]
+  queue: []
+
+✓ All 6 nodes processed — valid topological order!
+
+============================================================
+TEST: Graph with cycle
+============================================================
+Initial in-degrees: [0, 2, 1, 1]
+Graph: {0: [1, 3], 1: [2], 2: [1]}
+Initial queue (in-degree 0): [0]
+
+Step 1: Process node 0
+  result so far: [0]
+  → in_degree[1]: 2 → 1  (still waiting)
+  → in_degree[3]: 1 → 0  ★ READY! Added to queue
+  queue: [3]
+
+Step 2: Process node 3
+  result so far: [0, 3]
+  queue: []
+
+✗ Only 2/4 nodes processed — CYCLE EXISTS!
+  Nodes stuck in cycle: {1, 2}</code></pre></div>
+<hr>
+<h3>Version 3: Using Edge List Format [a, b] = "b depends on a"</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">topological_sort_v3</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Sometimes prerequisites are given as [course, prerequisite]:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      [1, 0] means "to take 1, you need 0 first" → edge: 0 → 1
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Be CAREFUL with the direction! Read the problem statement closely.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    This version handles BOTH common formats:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Format 1: [a, b] = "a before b" → edge a → b
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Format 2: [a, b] = "a requires b" → edge b → a
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Here we use Format 1: [a, b] means a → b
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    in_degree </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> a</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> b </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>a</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>b</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>b</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        node </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>result</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> n </span><span class="token" style="color: rgb(0, 0, 255);">else</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span></code></pre></div>
+<hr>
+<h3>Version 4: Return ALL Topological Orders (for understanding)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> defaultdict
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">all_topological_sorts</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find ALL valid topological orderings.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Uses backtracking — exponential time but shows all possibilities.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    NOT for production — just for understanding that
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    multiple valid orders exist!
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    graph </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> defaultdict</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token builtin">list</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    in_degree </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> a</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> b </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> edges</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>a</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>b</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>b</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    all_orders </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">backtrack</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current_order</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current_order</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            all_orders</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current_order</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> node </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">==</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Choose this node</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                current_order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Reduce in-degrees of neighbors</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Recurse</span><span>
+</span><span>                backtrack</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>current_order</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> visited</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Undo (backtrack)</span><span>
+</span><span>                visited</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">False</span><span>
+</span><span>                current_order</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>pop</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> neighbor </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> graph</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>node</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    in_degree</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>neighbor</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span>
+</span>    
+<span>    backtrack</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> n</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> all_orders
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>orders </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> all_topological_sorts</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"All valid topological orders (</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation builtin">len</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation interpolation">orders</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">)</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);"> total):"</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> order </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> orders</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">f"  </span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">{</span><span class="token string-interpolation interpolation">order</span><span class="token string-interpolation interpolation" style="color: rgb(57, 58, 52);">}</span><span class="token string-interpolation" style="color: rgb(163, 21, 21);">"</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>All valid topological orders (2 total):
+</span>  [0, 1, 2, 3]
+  [0, 2, 1, 3]</code></pre></div>
+<hr>
+<h2>STEP 7: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(V + E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  Build graph + compute in-degrees:                              │
+  │    → Iterate through E edges: O(E)                             │
+  │                                                                 │
+  │  Find initial in-degree 0 nodes:                                │
+  │    → Scan all V nodes: O(V)                                    │
+  │                                                                 │
+  │  BFS processing:                                                │
+  │    → Each node enters queue at most ONCE: O(V) dequeues        │
+  │    → For each node, iterate its neighbors:                      │
+  │      → Total neighbor iterations = E (each edge processed once)│
+  │    → Total: O(V + E)                                           │
+  │                                                                 │
+  │  GRAND TOTAL: O(E) + O(V) + O(V + E) = O(V + E)              │
+  └─────────────────────────────────────────────────────────────────┘
+  
+  WHY O(V + E)?
+  
+  → Same analysis as basic BFS (Problem 3):
+    Each node processed once, each edge examined once
+  → The only addition: in-degree array operations = O(1) per edge
+  → Doesn't change the asymptotic complexity
+  
+  COMPARISON WITH BRUTE FORCE:
+    Brute force: O(V! × E)
+    Kahn's:      O(V + E)
+    For V=1000, E=5000: 1000! vs 6000 → incomparable improvement!</code></pre></div>
+<h3>Space Complexity: O(V + E)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  Adjacency list (graph):  O(V + E)                             │
+  │  In-degree array:         O(V)                                 │
+  │  Queue:                   O(V) — at most all nodes             │
+  │  Result array:            O(V)                                 │
+  │                                                                 │
+  │  TOTAL: O(V + E)                                               │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: HOW THIS CONNECTS TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Problem 1 (Build Graph — Adjacency List):                       │
+  │    → We build a DIRECTED adjacency list here                     │
+  │    → Same graph[a].append(b) pattern                             │
+  │    → But DIRECTED: only one direction, NOT both (Problem 1)      │
+  │                                                                  │
+  │  Problem 3 (BFS Traversal):                                      │
+  │    → Kahn's IS BFS with a twist                                  │
+  │    → Standard BFS: queue starts with one node, visits neighbors  │
+  │    → Kahn's: queue starts with in-degree-0 nodes,               │
+  │      "visits" neighbors by reducing their in-degree              │
+  │    → SAME queue + while loop structure                           │
+  │                                                                  │
+  │  Problem 11 (Cycle Detection — Directed):                        │
+  │    → Problem 11 used 3-state DFS to detect directed cycles       │
+  │    → Kahn's ALSO detects cycles: len(result) &lt; n                │
+  │    → Two different ways to detect directed cycles!               │
+  │    → Kahn's: "nodes left out = in a cycle"                      │
+  │    → DFS: "back edge found = cycle"                              │
+  │                                                                  │
+  │  Problem 13 (Multi-Source BFS):                                  │
+  │    → Multiple starting points in queue simultaneously            │
+  │    → Kahn's: multiple in-degree-0 nodes start together           │
+  │    → SAME multi-source BFS pattern!                              │
+  │                                                                  │
+  │  NEW CONCEPT: IN-DEGREE                                          │
+  │    → Previous problems: visited set (boolean per node)           │
+  │    → This problem: in-degree count (integer per node)            │
+  │    → In-degree reaching 0 = "ready to process" (like visited     │
+  │      marking = "done processing")                                │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 9: WHEN TO USE THIS VS ALTERNATIVES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────┬──────────────────────────────────────┐
+</span>  │  Approach                    │  When to use                         │
+  ├──────────────────────────────┼──────────────────────────────────────┤
+  │  Kahn's (BFS topo sort)      │  ★ When you need the ordering       │
+  │  [this problem]              │  ★ When you want cycle detection     │
+  │                              │    built in naturally                │
+  │                              │  ★ When you want level-by-level     │
+  │                              │    processing (parallel scheduling)  │
+  │                              │  ★ More intuitive for most people   │
+  │                              │                                      │
+  │  DFS topo sort (Problem 20)  │  ★ When you prefer recursive code   │
+  │                              │  ★ Sometimes fewer lines of code    │
+  │                              │  ★ Natural for "reverse post-order" │
+  │                              │  ★ Better when combined with other  │
+  │                              │    DFS-based algorithms              │
+  │                              │                                      │
+  │  Brute force (all perms)     │  NEVER — O(V!) is unusable          │
+  └──────────────────────────────┴──────────────────────────────────────┘
+  
+  KAHN'S UNIQUE ADVANTAGE: PARALLEL SCHEDULING
+  
+  Each "layer" of BFS = tasks that can be done SIMULTANEOUSLY.
+  
+  Layer 0: [0]        ← do course 0
+  Layer 1: [1, 2]     ← do courses 1 and 2 IN PARALLEL (both only need 0)
+  Layer 2: [5, 3]     ← do courses 5 and 3 in parallel
+  Layer 3: [4]        ← do course 4
+  
+  Total time with parallelism: 4 layers (not 6 sequential courses)
+  
+  DFS topo sort doesn't naturally give you this layering.
+  Kahn's does — because it IS BFS!</code></pre></div>
+<hr>
+<h2>STEP 10: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Undirected?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Topological sort is ONLY for directed graphs.
+</span>  
+  Undirected edge A—B means "A before B AND B before A"
+  → This is always a "cycle" in topological sort terms
+  → Topological sort is impossible on undirected graphs
+  
+  If the problem gives undirected edges:
+    → It's NOT a topological sort problem
+    → Look for other algorithms (BFS shortest path, MST, etc.)</code></pre></div>
+<h3>What if Weighted?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Standard topological sort ignores weights.
+</span>  
+  But topo sort + weights → powerful combination:
+    → "Shortest path in DAG" (Problem 47 preview)
+    → "Longest path in DAG" (Problem 47)
+    → Process nodes in topological order, relax edges
+    → More efficient than Dijkstra for DAGs!
+    
+  This is DP on DAGs — a Phase 5 topic.</code></pre></div>
+<h3>What if We Wanted LEXICOGRAPHICALLY Smallest Order?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Example: multiple valid orders exist, return the one that's
+</span>  smallest when compared alphabetically/numerically.
+  
+  FIX: Replace queue (deque) with MIN-HEAP (priority queue)!
+  
+  import heapq
+  
+  heap = []
+  for node in range(n):
+      if in_degree[node] == 0:
+          heapq.heappush(heap, node)
+  
+  while heap:
+      node = heapq.heappop(heap)  # always pick smallest available
+      ...
+  
+  This ensures: among all nodes with in-degree 0 at any point,
+  we always pick the SMALLEST one first.
+  
+  Time: O((V + E) log V) due to heap operations
+  → Slightly slower than standard Kahn's O(V + E)</code></pre></div>
+<h3>What if Some Nodes Have No Prerequisites AND No Dependents?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Isolated nodes: in-degree 0 AND out-degree 0
+</span>  → They appear in the queue immediately
+  → They can go ANYWHERE in the order (no constraints)
+  → Kahn's handles this automatically — they're processed
+    whenever they happen to be dequeued</code></pre></div>
+<hr>
+<h2>STEP 11: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Edge direction confusion                             ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Different problems define edges differently:                    ║
+  ║                                                                  ║
+  ║  Format A: [a, b] = "a must come before b"  → edge: a → b      ║
+  ║  Format B: [a, b] = "a depends on b"        → edge: b → a      ║
+  ║                                                                  ║
+  ║  These are OPPOSITE directions!                                  ║
+  ║                                                                  ║
+  ║  Example: [1, 0]                                                 ║
+  ║    Format A: 1 before 0 → graph[1].append(0), in_degree[0]+=1  ║
+  ║    Format B: 1 needs 0  → graph[0].append(1), in_degree[1]+=1  ║
+  ║                                                                  ║
+  ║  ALWAYS read the problem statement carefully!                    ║
+  ║  Getting this wrong → completely wrong answer.                   ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Forgetting the cycle check                           ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If you don't check len(result) == n:                            ║
+  ║    → Cycles cause some nodes to never be processed               ║
+  ║    → You return an INCOMPLETE ordering                           ║
+  ║    → This is WRONG — must return empty or indicate failure       ║
+  ║                                                                  ║
+  ║  ALWAYS: if len(result) &lt; n → cycle exists → return []           ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Self-loops                                           ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Edge [a, a] = "a requires itself" → instant cycle!              ║
+  ║  → in_degree[a] ≥ 1 always → never reaches 0                    ║
+  ║  → Kahn's naturally handles this (node never enters queue)       ║
+  ║  → Detected in cycle check ✓                                     ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Duplicate edges                                      ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  If [0,1] appears twice in prerequisites:                        ║
+  ║    → in_degree[1] = 2 instead of 1                               ║
+  ║    → When processing node 0, we reduce in_degree[1] twice        ║
+  ║    → Still correct! 2 → 1 → 0 (just takes two reductions)      ║
+  ║    → But graph has duplicate edge: graph[0] = [1, 1]            ║
+  ║    → This is fine for topo sort, but wasteful                    ║
+  ║                                                                  ║
+  ║  Optional: deduplicate edges before building graph               ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: No edges (no prerequisites)                          ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  n = 5, prerequisites = []                                       ║
+  ║  → All in-degrees = 0                                            ║
+  ║  → All nodes start in queue                                      ║
+  ║  → Result = [0, 1, 2, 3, 4] (any order is valid)                ║
+  ║  → Correctly handled ✓                                           ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Single node                                          ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  n = 1, prerequisites = []                                       ║
+  ║  → in_degree[0] = 0 → queue = [0]                               ║
+  ║  → result = [0] → len = 1 = n ✓                                  ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 12: THE IN-DEGREE CONCEPT — A Deeper Look</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  IN-DEGREE tracks "how many prerequisites remain"                │
+  │                                                                  │
+  │  Think of it as a COUNTER on each node:                          │
+  │                                                                  │
+  │    Node 3 has in-degree 2:                                       │
+  │      "I need 2 things done before I can start"                   │
+  │      → Course 1 completes → in_degree[3] = 1                    │
+  │        "Still need 1 more thing"                                 │
+  │      → Course 2 completes → in_degree[3] = 0                    │
+  │        "All done! I'm ready!"                                    │
+  │                                                                  │
+  │  This is like a COUNTDOWN:                                       │
+  │    → Start at number of prerequisites                            │
+  │    → Each completed prerequisite decrements by 1                 │
+  │    → Reaching 0 = "go signal"                                    │
+  │                                                                  │
+  │  ANALOGY: Rocket launch countdown                                │
+  │    → Multiple systems must be "GO"                               │
+  │    → Each system reports "GO" (decrement counter)                │
+  │    → All systems GO (counter = 0) → LAUNCH!                     │
+  │                                                                  │
+  │  OUT-DEGREE = number of outgoing edges                           │
+  │             = "how many other nodes depend on me"                │
+  │             = Not used in Kahn's, but useful in other contexts   │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 13: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Order tasks respecting dependencies"                   │
+  │         → TOPOLOGICAL SORT                                         │
+  │                                                                    │
+  │  SIGNAL 2: "Prerequisites" / "must come before" / "depends on"     │
+  │         → Directed edges in a dependency graph                     │
+  │         → TOPOLOGICAL SORT                                         │
+  │                                                                    │
+  │  SIGNAL 3: "Is it possible to complete all tasks?"                 │
+  │         → "Is the graph a DAG?" → Cycle detection via topo sort   │
+  │                                                                    │
+  │  SIGNAL 4: "Find a valid ordering" / "schedule tasks"              │
+  │         → TOPOLOGICAL SORT                                         │
+  │                                                                    │
+  │  SIGNAL 5: "Compile order" / "build order" / "install order"       │
+  │         → Dependency resolution → TOPOLOGICAL SORT                 │
+  │                                                                    │
+  │  THINKING CHAIN:                                                   │
+  │  "Tasks with dependencies, find valid order"                       │
+  │     → dependency graph (directed edges)                            │
+  │        → need ordering respecting all edges                        │
+  │           → topological sort                                       │
+  │              → Kahn's (BFS) or DFS approach?                       │
+  │                 → Kahn's if: need layering, cleaner cycle detect   │
+  │                 → DFS if: prefer recursive, need post-order        │
+  │                                                                    │
+  │  SIMILAR PROBLEMS:                                                 │
+  │    → Course Schedule I &amp; II (Problems 21-22)                       │
+  │    → Alien Dictionary (Problem 37)                                 │
+  │    → Build Order / Compilation Order                               │
+  │    → Task Scheduling with Dependencies                             │
+  │    → Package Manager Dependency Resolution                         │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 14: KAHN'S vs DFS TOPOLOGICAL SORT — Preview</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  KAHN'S (BFS — this problem):                                    │
+  │    → Track in-degrees                                            │
+  │    → Process in-degree 0 nodes first                             │
+  │    → Remove processed nodes → new in-degree 0 nodes appear      │
+  │    → Natural cycle detection: len(result) &lt; n                    │
+  │    → Gives LAYERS (useful for parallel scheduling)               │
+  │    → Iterative (no recursion limit)                              │
+  │                                                                  │
+  │  DFS (Problem 20 — next):                                        │
+  │    → Run DFS, track finish order (post-order)                    │
+  │    → REVERSE the post-order → topological order                  │
+  │    → Cycle detection: back edge found                            │
+  │    → No natural layering                                         │
+  │    → Recursive (may hit limit on large graphs)                   │
+  │                                                                  │
+  │  BOTH produce valid topological orderings                        │
+  │  BOTH are O(V + E)                                               │
+  │  BOTH detect cycles                                              │
+  │  Choose based on what ELSE you need from the algorithm           │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: TOPOLOGICAL SORT (KAHN'S ALGORITHM)       ║
+  ║                                                                    ║
+  ║   → Topological sort = order nodes respecting directed edges      ║
+  ║   → ONLY works on DAGs (Directed Acyclic Graphs)                 ║
+  ║   → Cycle = impossible to order = detected automatically          ║
+  ║                                                                    ║
+  ║   → KAHN'S ALGORITHM:                                             ║
+  ║     1. Compute in-degrees (count incoming edges per node)         ║
+  ║     2. Queue all nodes with in-degree 0 (no dependencies)        ║
+  ║     3. Process queue: dequeue → add to result → reduce           ║
+  ║        neighbors' in-degree → if 0, enqueue                      ║
+  ║     4. If all nodes processed → valid order                      ║
+  ║        If not → cycle exists                                     ║
+  ║                                                                    ║
+  ║   → NEW DATA STRUCTURE CONCEPT: IN-DEGREE ARRAY                  ║
+  ║     Previous: visited (boolean per node)                          ║
+  ║     Now: in-degree (count per node, decremented over time)       ║
+  ║     "How many things must happen before I'm ready?"              ║
+  ║                                                                    ║
+  ║   → This is BFS applied to DEPENDENCY RESOLUTION                  ║
+  ║     (Queue + level-by-level processing of "ready" nodes)         ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h3>CONNECTION TO NEXT PROBLEM</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 19 → Topological Sort via Kahn's Algorithm (BFS approach)
+</span>  Problem 20 → Topological Sort via DFS (reverse post-order approach)
+  
+  Problem 20 shows the ALTERNATIVE way to topologically sort:
+    → Run DFS on the graph
+    → Record the ORDER in which nodes FINISH (post-order)
+    → REVERSE that order → topological sort!
+    
+  WHY learn both?
+    → Some problems naturally fit Kahn's (need layers, need in-degrees)
+    → Some problems naturally fit DFS (need recursion, need post-order)
+    → Knowing both = flexibility in interviews
+    
+  After Problem 20, Problems 21-22 (Course Schedule I &amp; II) will
+  APPLY topological sort directly — they're the classic interview
+  questions that USE what we learn in 19 and 20.</code></pre></div>
+<hr>
+<p><strong>Problem 19 Complete.</strong><br>
+<strong>Ready for Problem 20: Topological Sort (DFS Approach)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="15" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-18.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 19 of 50</span>
+            </div>
+            <a href="problem-20.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>

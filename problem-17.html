@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem 17: Problem 17: Pacific Atlantic Water Flow (Dual Multi-Source BFS) — Graph Algorithms Mastery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            color: #1a202c;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
+            padding: 48px 52px;
+        }
+        
+        .content { max-width: 950px; margin: 0 auto; color: #1a202c; }
+        .content h1 {
+            color: #1a202c; margin: 32px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #10b981;
+            font-size: 2.1em;
+            font-weight: 700;
+        }
+        .content h2 {
+            color: #1a202c; margin: 28px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #34d399;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        .content h3 { color: #1a202c; margin: 22px 0 12px; font-size: 1.3em; font-weight: 600; }
+        .content h4 { color: #2d3748; margin: 18px 0 10px; font-size: 1.1em; font-weight: 600; }
+        .content p  { margin-bottom: 16px; line-height: 1.8; color: #1a202c; }
+        .content ul, .content ol { margin: 12px 0 18px 30px; color: #1a202c; }
+        .content li { margin-bottom: 8px; line-height: 1.75; color: #1a202c; }
+        .content hr { border: none; border-top: 2px solid #e2e8f0; margin: 26px 0; }
+        .content pre {
+            background: #f7fafc !important;
+            border: 1px solid #cbd5e0 !important;
+            border-left: 4px solid #10b981 !important;
+            padding: 18px !important; overflow-x: auto; margin: 18px 0; border-radius: 6px;
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.9em !important;
+        }
+        .content pre:not([style*="color"]) { color: #1a202c !important; }
+        .content code {
+            font-family: 'Consolas','Monaco','Courier New',monospace !important;
+            font-size: 0.88em !important;
+        }
+        .content code:not(pre code) {
+            background: #d1fae5 !important;
+            color: #1a202c !important;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .content pre code { background: transparent !important; padding: 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .content th {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white; padding: 12px 16px; text-align: left;
+            font-weight: 600;
+        }
+        .content td { padding: 11px 16px; border: 1px solid #e2e8f0; color: #1a202c; }
+        .content tr:nth-child(even) td { background: #ecfdf5; }
+        .content blockquote {
+            border-left: 4px solid #10b981; background: #ecfdf5;
+            padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0;
+            color: #1a202c;
+        }
+        .content strong { color: #1a202c; font-weight: 600; }
+        .px-2 { padding: 0; }
+        .chat-message { background: transparent; padding: 0; margin: 0; }
+
+        /* Bottom nav bar only */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0;
+            margin-top: 50px;
+            border-top: 3px solid #34d399;
+        }
+        .nav-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white !important; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+        }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
+        .nav-button.disabled { background: #cbd5e1; box-shadow: none; pointer-events: none; }
+        .nav-button.home {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .nav-button.home:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
+        .page-info { color: #718096; font-size: 0.9em; text-align: center; }
+
+        /* Progress bar */
+        #progress-track {
+            position: fixed; top: 20px; right: 20px;
+            width: 10px; height: 150px;
+            background: rgba(16,185,129,0.2);
+            border: 2px solid #10b981;
+            border-radius: 6px; overflow: hidden; z-index: 1000;
+        }
+        #progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #10b981, #059669);
+            height: 0%;
+            transition: height 0.15s ease;
+        }
+        #progress-pct {
+            position: fixed; top: 0px; right: 16px;
+            color: #059669; font-size: 14px; font-weight: bold;
+            z-index: 1001;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+            line-height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="chat-message" data-index="9">
+<div class="px-2"><h1>Problem 17: Pacific Atlantic Water Flow (Dual Multi-Source BFS)</h1>
+<h2>[Algorithm Family: Multi-Source BFS/DFS — Dual Boundary Reverse Thinking]</h2>
+<h2>[Phase 2: Core Patterns — "I know WHICH traversal and WHY"]</h2>
+<hr>
+<h2>PROBLEM STATEMENT</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>You are given an M × N island represented as a height map (matrix of integers).
+</span>
+The island is bordered by TWO oceans:
+  → PACIFIC ocean touches the TOP edge and LEFT edge
+  → ATLANTIC ocean touches the BOTTOM edge and RIGHT edge
+
+Water can flow from a cell to an adjacent cell (up/down/left/right)
+if the adjacent cell's height is LESS THAN OR EQUAL to the current cell.
+(Water flows downhill or on flat ground, not uphill.)
+
+Water can also flow into the ocean from any cell on that ocean's border.
+
+Find ALL cells from which water can flow to BOTH the Pacific AND Atlantic oceans.
+
+Example:
+  heights = [
+    [1, 2, 2, 3, 5],
+    [3, 2, 3, 4, 4],
+    [2, 4, 5, 3, 1],
+    [6, 7, 1, 4, 5],
+    [5, 1, 1, 2, 4]
+  ]
+
+  Output: [[0,4],[1,3],[1,4],[2,2],[3,0],[3,1],[4,0]]
+  
+  These cells can reach BOTH oceans.</code></pre></div>
+<hr>
+<h2>STEP 1: VISUALIZE FIRST — Draw the Grid and Oceans</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  PACIFIC OCEAN (top + left)
+</span>  ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  ←  [1] [2] [2] [3] [5]
+  ←  [3] [2] [3] [4] [4]
+  ←  [2] [4] [5] [3] [1]  →
+  ←  [6] [7] [1] [4] [5]  →
+  ←  [5] [1] [1] [2] [4]  →
+                 ↑↑↑↑↑↑↑↑↑↑↑
+                 ATLANTIC OCEAN (bottom + right)
+
+  More precisely:
+
+                PACIFIC
+        ┌───────────────────────┐
+        │  P   P   P   P   P   │
+      P │  1   2   2   3   5   │ A
+      P │  3   2   3   4   4   │ A
+      P │  2   4   5   3   1   │ A
+      P │  6   7   1   4   5   │ A
+      P │  5   1   1   2   4   │ A
+        │  A   A   A   A   A   │
+        └───────────────────────┘
+                ATLANTIC
+
+  P = Pacific border cell (row 0 OR col 0)
+  A = Atlantic border cell (last row OR last col)
+  
+  Corner (0,0) touches Pacific (both top and left)
+  Corner (4,4) touches Atlantic (both bottom and right)
+  Corner (0,4) touches BOTH Pacific (top) and Atlantic (right)
+  Corner (4,0) touches BOTH Pacific (left) and Atlantic (bottom)</code></pre></div>
+<h3>Water Flow Direction</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Water flows from HIGH to LOW (or equal):
+</span>  
+  Cell with height 5 → can flow to adjacent cell with height ≤ 5
+  Cell with height 3 → can flow to adjacent cell with height ≤ 3
+  Cell with height 1 → can flow to adjacent cell with height ≤ 1
+  
+  Example flow path to Pacific:
+    (2,2)=5 → (1,2)=3 → (1,1)=2 → (0,1)=2 → Pacific (top border)
+    5 ≥ 3 ≥ 2 ≥ 2 → valid downhill/flat flow  ✓
+  
+  Example flow path to Atlantic:
+    (2,2)=5 → (2,3)=3 → (2,4)=1 → Atlantic (right border)
+    5 ≥ 3 ≥ 1 → valid downhill flow  ✓
+  
+  So (2,2) can reach BOTH → it's in the answer!</code></pre></div>
+<h3>Graph Properties</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>╔════════════════════════════════════════════════════════════════════╗
+</span>║  Property        │  Answer            │  Why?                     ║
+╠══════════════════╪════════════════════╪═══════════════════════════╣
+║  NODES           │  Grid cells        │  Each cell = node         ║
+║  EDGES           │  4-dir adjacency   │  Up/Down/Left/Right       ║
+║  Directed?       │  YES!              │  Water flows downhill     ║
+║                  │                    │  only (high → low/equal)  ║
+║  Weighted?       │  NO                │  Reachability, not cost   ║
+║  Implicit?       │  YES               │  Grid graph (Problem 6)  ║
+║  What we need    │  Reachability from │  Can cell reach BOTH      ║
+║                  │  cell to 2 targets │  Pacific AND Atlantic?    ║
+╚══════════════════╧════════════════════╧═══════════════════════════╝
+
+  ★ KEY OBSERVATION: This is a DIRECTED graph!
+  
+  Water at height 5 can flow TO height 3, but NOT back.
+  So edge direction matters: high → low (or equal).
+  
+  This makes forward search harder (directed reachability from each cell)
+  But reverse search elegant (reverse the edge direction!)</code></pre></div>
+<hr>
+<h2>STEP 2: BRUTE FORCE FIRST</h2>
+<h3>Approach: For Each Cell, Check if It Can Reach Both Oceans</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For each cell (r, c):
+</span>    → Run DFS/BFS following water flow (to cells with height ≤ current)
+    → Check: did we reach ANY Pacific border cell?
+    → Check: did we reach ANY Atlantic border cell?
+    → If BOTH → add to answer
+
+  Example for cell (2,2) with height 5:
+    DFS from (2,2):
+      → (2,1)=4 ≤ 5 ✓ → (2,0)=2 ≤ 4 ✓ → Pacific border (col 0) ✓
+      → (1,2)=3 ≤ 5 ✓ → (0,2)=2 ≤ 3 ✓ → Pacific border (row 0) ✓
+      → (2,3)=3 ≤ 5 ✓ → (2,4)=1 ≤ 3 ✓ → Atlantic border (col 4) ✓
+    Result: reaches BOTH → include (2,2)  ✓</code></pre></div>
+<h3>Why Brute Force Fails</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  For EACH of M×N cells:
+</span>    → Run DFS/BFS: O(M×N) in worst case
+  
+  Total: O((M×N)²)
+  
+  For a 200×200 grid:
+    → (200×200)² = 40000² = 1,600,000,000 operations
+    → TOO SLOW
+  
+  MASSIVE REDUNDANCY:
+    → Cell (2,2) does DFS and visits (1,2)
+    → Cell (1,2) does its OWN DFS and revisits same cells
+    → Same paths explored over and over
+  
+  We need each cell processed at most ONCE → O(M×N) total</code></pre></div>
+<hr>
+<h2>STEP 3: THE KEY INSIGHT — DOUBLE REVERSE THINKING</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  FORWARD THINKING (brute force):                                 │
+  │    "From each cell, can water flow DOWN to reach ocean?"         │
+  │    → M×N separate DFS/BFS searches → O((M×N)²)                 │
+  │                                                                  │
+  │  REVERSE THINKING (★ from Problem 14, 16):                      │
+  │    "From each ocean, where can water flow UP to reach?"          │
+  │    → REVERSE the flow direction!                                 │
+  │    → Start from ocean borders, flow UPHILL (to cells ≥ current) │
+  │    → This marks all cells that CAN reach that ocean              │
+  │                                                                  │
+  │  DOUBLE REVERSE:                                                 │
+  │    → BFS #1: From Pacific border → mark all "can reach Pacific" │
+  │    → BFS #2: From Atlantic border → mark all "can reach Atlantic│
+  │    → ANSWER: cells marked in BOTH = intersection                 │
+  │                                                                  │
+  │  This is Problem 16 (boundary DFS/BFS) done TWICE!              │
+  │  Problem 16: one boundary → mark reachable → classify rest      │
+  │  Problem 17: TWO boundaries → mark reachable from each → overlap│
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h3>Why Reverse Works</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  FORWARD: Water flows from cell A (height 5) to cell B (height 3)
+</span>           because 5 ≥ 3 (downhill)
+  
+  REVERSE: Starting from ocean, we "climb uphill"
+           From cell B (height 3) we can reach cell A (height 5)
+           because 5 ≥ 3 (A is higher or equal → water WOULD flow from A to B)
+  
+  So "reverse BFS going uphill" finds exactly the cells 
+  whose water would flow downhill to reach the ocean.
+  
+  ┌────────────────────────────────────────────────┐
+  │  Forward edge: A → B  when height[A] ≥ height[B]  │
+  │  Reverse edge: B → A  when height[A] ≥ height[B]  │
+  │                                                │
+  │  Reverse BFS condition:                        │
+  │    From current cell, visit neighbor if         │
+  │    neighbor height ≥ current height             │
+  │    (going UPHILL = reverse of downhill flow)    │
+  └────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 4: ALGORITHM WALKTHROUGH</h2>
+<h3>The Grid</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>     col: 0   1   2   3   4
+</span>  row 0: [1] [2] [2] [3] [5]     ← Pacific border (top)
+  row 1: [3] [2] [3] [4] [4]
+  row 2: [2] [4] [5] [3] [1]
+  row 3: [6] [7] [1] [4] [5]
+  row 4: [5] [1] [1] [2] [4]     ← Atlantic border (bottom)
+     ↑                       ↑
+   Pacific                Atlantic
+   (left)                  (right)</code></pre></div>
+<h3>PHASE 1: BFS from Pacific Border (Top Row + Left Column)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Pacific border cells:
+</span>    Top row:  (0,0)=1, (0,1)=2, (0,2)=2, (0,3)=3, (0,4)=5
+    Left col: (1,0)=3, (2,0)=2, (3,0)=6, (4,0)=5
+    (0,0) counted once
+  
+  Initialize BFS queue with ALL Pacific border cells
+  (Multi-source BFS — Problem 13 pattern!)
+  
+  pacific_reachable = set of all Pacific border cells initially
+  queue = [(0,0),(0,1),(0,2),(0,3),(0,4),(1,0),(2,0),(3,0),(4,0)]
+
+  ══════════════════════════════════════════════════════════
+  BFS EXPANSION — Go UPHILL from Pacific
+  ══════════════════════════════════════════════════════════
+  
+  I'll trace key expansions (not every single step):
+  
+  Process (0,0)=1:
+    neighbors: (0,1)=2 ≥ 1? YES, already in set → skip
+               (1,0)=3 ≥ 1? YES, already in set → skip
+  
+  Process (0,1)=2:
+    neighbors: (0,0)=1 ≥ 2? NO → skip (downhill from here)
+               (0,2)=2 ≥ 2? YES, already in set → skip
+               (1,1)=2 ≥ 2? YES, NOT in set → ADD
+  
+  Process (0,2)=2:
+    neighbors: (0,1)=2 already, (0,3)=3 already
+               (1,2)=3 ≥ 2? YES, NOT in set → ADD
+  
+  Process (0,3)=3:
+    neighbors: (0,2)=2 NO, (0,4)=5 already
+               (1,3)=4 ≥ 3? YES, NOT in set → ADD
+  
+  Process (0,4)=5:
+    neighbors: (0,3)=3 NO
+               (1,4)=4 ≥ 5? NO → skip (4 &lt; 5, can't go uphill)
+  
+  Process (1,0)=3:
+    neighbors: (0,0)=1 NO, (2,0)=2 already
+               (1,1)=2 ≥ 3? NO → skip
+  
+  Process (2,0)=2:
+    neighbors: (1,0)=3 already, (3,0)=6 already
+               (2,1)=4 ≥ 2? YES, NOT in set → ADD
+  
+  Process (3,0)=6:
+    neighbors: (2,0)=2 NO, (4,0)=5 already
+               (3,1)=7 ≥ 6? YES, NOT in set → ADD
+  
+  Process (4,0)=5:
+    neighbors: (3,0)=6 already
+               (4,1)=1 ≥ 5? NO → skip
+  
+  ─── Now process newly added cells ───
+  
+  Process (1,1)=2:
+    neighbors: (0,1)=2 already, (1,0)=3 already, (1,2)=3 already
+               (2,1)=4 ≥ 2? YES → will be added if not already
+  
+  Process (1,2)=3:
+    neighbors: (0,2)=2 NO, (1,1)=2 NO
+               (1,3)=4 already or being added
+               (2,2)=5 ≥ 3? YES, NOT in set → ADD
+  
+  Process (1,3)=4:
+    neighbors: (0,3)=3 NO, (1,2)=3 NO
+               (1,4)=4 ≥ 4? YES, NOT in set → ADD
+               (2,3)=3 ≥ 4? NO → skip
+  
+  Process (2,1)=4:
+    neighbors: (1,1)=2 NO, (2,0)=2 NO
+               (2,2)=5 ≥ 4? YES → ADD if not already
+               (3,1)=7 already
+  
+  Process (3,1)=7:
+    neighbors: (3,0)=6 NO wait — 6 ≥ 7? NO
+               (2,1)=4 NO
+               (3,2)=1 NO
+               (4,1)=1 NO
+    → No new cells (7 is a peak — nothing higher adjacent)
+  
+  Process (2,2)=5:
+    neighbors: (1,2)=3 NO, (2,1)=4 NO
+               (2,3)=3 NO
+               (3,2)=1 NO
+    → No new cells (5 is local peak)
+  
+  Process (1,4)=4:
+    neighbors: (0,4)=5 already
+               (1,3)=4 already
+               (2,4)=1 NO
+    → No new cells
+  
+  ══════════════════════════════════════════════════════════
+  PACIFIC REACHABLE SET (cells whose water can reach Pacific):
+  ══════════════════════════════════════════════════════════
+  
+  Mark with 'P':
+  
+     col: 0   1   2   3   4
+  row 0: [P] [P] [P] [P] [P]     ← entire top row (border)
+  row 1: [P] [P] [P] [P] [P]     ← (1,0) border + (1,1)(1,2)(1,3)(1,4) reachable
+  row 2: [P] [P] [P] [ ] [ ]     ← (2,0) border + (2,1)(2,2) reachable
+  row 3: [P] [P] [ ] [ ] [ ]     ← (3,0) border + (3,1) reachable
+  row 4: [P] [ ] [ ] [ ] [ ]     ← (4,0) border only
+  
+  pacific_set = {(0,0),(0,1),(0,2),(0,3),(0,4),
+                 (1,0),(1,1),(1,2),(1,3),(1,4),
+                 (2,0),(2,1),(2,2),
+                 (3,0),(3,1),
+                 (4,0)}</code></pre></div>
+<h3>PHASE 2: BFS from Atlantic Border (Bottom Row + Right Column)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Atlantic border cells:
+</span>    Bottom row: (4,0)=5, (4,1)=1, (4,2)=1, (4,3)=2, (4,4)=4
+    Right col:  (0,4)=5, (1,4)=4, (2,4)=1, (3,4)=5
+    (4,4) counted once
+  
+  Initialize BFS with ALL Atlantic border cells
+  
+  Same process — BFS going UPHILL from Atlantic border:
+  
+  I'll show the final result (same logic, reverse from Atlantic):
+  
+  Process (4,4)=4: up (3,4)=5 ≥ 4 → ADD
+  Process (3,4)=5: up (2,4)=1 NO, left (3,3)=4 ≥ 5? NO
+                   But wait: (2,4) is already in set as border cell
+  Process (0,4)=5: down (1,4)=4 already, left (0,3)=3 ≥ 5? NO
+  Process (1,4)=4: left (1,3)=4 ≥ 4? YES → ADD
+                   up (0,4)=5 already
+  Process (1,3)=4: left (1,2)=3 NO, up (0,3)=3 NO
+                   down (2,3)=3 NO
+  Process (4,0)=5: up (3,0)=6 ≥ 5? YES → ADD
+                   right (4,1)=1 already
+  Process (3,0)=6: up (2,0)=2 NO, right (3,1)=7 ≥ 6? YES → ADD
+  Process (3,1)=7: right (3,2)=1 NO, up (2,1)=4 NO
+                   left (3,0)=6 already, down (4,1)=1 NO
+  Process (4,3)=2: up (3,3)=4 ≥ 2? YES → ADD
+                   left (4,2)=1 already
+  Process (3,3)=4: up (2,3)=3 NO, left (3,2)=1 NO
+                   right (3,4)=5 already
+                   down (4,3)=2 already
+  Process (2,4)=1: up (1,4)=4 already
+                   left (2,3)=3 ≥ 1? YES → ADD
+  Process (2,3)=3: left (2,2)=5 ≥ 3? YES → ADD
+                   up (1,3)=4 already
+  Process (2,2)=5: left (2,1)=4 NO, up (1,2)=3 NO
+                   down (3,2)=1 NO
+  
+  ══════════════════════════════════════════════════════════
+  ATLANTIC REACHABLE SET:
+  ══════════════════════════════════════════════════════════
+  
+  Mark with 'A':
+  
+     col: 0   1   2   3   4
+  row 0: [ ] [ ] [ ] [ ] [A]     ← (0,4) border
+  row 1: [ ] [ ] [ ] [A] [A]     ← (1,3)(1,4) reachable
+  row 2: [ ] [ ] [A] [A] [A]     ← (2,2)(2,3)(2,4) reachable
+  row 3: [A] [A] [ ] [A] [A]     ← (3,0)(3,1)(3,3)(3,4) reachable
+  row 4: [A] [A] [A] [A] [A]     ← entire bottom row (border)
+  
+  atlantic_set = {(0,4),
+                  (1,3),(1,4),
+                  (2,2),(2,3),(2,4),
+                  (3,0),(3,1),(3,3),(3,4),
+                  (4,0),(4,1),(4,2),(4,3),(4,4)}</code></pre></div>
+<h3>PHASE 3: Find INTERSECTION</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Cells in BOTH pacific_set AND atlantic_set:
+</span>  
+     col: 0   1   2   3   4
+  row 0: [ ] [ ] [ ] [ ] [★]     ← (0,4): P ∩ A = YES
+  row 1: [ ] [ ] [ ] [★] [★]     ← (1,3): P ∩ A = YES, (1,4): P ∩ A = YES
+  row 2: [ ] [ ] [★] [ ] [ ]     ← (2,2): P ∩ A = YES
+  row 3: [★] [★] [ ] [ ] [ ]     ← (3,0): P ∩ A = YES, (3,1): P ∩ A = YES
+  row 4: [★] [ ] [ ] [ ] [ ]     ← (4,0): P ∩ A = YES
+  
+  ANSWER: [(0,4),(1,3),(1,4),(2,2),(3,0),(3,1),(4,0)]  ✓
+  
+  VISUAL OVERLAY:
+  
+     col: 0    1    2    3    4
+  row 0: [P ] [P ] [P ] [P ] [PA]★
+  row 1: [P ] [P ] [P ] [PA]★[PA]★
+  row 2: [P ] [P ] [PA]★[A ] [A ]
+  row 3: [PA]★[PA]★[  ] [A ] [A ]
+  row 4: [PA]★[A ] [A ] [A ] [A ]
+  
+  Notice: the ★ cells form a diagonal-ish band from top-right to bottom-left
+  This makes intuitive sense: high-altitude ridge that drains to both sides</code></pre></div>
+<h3>Verification of One Cell</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Let's verify (2,2) = height 5:
+</span>  
+  Can it reach Pacific?
+    (2,2)=5 → (1,2)=3 (5≥3 ✓) → (0,2)=2 (3≥2 ✓) → Pacific (top row) ✓
+  
+  Can it reach Atlantic?
+    (2,2)=5 → (2,3)=3 (5≥3 ✓) → (2,4)=1 (3≥1 ✓) → Atlantic (right col) ✓
+  
+  Both ✓ → (2,2) is in the answer  ✓
+  
+  Let's verify (2,1) = height 4 is NOT in the answer:
+  
+  Can it reach Pacific?
+    (2,1)=4 → (2,0)=2 (4≥2 ✓) → Pacific (left col) ✓
+  
+  Can it reach Atlantic?
+    (2,1)=4 → (2,2)=5? 4≥5? NO → can't go there
+    (2,1)=4 → (3,1)=7? 4≥7? NO → can't go there
+    (2,1)=4 → (1,1)=2 → (1,2)=3? 2≥3? NO → dead end
+    (2,1)=4 → (1,1)=2 → (0,1)=2 → Pacific only, can't reach Atlantic
+    NO path to Atlantic ✗
+  
+  Only Pacific → NOT in answer  ✓</code></pre></div>
+<hr>
+<h2>STEP 5: COMPLETE CODE</h2>
+<h3>Version 1: BFS (Multi-Source from Each Ocean)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">pacific_atlantic</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heights</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Find cells where water can flow to BOTH Pacific and Atlantic oceans.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    STRATEGY (double reverse thinking — from Problem 16):
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      1. Multi-source BFS from Pacific border → mark pacific_reachable
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      2. Multi-source BFS from Atlantic border → mark atlantic_reachable
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      3. Answer = intersection of both sets
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    REVERSE DIRECTION:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Forward: water flows from high to low (height[curr] ≥ height[next])
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      Reverse: we go from low to high (height[next] ≥ height[curr])
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">               "From the ocean, climb uphill to find who can drain to me"
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> heights </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> heights</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    rows</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heights</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heights</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start_cells</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Multi-source BFS going UPHILL from given starting cells.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        Returns set of all cells reachable (= cells whose water 
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        can flow downhill to reach these start cells).
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">        """</span><span>
+</span><span>        reachable </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start_cells</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>        queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>start_cells</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Bounds check</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> cols</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Already visited</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> reachable</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">continue</span><span>
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ★ KEY: Go UPHILL (reverse of water flow)</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Water flows from neighbor to current if neighbor ≥ current</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># So in reverse: we can visit neighbor if neighbor ≥ current</span><span>
+</span><span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> heights</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> heights</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    reachable</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>                    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> reachable
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 1: Collect Pacific border cells (top row + left col) ───</span><span>
+</span><span>    pacific_starts </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        pacific_starts</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>          </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># top row</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        pacific_starts</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>          </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># left col (skip (0,0) already added)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 2: Collect Atlantic border cells (bottom row + right col) ───</span><span>
+</span><span>    atlantic_starts </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        atlantic_starts</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># bottom row</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        atlantic_starts</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># right col (skip corner)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 3: BFS from each ocean ───</span><span>
+</span><span>    pacific_reachable </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>pacific_starts</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    atlantic_reachable </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>atlantic_starts</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── PHASE 4: Intersection ───</span><span>
+</span><span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> pacific_reachable </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> atlantic_reachable</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>heights </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+<span>result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> pacific_atlantic</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heights</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(163, 21, 21);">"Cells reaching both oceans:"</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> result</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Output: [[0,4],[1,3],[1,4],[2,2],[3,0],[3,1],[4,0]]</span></code></pre></div>
+<hr>
+<h3>Version 2: DFS (Recursive — Cleaner for Some)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">pacific_atlantic_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heights</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Same logic as Version 1 but using DFS instead of BFS.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    DFS vs BFS here:
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Both find the same reachable set
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → BFS: level-by-level expansion (not needed here)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → DFS: recursive, slightly cleaner code
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → For reachability-only problems, either works (Problem 8)
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> heights </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> heights</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    rows</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heights</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heights</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> reachable</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""DFS going UPHILL from (r,c). Mark all reachable cells."""</span><span>
+</span><span>        reachable</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>add</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Bounds + not visited + can go uphill</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols 
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> reachable
+</span><span>                    </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> heights</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> heights</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> reachable</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BFS from Pacific border ───</span><span>
+</span><span>    pacific </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> pacific</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># top row</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> pacific</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>        </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># left col</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── BFS from Atlantic border ───</span><span>
+</span><span>    atlantic </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">set</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> atlantic</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># bottom row</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> atlantic</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>  </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># right col</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── Intersection ───</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Set intersection: pacific &amp; atlantic</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> pacific </span><span class="token" style="color: rgb(57, 58, 52);">&amp;</span><span> atlantic</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>
+
+<span></span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># ─── TEST ───</span><span>
+</span><span>heights </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">3</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">6</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">7</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">5</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">2</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">4</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span></span><span class="token" style="color: rgb(0, 0, 255);">print</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>pacific_atlantic_dfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heights</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span></code></pre></div>
+<hr>
+<h3>Version 3: Using 2D Boolean Arrays Instead of Sets</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span class="token" style="color: rgb(0, 0, 255);">from</span><span> collections </span><span class="token" style="color: rgb(0, 0, 255);">import</span><span> deque
+</span>
+<span></span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">pacific_atlantic_v3</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heights</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>    </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    Using 2D boolean arrays instead of hash sets.
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    WHY?
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Set lookup O(1) average but with hash overhead
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → 2D array lookup O(1) with zero overhead
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → For dense grids, arrays can be faster in practice
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">      → Also makes the intersection step cleaner
+</span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">    """</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> heights </span><span class="token" style="color: rgb(0, 0, 255);">or</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> heights</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    rows</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heights</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token builtin">len</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>heights</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    directions </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Boolean grids: can water from this cell reach Pacific/Atlantic?</span><span>
+</span><span>    pacific </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    atlantic </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(54, 172, 170);">False</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">*</span><span> cols </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> _ </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">def</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>starts</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> reachable</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token triple-quoted-string" style="color: rgb(163, 21, 21);">"""Multi-source BFS going uphill."""</span><span>
+</span><span>        queue </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> deque</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> starts</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            reachable</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>            queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>        
+<span>        </span><span class="token" style="color: rgb(0, 0, 255);">while</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>popleft</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>            
+<span>            </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> dc </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> directions</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> r </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> dc
+</span>                
+<span>                </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nr </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> rows </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&lt;=</span><span> nc </span><span class="token" style="color: rgb(57, 58, 52);">&lt;</span><span> cols
+</span><span>                        </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">not</span><span> reachable</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>                        </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> heights</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">&gt;=</span><span> heights</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                    reachable</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>nc</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">True</span><span>
+</span><span>                    queue</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>nr</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> nc</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Pacific border: top row + left column</span><span>
+</span><span>    pacific_starts </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>
+</span><span>        </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> 
+</span><span>        </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">0</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Atlantic border: bottom row + right column</span><span>
+</span><span>    atlantic_starts </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>
+</span><span>        </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">+</span><span> 
+</span><span>        </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> cols </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows </span><span class="token" style="color: rgb(57, 58, 52);">-</span><span> </span><span class="token" style="color: rgb(54, 172, 170);">1</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>pacific_starts</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> pacific</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span><span>    bfs</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>atlantic_starts</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> atlantic</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 128, 0); font-style: italic;"># Intersection: both True</span><span>
+</span><span>    result </span><span class="token" style="color: rgb(57, 58, 52);">=</span><span> </span><span class="token" style="color: rgb(57, 58, 52);">[</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span>
+</span><span>    </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> r </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>rows</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>        </span><span class="token" style="color: rgb(0, 0, 255);">for</span><span> c </span><span class="token" style="color: rgb(0, 0, 255);">in</span><span> </span><span class="token builtin">range</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span>cols</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>            </span><span class="token" style="color: rgb(0, 0, 255);">if</span><span> pacific</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span> </span><span class="token" style="color: rgb(0, 0, 255);">and</span><span> atlantic</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">:</span><span>
+</span><span>                result</span><span class="token" style="color: rgb(57, 58, 52);">.</span><span>append</span><span class="token" style="color: rgb(57, 58, 52);">(</span><span class="token" style="color: rgb(57, 58, 52);">[</span><span>r</span><span class="token" style="color: rgb(57, 58, 52);">,</span><span> c</span><span class="token" style="color: rgb(57, 58, 52);">]</span><span class="token" style="color: rgb(57, 58, 52);">)</span><span>
+</span>    
+<span>    </span><span class="token" style="color: rgb(0, 0, 255);">return</span><span> result</span></code></pre></div>
+<hr>
+<h2>STEP 6: COMPLEXITY ANALYSIS</h2>
+<h3>Time Complexity: O(M × N)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  Pacific BFS:                                                   │
+  │    → Start: O(M + N) border cells                              │
+  │    → Each cell visited at most ONCE (marked in reachable set)  │
+  │    → Total cells: at most M × N                                │
+  │    → Per cell: check 4 neighbors → O(1)                        │
+  │    → Pacific BFS total: O(M × N)                               │
+  │                                                                 │
+  │  Atlantic BFS:                                                  │
+  │    → Same analysis: O(M × N)                                   │
+  │                                                                 │
+  │  Intersection scan:                                             │
+  │    → Visit every cell once: O(M × N)                           │
+  │                                                                 │
+  │  TOTAL: O(M×N) + O(M×N) + O(M×N) = O(M × N)                  │
+  └─────────────────────────────────────────────────────────────────┘
+  
+  COMPARISON WITH BRUTE FORCE:
+    Brute force: O((M×N)²) — DFS from each cell
+    Reverse BFS: O(M×N)   — two passes from borders
+    
+    For 200×200 grid:
+      Brute: 40000² = 1.6 billion
+      Ours:  3 × 40000 = 120,000
+      → 13,000× FASTER
+  
+  WHY so much better?
+    → Each cell processed at most TWICE (once per ocean BFS)
+    → No redundant exploration — if cell is already marked, skip it
+    → Multi-source BFS processes ALL border cells in ONE pass</code></pre></div>
+<h3>Space Complexity: O(M × N)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌─────────────────────────────────────────────────────────────────┐
+</span>  │  pacific_reachable set:  O(M × N)  — at most all cells         │
+  │  atlantic_reachable set: O(M × N)  — at most all cells         │
+  │  BFS queue:              O(M × N)  — at most all cells         │
+  │  Result list:            O(M × N)  — at most all cells         │
+  │                                                                 │
+  │  TOTAL: O(M × N)                                               │
+  │                                                                 │
+  │  Can we reduce? Not really — need to track reachability for    │
+  │  both oceans across the entire grid                            │
+  └─────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 7: HOW THIS CONNECTS TO PREVIOUS PROBLEMS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  Problem 6 (Grid as Graph):                                      │
+  │    → Grid cells as nodes, 4-directional edges                    │
+  │    → SAME grid traversal pattern                                 │
+  │                                                                  │
+  │  Problem 13 (Rotten Oranges — Multi-Source BFS):                 │
+  │    → Multiple starting points in queue simultaneously            │
+  │    → Problem 13: all rotten oranges start together               │
+  │    → Problem 17: all Pacific border cells start together         │
+  │    → SAME multi-source BFS pattern                               │
+  │                                                                  │
+  │  Problem 14 (01 Matrix — Reverse Thinking):                      │
+  │    → Start from TARGETS, work backward                           │
+  │    → Problem 14: start from zeros, find distances                │
+  │    → Problem 17: start from oceans, find reachable cells         │
+  │    → SAME reverse thinking principle                             │
+  │                                                                  │
+  │  Problem 16 (Surrounded Regions — Boundary DFS/BFS):             │
+  │    → Start from border, mark reachable cells                     │
+  │    → Problem 16: ONE border → mark safe cells                    │
+  │    → Problem 17: TWO borders → mark each → find OVERLAP         │
+  │    → DIRECT EXTENSION of Problem 16                              │
+  │                                                                  │
+  │  EVOLUTION CHAIN:                                                │
+  │    Problem 13: multi-source BFS (one set of sources)             │
+  │    Problem 14: reverse thinking + multi-source BFS               │
+  │    Problem 16: boundary-first traversal (one boundary)           │
+  │    Problem 17: dual boundary traversal (two boundaries) ★ HERE  │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 8: WHEN TO USE THIS VS ALTERNATIVES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────┬──────────────────────────────────────┐
+</span>  │  Approach                  │  When to use                         │
+  ├────────────────────────────┼──────────────────────────────────────┤
+  │  Dual reverse BFS/DFS      │  ★ Two targets/regions to check     │
+  │  (this problem)            │  ★ "Can cell reach BOTH X and Y?"   │
+  │                            │  ★ Two separate reachability queries │
+  │                            │  ★ Find intersection                │
+  │                            │                                      │
+  │  Single boundary BFS/DFS   │  One target region (Problem 16)     │
+  │                            │  "Can cell reach the border?"       │
+  │                            │                                      │
+  │  Forward DFS from each cell│  If only a FEW cells need checking  │
+  │                            │  (not all M×N cells)                │
+  │                            │  Or if targets are interior cells    │
+  │                            │                                      │
+  │  Union-Find (Problem 27)   │  If connectivity queries are dynamic│
+  │                            │  (edges added/removed over time)    │
+  └────────────────────────────┴──────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 9: WHAT IF THE GRAPH WERE...</h2>
+<h3>What if Water Could Flow Uphill? (Undirected)</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  If water can flow in both directions regardless of height:
+</span>    → Every 'O' connected to border can reach the ocean
+    → Becomes exactly Problem 16 (surrounded regions)
+    → No height comparison needed, just connectivity
+    
+  The height constraint makes this DIRECTED:
+    → Water flows from A to B only if height[A] ≥ height[B]
+    → This directionality is WHY we need reverse BFS
+    → Without it, regular flood fill would work</code></pre></div>
+<h3>What if There Were Three Oceans?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Example: Pacific (top+left), Atlantic (bottom+right), Arctic (just top)
+</span>  
+  → Run THREE separate BFS passes
+  → Find cells in ALL THREE reachable sets
+  → Same algorithm, just one more pass
+  → Time: O(3 × M×N) = O(M×N) still
+  
+  Generalizes to K regions:
+    → K BFS passes → O(K × M×N) time
+    → Intersection of K sets</code></pre></div>
+<h3>What if We Needed the SHORTEST Path to Each Ocean?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Currently: just reachability (YES/NO)
+</span>  If we needed distance:
+    → Use distance arrays instead of boolean arrays
+    → Multi-source BFS naturally gives shortest distance (Problem 14)
+    → pacific_dist[r][c] = min distance to Pacific border
+    → atlantic_dist[r][c] = min distance to Atlantic border
+    → But remember: edges are DIRECTED (downhill only)
+    → Reverse BFS going uphill still works for distances</code></pre></div>
+<h3>What if the Grid Were Very Large (10000 × 10000)?</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Our algorithm: O(M×N) = O(10^8) — borderline
+</span>  
+  Optimizations:
+    → Use boolean arrays (Version 3) instead of hash sets
+    → Use iterative BFS instead of recursive DFS (stack overflow)
+    → Process both BFS in parallel? Not helpful asymptotically
+    → Can't do better than O(M×N) — must check every cell</code></pre></div>
+<hr>
+<h2>STEP 10: COMMON PITFALLS AND EDGE CASES</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔══════════════════════════════════════════════════════════════════╗
+</span>  ║  PITFALL 1: Getting the flow direction WRONG in reverse BFS     ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  FORWARD: water flows from HIGH to LOW                           ║
+  ║    → visit neighbor if heights[neighbor] ≤ heights[current]     ║
+  ║                                                                  ║
+  ║  REVERSE: we climb from LOW to HIGH                              ║
+  ║    → visit neighbor if heights[neighbor] ≥ heights[current]     ║
+  ║                                 ↑↑↑                              ║
+  ║                           MUST BE ≥ NOT ≤                        ║
+  ║                                                                  ║
+  ║  Getting this comparison backward = completely wrong answer      ║
+  ║                                                                  ║
+  ║  MEMORY AID:                                                     ║
+  ║    "I'm the ocean, I'm climbing uphill to find who drains to me" ║
+  ║    → I can visit cells that are HIGHER than me                   ║
+  ║    → heights[neighbor] ≥ heights[current]                        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 2: Forgetting EQUAL heights                             ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  "Water flows to adjacent cells with height LESS THAN OR EQUAL" ║
+  ║                                                     ↑↑↑↑↑↑↑↑    ║
+  ║  Must use ≥ not &gt;, otherwise miss flat terrain paths             ║
+  ║                                                                  ║
+  ║  Example: heights 5 → 5 → 5 → ocean                             ║
+  ║  This IS valid flow! All equal heights, water flows.             ║
+  ║  Using &gt; instead of ≥ would miss this path.                      ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 3: Double-counting border corners                       ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  (0,0) is on BOTH Pacific top row AND Pacific left column       ║
+  ║  → If added twice to start cells, it gets processed twice       ║
+  ║  → Not incorrect (second time it's already in reachable set)    ║
+  ║  → But wastes a tiny bit of time                                ║
+  ║                                                                  ║
+  ║  FIX: Skip (0,0) in left column scan since it's in top row     ║
+  ║  → for r in range(1, rows) instead of range(rows)              ║
+  ║  → Minor optimization, not critical                             ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  PITFALL 4: Mixing up which border is which ocean                ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  Pacific  = TOP row + LEFT column                                ║
+  ║  Atlantic = BOTTOM row + RIGHT column                            ║
+  ║                                                                  ║
+  ║  Easy to accidentally swap or forget one edge                    ║
+  ║  Draw the diagram first!                                         ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: 1×1 grid                                            ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  heights = [[5]]                                                 ║
+  ║  → (0,0) is on Pacific border AND Atlantic border               ║
+  ║  → Reaches both → answer = [[0,0]]                              ║
+  ║  → Our code handles this: (0,0) in both start sets              ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Flat grid (all same height)                          ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  heights = [[3,3,3],[3,3,3],[3,3,3]]                             ║
+  ║  → Water flows everywhere (all ≥ all)                            ║
+  ║  → Every cell reaches both oceans                                ║
+  ║  → Answer = all cells                                            ║
+  ║  → BFS from Pacific marks everything (all equal heights)         ║
+  ║  → BFS from Atlantic marks everything                            ║
+  ║  → Intersection = everything  ✓                                  ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  EDGE CASE: Valley in the middle                                 ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  heights = [[5,5,5],[5,1,5],[5,5,5]]                             ║
+  ║  → Center cell (1,1)=1 is a valley                               ║
+  ║  → Water at (1,1) can flow to all neighbors (1 ≤ 5) ✓           ║
+  ║  → So (1,1) CAN reach both oceans (through any border cell)     ║
+  ║  → (1,1) IS in the answer                                       ║
+  ║                                                                  ║
+  ║  In reverse BFS:                                                 ║
+  ║    Pacific BFS reaches border cells (height 5)                   ║
+  ║    → Can it reach (1,1)=1? heights[1][1]=1 ≥ 5? NO!            ║
+  ║    → Reverse BFS does NOT reach (1,1) from Pacific!             ║
+  ║                                                                  ║
+  ║  WAIT — is this a bug?                                           ║
+  ║  NO! The reverse BFS is correct. Let me re-check:               ║
+  ║    Forward: (1,1)=1 → (0,1)=5? 1 ≥ 5? NO!                     ║
+  ║    Water at height 1 CANNOT flow to height 5!                    ║
+  ║    (1,1) is TRAPPED — water flows INTO it, not OUT              ║
+  ║    (1,1) does NOT reach any ocean → NOT in answer               ║
+  ║                                                                  ║
+  ║  The reverse BFS correctly captures this! ✓                      ║
+  ╚══════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h2>STEP 11: HOW I WOULD RECOGNIZE THIS PATTERN IN AN INTERVIEW</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌────────────────────────────────────────────────────────────────────┐
+</span>  │                                                                    │
+  │  SIGNAL 1: "Can something flow/reach from interior to boundary?"  │
+  │         → Reachability to boundary                                 │
+  │         → Reverse thinking: start FROM boundary                    │
+  │                                                                    │
+  │  SIGNAL 2: "TWO different targets/destinations to check"           │
+  │         → Run SEPARATE traversals for each target                  │
+  │         → Find intersection                                        │
+  │                                                                    │
+  │  SIGNAL 3: "Flow follows a constraint (height, weight, etc.)"     │
+  │         → DIRECTED implicit graph                                  │
+  │         → Reverse the constraint direction for reverse BFS         │
+  │                                                                    │
+  │  SIGNAL 4: Grid problem with boundary significance                 │
+  │         → Boundary DFS/BFS (Problem 16 extended)                   │
+  │                                                                    │
+  │  THINKING CHAIN:                                                   │
+  │  "Water flows to two oceans on different borders"                  │
+  │     → need reachability to TWO boundaries                          │
+  │        → forward from each cell = O((M×N)²) too slow              │
+  │           → REVERSE: BFS from each ocean boundary                  │
+  │              → two multi-source BFS passes                         │
+  │                 → intersection = answer                            │
+  │                    → O(M×N) total  ✓                               │
+  │                                                                    │
+  │  SIMILAR PROBLEMS:                                                 │
+  │    → Any "can this cell reach boundary A AND boundary B?"          │
+  │    → Temperature/pressure flow problems                            │
+  │    → Two-exit maze: cells that can reach both exits                │
+  │    → Watershed problems in geographic computing                    │
+  │                                                                    │
+  └────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>STEP 12: THE PATTERN GENERALIZATION — Multi-Target Reverse BFS</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ┌──────────────────────────────────────────────────────────────────┐
+</span>  │                                                                  │
+  │  GENERAL PATTERN: "Which cells can reach target set T?"          │
+  │                                                                  │
+  │  FORWARD (naive):                                                │
+  │    For each cell → DFS/BFS → check if reaches any cell in T     │
+  │    Time: O(cells × cells) = O(N²)                               │
+  │                                                                  │
+  │  REVERSE (optimal):                                              │
+  │    Multi-source BFS from ALL cells in T simultaneously           │
+  │    Going in REVERSE direction (reverse edge directions)          │
+  │    Mark all reachable cells                                      │
+  │    Time: O(cells) = O(N)                                        │
+  │                                                                  │
+  │  FOR MULTIPLE TARGET SETS:                                       │
+  │    Run separate reverse BFS for each target set                  │
+  │    Intersect the results                                         │
+  │    Time: O(K × N) where K = number of target sets               │
+  │                                                                  │
+  │  APPLICATIONS:                                                   │
+  │    K=1: Problem 14 (nearest zero), Problem 16 (surrounded)       │
+  │    K=2: Problem 17 (Pacific + Atlantic)  ← WE ARE HERE          │
+  │    K=3+: generalize to any number of targets                     │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘</code></pre></div>
+<hr>
+<h2>KEY TAKEAWAY</h2>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  ╔════════════════════════════════════════════════════════════════════╗
+</span>  ║                                                                    ║
+  ║   NEW CONCEPT LEARNED: DUAL BOUNDARY REVERSE BFS                  ║
+  ║                                                                    ║
+  ║   → When asking "can cell reach BOTH target A and target B?"      ║
+  ║     → Run SEPARATE reverse BFS from each target                   ║
+  ║     → Find INTERSECTION of reachable sets                         ║
+  ║     → O(M×N) instead of O((M×N)²)                                ║
+  ║                                                                    ║
+  ║   → When flow has direction (height constraint):                  ║
+  ║     → REVERSE the constraint in reverse BFS                       ║
+  ║     → Forward: flow from high to low (≥)                          ║
+  ║     → Reverse: climb from low to high (≥ in opposite direction)   ║
+  ║                                                                    ║
+  ║   → This completes the REVERSE THINKING trilogy:                  ║
+  ║     Problem 14: one target set → one reverse BFS                  ║
+  ║     Problem 16: one boundary → one boundary BFS                   ║
+  ║     Problem 17: two boundaries → two boundary BFS → intersect     ║
+  ║                                                                    ║
+  ║   MASTER PRINCIPLE:                                                ║
+  ║   "When many sources need to reach few targets,                   ║
+  ║    start from targets and work backward."                         ║
+  ║                                                                    ║
+  ╚════════════════════════════════════════════════════════════════════╝</code></pre></div>
+<hr>
+<h3>CONNECTION TO NEXT PROBLEM</h3>
+<div class="relative"><pre style="color: rgb(57, 58, 52); font-family: Consolas, &quot;Bitstream Vera Sans Mono&quot;, &quot;Courier New&quot;, Courier, monospace; direction: ltr; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; font-size: 0.9em; line-height: 1.2em; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto; border: 1px solid rgb(221, 221, 221); background-color: white;"><code style="white-space: pre-wrap; word-break: break-all;"><span>  Problem 17 → Dual reverse BFS on grid (two reachability queries)
+</span>  Problem 18 → Clone Graph (graph transformation with BFS/DFS + hashmap)
+  
+  Problem 18 shifts from GRID graphs back to EXPLICIT graphs,
+  and introduces a completely new operation: COPYING a graph.
+  
+  Instead of "traverse and FIND something", we will
+  "traverse and BUILD something" — a deep copy of the graph.
+  
+  This requires combining traversal (BFS or DFS from Problem 3-4)
+  with a HASHMAP to track old-node → new-node mapping.
+  
+  It's the last problem in Phase 2 — after this, we enter
+  Phase 3 with Topological Sort and weighted shortest paths!</code></pre></div>
+<hr>
+<p><strong>Problem 17 Complete.</strong><br>
+<strong>Ready for Problem 18: Clone Graph (Graph Transformation — BFS/DFS + Hashmap)?</strong><br>
+<em>Please confirm to proceed.</em></p></div>
+</div>
+
+<!-- ========== data-index="11" ========== -->
+
+        </div>
+
+        <div class="nav-bar">
+            <a href="problem-16.html" class="nav-button prev">← Previous Problem</a>
+            <div class="page-info">
+                <a href="index.html" class="nav-button home">📚 Table of Contents</a><br>
+                <span style="margin-top:8px;display:block">Problem 17 of 50</span>
+            </div>
+            <a href="problem-18.html" class="nav-button next">Next Problem →</a>
+        </div>
+    </div>
+
+    
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-pct">0%</div>
+
+
+    <script>
+    const fill = document.getElementById('progress-fill');
+    const pct  = document.getElementById('progress-pct');
+    function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrolled  = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        fill.style.height = scrolled + '%';
+        pct.textContent   = Math.round(scrolled) + '%';
+    }
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') {
+            const b = document.querySelector('.nav-button.prev');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+        if (e.key === 'ArrowRight') {
+            const b = document.querySelector('.nav-button.next');
+            if (b && !b.classList.contains('disabled')) window.location.href = b.href;
+        }
+    });
+    </script>
+
+</body>
+</html>
